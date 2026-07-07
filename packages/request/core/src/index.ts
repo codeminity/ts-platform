@@ -5,3 +5,5 @@ export type { RetryConfig } from './interfaces/retry-config'
 
 export { TokenModeEnum } from './enums/token-mode'
 export { ErrorEventEnum } from './enums/error-event'
+export { createRefreshQueue } from './utils/create-refresh-queue'
+export { delay } from './utils/delay'
