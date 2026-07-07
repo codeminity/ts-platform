@@ -1,6 +1,8 @@
 ## 🧩 Summary
 
-What does this PR change and why?
+<!-- What does this PR change and why? -->
+
+-
 
 ---
 
@@ -17,38 +19,35 @@ What does this PR change and why?
 
 ## 📦 Affected Packages
 
-List affected packages:
-
-- package-name
+-
 
 ---
 
 ## ⚠️ Risk Level
 
-- [ ] low
-- [ ] medium
-- [ ] high (breaking or core logic)
-
----
-
-## 🔗 Related Issues
-
-Closes #
+- [ ] Low
+- [ ] Medium
+- [ ] High
 
 ---
 
 ## 🧪 Testing
 
-- [ ] unit tests
-- [ ] integration tests
-- [ ] manual testing
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Manual testing
 
 ---
 
 ## 📋 Checklist
 
-- [ ] tests pass
-- [ ] lint passes
-- [ ] build passes
-- [ ] no unnecessary changes
-- [ ] public API changes are intentional
+- [ ] Tests pass
+- [ ] Lint passes
+- [ ] Build passes
+- [ ] Public API changes are intentional
+
+---
+
+## 📝 Notes
+
+<!-- Anything reviewers should know -->
