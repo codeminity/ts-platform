@@ -1,0 +1,50 @@
+{
+  "name": "ts-platform",
+  "private": true,
+  "type": "module",
+  "description": "A TypeScript monorepo platform for building shared packages, tools, and infrastructure across the Codeminity ecosystem.",
+  "license": "MIT",
+  "author": "Masoud Fouladi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeminity/ts-platform"
+  },
+  "homepage": "https://github.com/codeminity/ts-platform#readme",
+  "bugs": {
+    "url": "https://github.com/codeminity/ts-platform/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "prepublishOnly": "pnpm build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "clean": "turbo clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "validate:api": "node scripts/validate-api.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import-x": "^4.17.1",
+    "globals": "^17.7.0",
+    "globby": "^16.2.1",
+    "prettier": "^3.9.4",
+    "turbo": "^2.10.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,20 @@
+* text=auto
+
+# Source files
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# Data / config
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Docs
+*.md text eol=lf
+
+# Git / tooling
+.editorconfig text eol=lf
+.gitignore text eol=lf

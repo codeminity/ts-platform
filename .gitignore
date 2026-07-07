@@ -1,0 +1,27 @@
+.DS_Store
+.thumbs.db
+node_modules
+dist
+coverage
+.turbo
+localhost-key.pem
+localhost.pem
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# local .env files
+.env.local*
+
+# changesets
+.changeset/*.md
+!.changeset/config.json
