@@ -1,5 +1,12 @@
 # @codeminity/request-core
 
+## 0.1.1
+
+### 🛠 Improvements
+
+- Update @types/node dependency
+- Upgrade pnpm version used in CI and release workflows
+
 ## 0.1.0
 
 ### 🚀 Features
