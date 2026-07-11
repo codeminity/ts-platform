@@ -1,0 +1,61 @@
+{
+  "name": "@codeminity/axios",
+  "version": "0.0.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "axios",
+    "http",
+    "request",
+    "typescript",
+    "javascript",
+    "adapter",
+    "retry",
+    "authentication",
+    "interceptors"
+  ],
+  "type": "module",
+  "author": "Masoud Fooladi",
+  "description": "A production-ready Axios adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeminity/ts-platform.git",
+    "directory": "packages/request/axios"
+  },
+  "homepage": "https://github.com/codeminity/ts-platform#readme",
+  "bugs": {
+    "url": "https://github.com/codeminity/ts-platform/issues"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:js": "tsup",
+    "build:types": "tsc -p tsconfig.json --emitDeclarationOnly",
+    "build": "pnpm build:js && pnpm build:types",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@codeminity/request-core": "workspace:*",
+    "axios": "^1.18.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  }
+}
