@@ -3,7 +3,7 @@
 > A production-ready Axios adapter built on top of `@codeminity/request-core`.
 
 [![npm version](https://img.shields.io/npm/v/@codeminity/axios.svg)](https://www.npmjs.com/package/@codeminity/axios)
-[![license](https://img.shields.io/npm/l/@codeminity/axios.svg)](https://github.com/codeminity/ts-platform)
+[![license](https://img.shields.io/npm/l/%40codeminity%2Faxios.svg)](https://github.com/codeminity/ts-platform/blob/main/LICENSE)
 [![typescript](https://img.shields.io/badge/typescript-supported-blue.svg)](https://www.typescriptlang.org/)
 [![build](https://img.shields.io/github/actions/workflow/status/codeminity/ts-platform/ci.yml)](https://github.com/codeminity/ts-platform/actions)
 
