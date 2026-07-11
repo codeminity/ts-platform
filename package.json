@@ -16,7 +16,7 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.10.0",
+  "packageManager": "pnpm@11.11.0",
   "sideEffects": false,
   "scripts": {
     "dev": "turbo dev",
@@ -41,7 +41,7 @@
     "eslint-plugin-import-x": "^4.17.1",
     "globals": "^17.7.0",
     "globby": "^16.2.1",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.5",
     "turbo": "^2.10.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.63.0",
