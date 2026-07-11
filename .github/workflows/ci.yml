@@ -26,7 +26,7 @@ jobs:
           cache: pnpm
 
       - name: Install pnpm
-        run: corepack install -g pnpm@11.10.0
+        run: corepack install -g pnpm@11.11.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
