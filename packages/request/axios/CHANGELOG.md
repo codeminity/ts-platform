@@ -1,5 +1,12 @@
 # @codeminity/axios
 
+## 0.1.1
+
+### 🛠 Improvements
+
+- Update README badge links for the published `@codeminity/axios` package.
+- Fix scoped npm badge resolution for package metadata display.
+
 ## 0.1.0
 
 ### 🚀 Features
