@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+dist
+build
+*.tsbuildinfo
+
+# Package manager
+pnpm-lock.yaml
+
+# Turborepo
+.turbo
+
+# Changesets (auto-generated changelogs shouldn't be reformatted)
+.changeset/*.md
+CHANGELOG.md
+
+# Coverage / test output
+coverage
+.nyc_output
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Env files
+.env
+.env.*
+
+# Generated type declarations
+*.d.ts
+
+# Git
+.git
