@@ -7,12 +7,12 @@ import { attachResponseInterceptor } from '../interceptors/attach-response'
 
 import type { AxiosInstance, CreateAxiosDefaults } from 'axios'
 
-const refreshQueue = createRefreshQueue()
-
 export function create(config: CreateAxiosDefaults = {}): AxiosInstance {
   const { codeminity, ...axiosConfig } = config
 
   const instance = axios.create(axiosConfig)
+
+  const refreshQueue = createRefreshQueue()
 
   attachAuthInterceptor(instance, codeminity ?? {}, refreshQueue)
   attachResponseInterceptor(instance, codeminity ?? {})
