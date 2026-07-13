@@ -2,6 +2,7 @@ import { type InternalAxiosRequestConfig, isAxiosError } from 'axios'
 
 import { TokenModeEnum, type RefreshQueue } from '@codeminity/request-core'
 
+import { ErrorEventEnum } from '../enum/error-event'
 import { createAuthorizationHeader } from '../utils/create-auth-header'
 
 import { dependencies } from './dependencies'
@@ -22,18 +23,18 @@ export async function handleAuthRequest(
     return request
   }
 
+  if (codeminity?.skipAuth || !config.getToken) {
+    return request
+  }
+
   try {
     await dependencies.handleRefreshToken(config, refreshQueue)
   } catch (error) {
     if (isAxiosError(error)) {
-      await config.onEvent?.('auth_refresh_failed', error)
+      await config.onEvent?.(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
     } else {
       await config.onError?.(error)
     }
-  }
-
-  if (codeminity?.skipAuth || !config.getToken) {
-    return request
   }
 
   try {
@@ -44,7 +45,7 @@ export async function handleAuthRequest(
     }
   } catch (error) {
     if (isAxiosError(error)) {
-      await config.onEvent?.('auth_token_failed', error)
+      await config.onEvent?.(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
     } else {
       await config.onError?.(error)
     }
