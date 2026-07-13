@@ -23,6 +23,10 @@ export async function handleAuthRequest(
     return request
   }
 
+  if (codeminity?.skipAuth || !config.getToken) {
+    return request
+  }
+
   try {
     await dependencies.handleRefreshToken(config, refreshQueue)
   } catch (error) {
@@ -31,10 +35,6 @@ export async function handleAuthRequest(
     } else {
       await config.onError?.(error)
     }
-  }
-
-  if (codeminity?.skipAuth || !config.getToken) {
-    return request
   }
 
   try {
