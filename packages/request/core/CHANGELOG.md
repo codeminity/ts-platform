@@ -11,7 +11,7 @@
 
 ### 🚀 Features
 
-- Initial release of @codesolity/request-core
+- Initial release of @codeminity/request-core
 - Introduce core request orchestration primitives
 - Add authentication lifecycle handling (token validation, refresh flow)
 - Implement refresh queue for safe concurrent execution
