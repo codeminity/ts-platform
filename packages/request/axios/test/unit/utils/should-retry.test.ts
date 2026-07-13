@@ -98,4 +98,15 @@ describe('shouldRetry', () => {
 
     expect(shouldRetry(error, 1, config)).toBe(false)
   })
+
+  it('honors a custom shouldRetry decision for status errors even without retryOnStatuses', () => {
+    const error = createError({ status: 500 })
+
+    const config: RetryConfig = {
+      retries: 3,
+      shouldRetry: () => true
+    }
+
+    expect(shouldRetry(error, 1, config)).toBe(true)
+  })
 })

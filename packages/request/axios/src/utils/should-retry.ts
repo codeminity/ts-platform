@@ -10,14 +10,11 @@ export function shouldRetry(error: AxiosError, attempt: number, config: RetryCon
 
   const status = error.response?.status
 
-  const baseDecision =
-    status != null
-      ? (config.retryOnStatuses?.includes(status) ?? false)
-      : error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED'
-
-  if (!config.shouldRetry) {
-    return baseDecision
+  if (config.shouldRetry) {
+    return config.shouldRetry(error, attempt)
   }
 
-  return config.shouldRetry(error, attempt) && baseDecision
+  return status != null
+    ? (config.retryOnStatuses?.includes(status) ?? false)
+    : error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED'
 }
