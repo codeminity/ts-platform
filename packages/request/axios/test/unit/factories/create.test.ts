@@ -75,4 +75,18 @@ describe('create', () => {
 
     expect(attachResponseInterceptor).toHaveBeenCalledWith(instance, {})
   })
+
+  it('gives each axios instance its own refresh queue (per-instance isolation, ADR-004)', async () => {
+    const { create } = await import('../../../src/factories/create')
+
+    create({ codeminity: { getToken: vi.fn() } })
+    create({ codeminity: { getToken: vi.fn() } })
+
+    const firstCallQueue = attachAuthInterceptor.mock.calls[0]?.[2] as unknown
+    const secondCallQueue = attachAuthInterceptor.mock.calls[1]?.[2] as unknown
+
+    expect(firstCallQueue).toBeDefined()
+    expect(secondCallQueue).toBeDefined()
+    expect(firstCallQueue).not.toBe(secondCallQueue)
+  })
 })
