@@ -30,7 +30,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "validate:api": "node scripts/validate-api.mjs"
+    "validate:api": "node scripts/validate-api.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
