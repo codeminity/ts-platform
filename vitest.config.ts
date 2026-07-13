@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/**/*.{test,spec}.ts'],
+    include: ['packages/**/*.{test,spec}.ts', 'scripts/validate-api.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
 
     coverage: {
