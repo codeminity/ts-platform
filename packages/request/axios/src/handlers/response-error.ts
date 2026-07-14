@@ -32,7 +32,7 @@ export async function handleResponseError(
     attempt
   }
 
-  const retryConfig = requestConfig.codeminity ?? config
+  const retryConfig = { ...config, ...requestConfig.codeminity }
   const canRetry = await handleRetry(error, attempt, retryConfig)
 
   if (canRetry) {
