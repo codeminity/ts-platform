@@ -101,6 +101,37 @@ describe('handleRefreshToken', () => {
 
     await handleRefreshToken(config, queue)
 
-    expect(queue.run).toHaveBeenCalledTimes(1)
+    expect(queue.run).not.toHaveBeenCalled()
+  })
+
+  it('runs refresh only once', async () => {
+    const queue = createRefreshQueue()
+
+    const isTokenExpired = vi.fn().mockResolvedValue(true)
+    const refreshToken = vi.fn().mockResolvedValue(undefined)
+    const onStart = vi.fn()
+    const onSuccess = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired,
+      refreshToken,
+      onRefreshStart: onStart,
+      onRefreshSuccess: onSuccess
+    })
+
+    await Promise.all([
+      handleRefreshToken(config, queue),
+      handleRefreshToken(config, queue),
+      handleRefreshToken(config, queue)
+    ])
+
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not share refresh state', () => {
+    const queueA = createRefreshQueue()
+    const queueB = createRefreshQueue()
+
+    expect(queueA).not.toBe(queueB)
   })
 })
