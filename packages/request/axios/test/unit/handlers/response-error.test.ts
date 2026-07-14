@@ -58,13 +58,13 @@ describe('handleResponseError', () => {
   })
 
   it('retries request when retry is allowed', async () => {
-    const config = {
+    const requestConfig = {
       url: '/users',
       codeminity: {}
     } as InternalRequestConfig
 
     const error = new AxiosError('boom')
-    error.config = config
+    error.config = requestConfig
 
     vi.mocked(handleRetry).mockResolvedValue(true)
 
@@ -74,11 +74,10 @@ describe('handleResponseError', () => {
 
     const result = await handleResponseError(instance, {}, error)
 
-    expect(handleRetry).toHaveBeenCalledWith(error, 1, config.codeminity)
-    expect(request).toHaveBeenCalledTimes(1)
+    expect(handleRetry).toHaveBeenCalledWith(error, 1, requestConfig.codeminity)
 
     expect(request).toHaveBeenCalledWith({
-      ...config,
+      ...requestConfig,
       attempt: 1
     })
 
@@ -86,13 +85,13 @@ describe('handleResponseError', () => {
   })
 
   it('emits event when retry is denied', async () => {
-    const config = {
+    const requestConfig = {
       url: '/users',
       codeminity: {}
     } as InternalRequestConfig
 
     const error = new AxiosError('boom')
-    error.config = config
+    error.config = requestConfig
 
     vi.mocked(handleRetry).mockResolvedValue(false)
 
@@ -103,14 +102,14 @@ describe('handleResponseError', () => {
   })
 
   it('increments request attempt', async () => {
-    const config = {
+    const requestConfig = {
       url: '/users',
       attempt: 5,
       codeminity: {}
     } as InternalRequestConfig
 
     const error = new AxiosError('boom')
-    error.config = config
+    error.config = requestConfig
 
     vi.mocked(handleRetry).mockResolvedValue(true)
 
@@ -119,7 +118,7 @@ describe('handleResponseError', () => {
     await handleResponseError(instance, {}, error)
 
     expect(request).toHaveBeenCalledWith({
-      ...config,
+      ...requestConfig,
       attempt: 6
     })
   })
@@ -129,17 +128,52 @@ describe('handleResponseError', () => {
       retries: 5
     } as Config
 
-    const config = {
+    const requestConfig = {
       url: '/users'
     } as InternalRequestConfig
 
     const error = new AxiosError('boom')
-    error.config = config
+    error.config = requestConfig
 
     vi.mocked(handleRetry).mockResolvedValue(false)
 
     await expect(handleResponseError(instance, globalConfig, error)).rejects.toBe(error)
 
     expect(handleRetry).toHaveBeenCalledWith(error, 1, globalConfig)
+  })
+
+  it('merges global retry config with per-request override', async () => {
+    const globalConfig = {
+      retries: 3,
+      retryOnStatuses: [502, 503, 504]
+    } as Config
+
+    const requestConfig = {
+      url: '/reports/annual',
+      codeminity: {
+        retries: 1,
+        retryDelay: 5
+      }
+    } as InternalRequestConfig
+
+    const error = new AxiosError('boom')
+    error.config = requestConfig
+    error.response = { status: 503 } as AxiosError['response']
+
+    vi.mocked(handleRetry).mockResolvedValue(true)
+
+    request.mockResolvedValue({ data: 'ok' })
+
+    await expect(handleResponseError(instance, globalConfig, error)).resolves.toEqual({
+      data: 'ok'
+    })
+
+    expect(handleRetry).toHaveBeenCalledWith(error, 1, {
+      retries: 1,
+      retryDelay: 5,
+      retryOnStatuses: [502, 503, 504]
+    })
+
+    expect(request).toHaveBeenCalledTimes(1)
   })
 })
