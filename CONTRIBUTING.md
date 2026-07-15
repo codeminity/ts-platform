@@ -63,6 +63,22 @@ Avoid:
 
 ---
 
+## Releasing (Changesets)
+
+Every PR that changes the runtime behavior, public API, or fixes a bug in any package under `packages/` **must** include a changeset:
+
+```
+pnpm changeset
+```
+
+This prompts for the affected package(s), the semver bump (`patch` / `minor` / `major`), and a short summary — then writes a file to `.changeset/`. Commit that file as part of the PR.
+
+Skip this only for changes that can't affect a published package: docs-only edits, CI/tooling config, internal test-only changes with no behavior implication. When unsure, add one — an unnecessary changeset is a much smaller problem than a shipped fix nobody ever gets.
+
+Versioning (`pnpm version-packages`) and publishing (`pnpm release`) are run separately, outside individual PRs — see the release workflow for the current process.
+
+---
+
 ## Pull Requests
 
 Before submitting:
