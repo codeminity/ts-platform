@@ -4,7 +4,7 @@
   "type": "module",
   "description": "A TypeScript monorepo platform for building shared packages, tools, and infrastructure across the Codeminity ecosystem.",
   "license": "MIT",
-  "author": "Masoud Fouladi",
+  "author": "Masoud Fooladi",
   "repository": {
     "type": "git",
     "url": "https://github.com/codeminity/ts-platform"
@@ -13,11 +13,11 @@
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },
+  "sideEffects": false,
   "engines": {
     "node": ">=24"
   },
   "packageManager": "pnpm@11.13.0",
-  "sideEffects": false,
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -26,7 +26,6 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "clean": "turbo clean",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
