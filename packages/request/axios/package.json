@@ -1,6 +1,6 @@
 {
   "name": "@codeminity/axios",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "A production-ready Axios adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
   "keywords": [
