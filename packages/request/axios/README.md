@@ -1189,7 +1189,7 @@ Yes: `api.get('/public-data', { codeminity: { skipAuth: true } })`.
 Yes — every instance created via `axios.create()` can have its own `codeminity` config.
 
 **Does it maintain global state?**
-Configuration and lifecycle state are scoped to created instances, which improves testability and predictability. If you're relying on refresh coordination working a specific way across multiple instances, verify that behavior against your installed version rather than assuming it.
+No. Configuration and lifecycle state — including refresh coordination — are scoped to each instance created via `axios.create()`. Two instances never share a refresh queue or any other mutable state, even if created with identical config. This is an explicit architectural decision (see ADR-004 in `DECISIONS.md`) and is covered by regression tests.
 
 **Can I import internal files?**
 No — only `import axios from '@codeminity/axios'` is supported. Internal files are implementation details and may change without notice.
@@ -1258,7 +1258,7 @@ Only one refresh operation executes, avoiding duplicate network requests, race c
 
 ### Memory & Scope
 
-Per-instance resources are intentionally small. If you rely on any resource being shared or isolated across multiple `axios.create()` instances (for example, refresh coordination), check that against your installed version's changelog — this is an implementation detail worth confirming rather than assuming.
+Per-instance resources are intentionally small. Each `axios.create()` call gets its own isolated refresh queue and lifecycle state — nothing is shared or deduplicated across instances, by design (ADR-004) and verified by tests.
 
 ### Multiple API Clients
 
