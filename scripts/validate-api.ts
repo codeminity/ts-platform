@@ -2,7 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { globby } from 'globby'
-import ts from 'typescript'
+
+import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
 
 const packages = await globby('packages/**/package.json', {
   ignore: ['**/node_modules/**']
@@ -44,68 +45,4 @@ for (const pkgFile of packages) {
   }
 
   console.log(`✅ API validated ${packageName}`)
-}
-
-function extractExportsFromSource(pkgPath: string) {
-  const entry = path.join(pkgPath, 'src/index.ts')
-
-  if (!fs.existsSync(entry)) {
-    return {
-      runtime: [],
-      types: []
-    }
-  }
-
-  const source = fs.readFileSync(entry, 'utf8')
-
-  const file = ts.createSourceFile(entry, source, ts.ScriptTarget.Latest, true)
-
-  const runtime = new Set<string>()
-
-  const types = new Set<string>()
-
-  function visit(node: ts.Node) {
-    if (ts.isFunctionDeclaration(node) && node.name) {
-      runtime.add(node.name.text)
-    }
-
-    if (ts.isClassDeclaration(node) && node.name) {
-      runtime.add(node.name.text)
-    }
-
-    if (ts.isVariableStatement(node)) {
-      node.declarationList.declarations.forEach((d) => {
-        if (ts.isIdentifier(d.name)) {
-          runtime.add(d.name.text)
-        }
-      })
-    }
-
-    if (ts.isInterfaceDeclaration(node)) {
-      types.add(node.name.text)
-    }
-
-    if (ts.isTypeAliasDeclaration(node)) {
-      types.add(node.name.text)
-    }
-
-    if (ts.isEnumDeclaration(node)) {
-      runtime.add(node.name.text)
-    }
-
-    ts.forEachChild(node, visit)
-  }
-
-  visit(file)
-
-  return {
-    runtime: [...runtime],
-    types: [...types]
-  }
-}
-
-function hasTypeExport(dts: string, name: string) {
-  const regex = new RegExp(`(interface|type|class|enum)\\s+${name}\\b`)
-
-  return regex.test(dts)
 }
