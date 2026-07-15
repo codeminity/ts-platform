@@ -55,8 +55,9 @@ pnpm changeset
 
 ```ts
 pnpm build
-pnpm test
 pnpm lint
+pnpm typecheck
+pnpm test
 pnpm validate:api
 ```
 

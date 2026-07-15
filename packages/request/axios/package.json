@@ -48,7 +48,8 @@
     "build:js": "tsup",
     "build:types": "tsc -p tsconfig.json --emitDeclarationOnly",
     "build": "pnpm build:js && pnpm build:types",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@codeminity/request-core": "workspace:*",

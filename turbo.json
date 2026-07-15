@@ -1,6 +1,11 @@
 {
   "$schema": "https://v2-10-5.turborepo.dev/schema.json",
   "tasks": {
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": []
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
