@@ -2,9 +2,7 @@
   "name": "@codeminity/request-core",
   "version": "0.1.1",
   "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
+  "description": "Production-ready request infrastructure for retries, authentication, token refresh, queues and shared networking utilities.",
   "keywords": [
     "request",
     "http",
@@ -12,34 +10,40 @@
     "javascript",
     "infrastructure",
     "retry",
-    "auth"
+    "auth",
+    "fetch",
+    "network",
+    "token",
+    "middleware",
+    "refresh-token"
   ],
-  "type": "module",
-  "author": "Masoud Fooladi",
-  "description": "Core infrastructure layer for request handling.",
   "license": "MIT",
-  "engines": {
-    "node": ">=24"
-  },
+  "author": "Masoud Fooladi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codeminity/ts-platform.git",
+    "url": "https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/core"
   },
   "homepage": "https://github.com/codeminity/ts-platform#readme",
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },
+  "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "files": [
     "dist"
   ],

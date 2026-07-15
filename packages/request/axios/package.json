@@ -2,9 +2,7 @@
   "name": "@codeminity/axios",
   "version": "0.1.1",
   "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
+  "description": "A production-ready Axios adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
   "keywords": [
     "axios",
     "http",
@@ -16,32 +14,33 @@
     "authentication",
     "interceptors"
   ],
-  "type": "module",
-  "author": "Masoud Fooladi",
-  "description": "A production-ready Axios adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
   "license": "MIT",
-  "engines": {
-    "node": ">=20"
-  },
+  "author": "Masoud Fooladi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codeminity/ts-platform.git",
+    "url": "https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/axios"
   },
   "homepage": "https://github.com/codeminity/ts-platform#readme",
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },
+  "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "files": [
     "dist"
   ],
