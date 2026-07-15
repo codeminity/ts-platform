@@ -7,6 +7,15 @@ export async function emitterCallback(
   error: AxiosError,
   config: CallbackConfig
 ): Promise<void> {
-  await config.onEvent?.(event, error)
-  await config.onError?.(error)
+  try {
+    await config.onEvent?.(event, error)
+  } catch {
+    /* empty */
+  }
+
+  try {
+    await config.onError?.(error)
+  } catch {
+    /* empty */
+  }
 }

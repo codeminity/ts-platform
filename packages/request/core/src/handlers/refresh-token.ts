@@ -19,7 +19,12 @@ export async function handleRefreshToken(
       await refreshToken()
       await onRefreshSuccess?.()
     } catch (error) {
-      await onRefreshFail?.(error)
+      try {
+        await onRefreshFail?.(error)
+      } catch {
+        // ignore callback failure
+      }
+
       throw error
     }
   })
