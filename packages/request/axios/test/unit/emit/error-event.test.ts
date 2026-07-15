@@ -59,4 +59,67 @@ describe('emitterCallback', () => {
 
     await expect(emitterCallback(ErrorEventEnum.ABORT, error, config)).resolves.toBeUndefined()
   })
+
+  it('ignores onEvent callback errors', async () => {
+    const onEvent = vi.fn().mockRejectedValue(new Error('event callback failed'))
+
+    const config: CallbackConfig = {
+      onEvent
+    }
+
+    const error = {} as AxiosError
+
+    await expect(emitterCallback(ErrorEventEnum.ABORT, error, config)).resolves.toBeUndefined()
+
+    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.ABORT, error)
+  })
+
+  it('ignores onError callback errors', async () => {
+    const onError = vi.fn().mockRejectedValue(new Error('error callback failed'))
+
+    const config: CallbackConfig = {
+      onError
+    }
+
+    const error = {} as AxiosError
+
+    await expect(emitterCallback(ErrorEventEnum.ABORT, error, config)).resolves.toBeUndefined()
+
+    expect(onError).toHaveBeenCalledWith(error)
+  })
+
+  it('still calls onError when onEvent throws', async () => {
+    const onEvent = vi.fn().mockRejectedValue(new Error('event failed'))
+    const onError = vi.fn()
+
+    const config: CallbackConfig = {
+      onEvent,
+      onError
+    }
+
+    const error = {} as AxiosError
+
+    await expect(emitterCallback(ErrorEventEnum.ABORT, error, config)).resolves.toBeUndefined()
+
+    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.ABORT, error)
+    expect(onError).toHaveBeenCalledWith(error)
+  })
+
+  it('calls onEvent before onError throws', async () => {
+    const onEvent = vi.fn()
+
+    const onError = vi.fn().mockRejectedValue(new Error('error callback failed'))
+
+    const config: CallbackConfig = {
+      onEvent,
+      onError
+    }
+
+    const error = {} as AxiosError
+
+    await expect(emitterCallback(ErrorEventEnum.ABORT, error, config)).resolves.toBeUndefined()
+
+    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.ABORT, error)
+    expect(onError).toHaveBeenCalledWith(error)
+  })
 })

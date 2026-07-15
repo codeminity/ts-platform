@@ -63,26 +63,63 @@ describe('createRefreshQueue', () => {
     expect(task).toHaveBeenCalledTimes(1)
   })
 
-  it('handles high concurrency correctly', async () => {
+  it('runs only one refresh task for concurrent calls', async () => {
+    let calls = 0
+
     const queue = createRefreshQueue()
 
-    const task = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          setTimeout(resolve, 10)
-        })
-    )
+    const task = async () => {
+      calls++
 
-    const results = await Promise.all([
-      queue.run(task),
-      queue.run(task),
-      queue.run(task),
-      queue.run(task)
-    ])
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
 
-    expect(results[0]).toBe(results[1])
-    expect(results[1]).toBe(results[2])
-    expect(results[2]).toBe(results[3])
-    expect(task).toHaveBeenCalledTimes(1)
+    await Promise.all([queue.run(task), queue.run(task), queue.run(task)])
+
+    expect(calls).toBe(1)
+  })
+
+  it('allows retry after failed refresh', async () => {
+    const queue = createRefreshQueue()
+
+    let calls = 0
+
+    const task = async () => {
+      calls++
+
+      await Promise.resolve()
+
+      if (calls === 1) {
+        throw new Error('failed')
+      }
+    }
+
+    await expect(queue.run(task)).rejects.toThrow('failed')
+
+    await expect(queue.run(task)).resolves.toBeUndefined()
+
+    expect(calls).toBe(2)
+  })
+
+  it('allows refresh again after previous refresh failure', async () => {
+    let attempts = 0
+
+    const queue = createRefreshQueue()
+
+    await expect(
+      queue.run(() => {
+        attempts++
+
+        return Promise.reject(new Error('fail'))
+      })
+    ).rejects.toThrow('fail')
+
+    await queue.run(() => {
+      attempts++
+
+      return Promise.resolve()
+    })
+
+    expect(attempts).toBe(2)
   })
 })

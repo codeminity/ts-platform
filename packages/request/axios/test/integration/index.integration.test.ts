@@ -19,6 +19,10 @@ function fakeAdapter(
   }
 }
 
+interface ResponseData {
+  ok: boolean
+}
+
 describe('package entry point (real, unmocked)', () => {
   it('create() returns a working axios instance without throwing (regression test for self-mutating axios singleton)', async () => {
     const api = create({
@@ -90,5 +94,185 @@ describe('package entry point (real, unmocked)', () => {
 
     await expect(api.get('/missing')).rejects.toThrow()
     expect(seenEvent).toBe('not_found')
+  })
+
+  it('refreshes token only once for concurrent requests with expired token', async () => {
+    let refreshCount = 0
+    let refreshed = false
+
+    const api = create({
+      adapter: fakeAdapter((config) => {
+        if (!refreshed) {
+          const error = new Error('Unauthorized') as AxiosError
+
+          error.isAxiosError = true
+          error.config = config
+
+          error.response = {
+            status: 401,
+            statusText: 'Unauthorized',
+            headers: {},
+            config,
+            data: {}
+          }
+
+          error.toJSON = () => ({})
+
+          throw error
+        }
+
+        return {
+          data: {
+            ok: true
+          }
+        }
+      }),
+
+      codeminity: {
+        isTokenExpired: () => !refreshed,
+
+        getToken: () => 'new-token',
+
+        refreshToken: async () => {
+          refreshCount++
+
+          await new Promise((r) => setTimeout(r, 50))
+
+          refreshed = true
+        }
+      }
+    })
+
+    const responses = await Promise.all([
+      api.get<ResponseData>('/a'),
+      api.get<ResponseData>('/b'),
+      api.get<ResponseData>('/c'),
+      api.get<ResponseData>('/d'),
+      api.get<ResponseData>('/e')
+    ])
+
+    expect(refreshCount).toBe(1)
+
+    expect(responses).toHaveLength(5)
+
+    expect(responses.every((response) => response.data.ok)).toBe(true)
+  })
+
+  it('does not refresh again after a successful refresh', async () => {
+    let refreshCount = 0
+    let refreshed = false
+
+    const api = create({
+      adapter: fakeAdapter(() => ({
+        data: { ok: true }
+      })),
+
+      codeminity: {
+        isTokenExpired: () => !refreshed,
+
+        getToken: () => 'token',
+
+        refreshToken: () => {
+          refreshCount++
+          refreshed = true
+        }
+      }
+    })
+
+    await api.get('/first')
+    await api.get('/second')
+    await api.get('/third')
+
+    expect(refreshCount).toBe(1)
+  })
+
+  it('continues serving requests after a previous refresh failure', async () => {
+    let refreshCount = 0
+    let refreshed = false
+    let shouldFailRefresh = true
+
+    const api = create({
+      adapter: fakeAdapter(() => {
+        return {
+          data: {
+            ok: true
+          }
+        }
+      }),
+
+      codeminity: {
+        isTokenExpired: () => !refreshed,
+
+        getToken: () => 'token',
+
+        refreshToken: () => {
+          refreshCount++
+
+          if (shouldFailRefresh) {
+            shouldFailRefresh = false
+            throw new Error('refresh failed')
+          }
+
+          refreshed = true
+        }
+      }
+    })
+
+    const first = await Promise.all([api.get<ResponseData>('/a'), api.get<ResponseData>('/b')])
+
+    expect(first.every((response) => response.data.ok)).toBe(true)
+
+    const second = await Promise.all([api.get<ResponseData>('/c'), api.get<ResponseData>('/d')])
+
+    expect(second.every((response) => response.data.ok)).toBe(true)
+
+    expect(refreshCount).toBe(2)
+  })
+
+  it('rejects all concurrent requests when refresh fails', async () => {
+    let refreshCount = 0
+
+    const api = create({
+      adapter: fakeAdapter((config) => {
+        const error = new Error('Unauthorized') as AxiosError
+
+        error.isAxiosError = true
+        error.config = config
+
+        error.response = {
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: {},
+          config,
+          data: {}
+        }
+
+        error.toJSON = () => ({})
+
+        throw error
+      }),
+
+      codeminity: {
+        isTokenExpired: () => true,
+
+        getToken: () => 'old-token',
+
+        refreshToken: async () => {
+          refreshCount++
+
+          await new Promise((resolve) => setTimeout(resolve, 50))
+
+          throw new Error('refresh failed')
+        }
+      }
+    })
+
+    const results = await Promise.allSettled([api.get('/a'), api.get('/b'), api.get('/c')])
+
+    expect(refreshCount).toBe(1)
+
+    expect(results).toHaveLength(3)
+
+    expect(results.every((result) => result.status === 'rejected')).toBe(true)
   })
 })
