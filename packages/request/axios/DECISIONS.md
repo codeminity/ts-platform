@@ -10,6 +10,8 @@ This document records significant design decisions for `@codeminity/axios`, usin
 - [ADR-002: Lifecycle logic lives in `@codeminity/request-core`, not in this package](#adr-002-lifecycle-logic-lives-in-codeminityrequest-core-not-in-this-package)
 - [ADR-003: Retry and auth are opt-in, never automatic](#adr-003-retry-and-auth-are-opt-in-never-automatic)
 - [ADR-004: Refresh coordination scope — per-instance vs. shared](#adr-004-refresh-coordination-scope--per-instance-vs-shared)
+- [ADR-005: `shouldRetry` is a full override, not an additional filter](#adr-005-shouldretry-is-a-full-override-not-an-additional-filter)
+- [ADR-006: Per-request retry config is merged with global config, not replaced](#adr-006-per-request-retry-config-is-merged-with-global-config-not-replaced)
 
 ---
 
@@ -52,6 +54,26 @@ This document records significant design decisions for `@codeminity/axios`, usin
 **Decision:** Refresh coordination **should** be scoped per Axios instance, so that two instances created with different configurations (e.g., pointed at different backends, or using different `getToken` implementations) never accidentally share an in-flight refresh. Any implementation where a refresh queue is created at module scope (shared across all `axios.create()` calls) is considered a bug against this decision, not an accepted behavior, and should be fixed at the source rather than documented as intentional.
 
 **Consequences:** Contributors introducing any shared or singleton state in `factories/` must treat it as a design regression requiring discussion, not a minor implementation detail. Anyone integrating this package who observes refresh coordination behaving differently than "scoped per instance" is encouraged to file an issue rather than assume it's by design — this ADR is the source of truth for intended behavior, and the README/API docs should always be kept in sync with it.
+
+---
+
+## ADR-005: `shouldRetry` is a full override, not an additional filter
+
+**Context:** `RetryConfig` supports both a declarative `retryOnStatuses` list and an imperative `shouldRetry(error, attempt)` predicate. An earlier implementation combined them with logical AND (`shouldRetry(...) && retryOnStatuses.includes(status)`), meaning a custom `shouldRetry` could only ever narrow what `retryOnStatuses` already allowed — it could never independently decide to retry something outside that list. This directly contradicted documented usage (`docs/guides/retry.md`, README) showing `shouldRetry` used standalone, with no `retryOnStatuses` configured at all.
+
+**Decision:** When `shouldRetry` is provided, it is the **sole** decision-maker for that request — `retryOnStatuses` and the built-in network-error classification are not consulted at all. The built-in classification only applies when `shouldRetry` is absent.
+
+**Consequences:** Consumers who configure both `retryOnStatuses` and `shouldRetry` together should be aware that `shouldRetry` fully takes over the decision — `retryOnStatuses` becomes inert for that request unless the custom predicate consults it itself (via `error.response?.status`). This is intentional: it matches "opt-in, predictable behavior" (ADR-003) — a config option that's silently ignored half the time is a worse outcome than one that's fully in control once specified.
+
+---
+
+## ADR-006: Per-request retry config is merged with global config, not replaced
+
+**Context:** `handleResponseError` resolves the effective retry config for a failed request from two sources: the Axios instance's global `codeminity` config, and an optional per-request `codeminity` override. An earlier implementation used `requestConfig.codeminity ?? config` — a full replacement whenever _any_ per-request `codeminity` object was present, even a partial one. This broke the documented "Per-Endpoint Retry Policies" pattern, where a request overrides only `retries`/`retryDelay` and expects to still inherit the global `retryOnStatuses`.
+
+**Decision:** Per-request retry config is shallow-merged on top of the global config (`{ ...globalConfig, ...requestConfig.codeminity }`). A per-request override replaces only the specific fields it declares; every other field falls back to the instance-level default.
+
+**Consequences:** Per-request overrides can stay minimal (override only what's different for that endpoint) without silently losing the rest of the instance's retry behavior. Contributors adding new fields to `RetryConfig` should keep this merge semantic in mind — a field that should NOT be inherited per-request (if one is ever introduced) would need explicit handling, not just addition to the interface.
 
 ---
 
