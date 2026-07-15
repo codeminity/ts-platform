@@ -3,8 +3,9 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import importX from 'eslint-plugin-import-x'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import { defineConfig } from 'eslint/config'
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: [
       '**/dist/**',
