@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { TokenModeEnum } from '@codeminity/request-core'
 
-import { createAuthConfig } from '../../../../core/test/mocks/create-auth-config'
-import { createRefreshQueue } from '../../../../core/test/mocks/create-refresh-queue'
 import { ErrorEventEnum } from '../../../src/enum/error-event'
 import { handleAuthRequest } from '../../../src/handlers/auth-request'
 import { dependencies } from '../../../src/handlers/dependencies'
 import { type Config } from '../../../src/interfaces/config'
+import { createAuthConfig } from '../../mocks/create-auth-config'
+import { createRefreshQueue } from '../../mocks/create-refresh-queue'
 import { createRequestConfig } from '../../mocks/create-request-config'
 
 describe('handleAuthRequest', () => {
