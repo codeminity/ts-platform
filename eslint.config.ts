@@ -1,26 +1,13 @@
 import js from '@eslint/js'
+import { defineConfig } from 'eslint/config'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import importX from 'eslint-plugin-import-x'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import importX from 'eslint-plugin-import-x'
-import eslintConfigPrettier from 'eslint-config-prettier'
-import { defineConfig } from 'eslint/config'
 
 export default defineConfig(
   {
-    ignores: [
-      '**/dist/**',
-      '**/coverage/**',
-      '**/.turbo/**',
-      '**/node_modules/**',
-
-      // configs (handled separately, no type-aware linting needed)
-      '**/*.config.*',
-      '**/eslint.config.*',
-      '**/vite.config.*',
-
-      // scripts
-      './scripts/**'
-    ]
+    ignores: ['**/dist/**', '**/coverage/**', '**/.turbo/**', '**/node_modules/**']
   },
 
   js.configs.recommended,
@@ -150,7 +137,17 @@ export default defineConfig(
 
     rules: {
       'no-unused-vars': 'warn',
-      'no-undef': 'off'
+      'no-undef': 'off',
+      'import-x/no-internal-modules': 'off'
+    }
+  },
+
+  // scripts file
+  {
+    files: ['scripts/**/*.ts'],
+    rules: {
+      'import-x/no-internal-modules': 'off',
+      'import-x/no-cycle': 'off'
     }
   }
 )
