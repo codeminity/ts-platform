@@ -192,7 +192,7 @@ yarn add @codeminity/axios
 
 | Requirement | Version                      |
 | ----------- | ---------------------------- |
-| Node.js     | ^20.19.0 OR >=24.0.0         |
+| Node.js     | ^22.13.0 OR >=24.0.0         |
 | TypeScript  | >= 5 (recommended, optional) |
 
 Works in Node.js applications, browser applications, frontend frameworks, and backend services — no application-framework dependency.
