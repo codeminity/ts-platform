@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+
 import { globby } from 'globby'
 
 import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
@@ -9,12 +10,23 @@ const packages = await globby('packages/**/package.json', {
   ignore: ['**/node_modules/**']
 })
 
+interface PackageJson {
+  name?: string
+  version?: string
+  exports?: Record<string, unknown>
+  types?: string
+  main?: string
+  module?: string
+}
+
+type RuntimeModule = Record<string, unknown>
+
 for (const pkgFile of packages) {
   const pkgPath = path.dirname(pkgFile)
 
-  const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'))
+  const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8')) as PackageJson
 
-  const packageName = pkg.name
+  const packageName = pkg.name ?? 'not_found'
 
   const distPath = path.resolve(pkgPath, 'dist/index.js')
 
@@ -26,7 +38,7 @@ for (const pkgFile of packages) {
 
   const expected = extractExportsFromSource(pkgPath)
 
-  const runtime = await import(pathToFileURL(distPath).href)
+  const runtime = (await import(pathToFileURL(distPath).href)) as RuntimeModule
 
   for (const name of expected.runtime) {
     if (!(name in runtime)) {
