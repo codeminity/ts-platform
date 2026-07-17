@@ -1,5 +1,38 @@
 # @codeminity/axios
 
+## 0.3.0
+
+### 🚀 Features
+
+- Export public configuration types from the package root:
+  - `Config`
+  - `RequestConfig`
+  - `RetryConfig`
+  - `CallbackConfig`
+  - `AuthConfig`
+
+### 🛠 Improvements
+
+- Update supported Node.js versions to `^22.13.0 || >=24.0.0`.
+- Improve TypeScript package boundaries and public API surface.
+- Strengthen package publishing configuration and export validation.
+- Improve CI quality gates with dependency auditing and coverage validation.
+
+### 🧪 Testing
+
+- Run code coverage as part of CI and release workflows.
+- Improve API validation script with full type safety.
+- Improve linting support for workspace scripts without relaxing project rules.
+
+### 📚 Documentation
+
+- Update Node.js version requirements.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.3.0
+
 ## 0.2.0
 
 ### 🛠 Improvements

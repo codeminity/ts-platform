@@ -1,5 +1,26 @@
 # @codeminity/request-core
 
+## 0.3.0
+
+### 🛠 Improvements
+
+- Update supported Node.js versions to `^22.13.0 || >=24.0.0`.
+- Improve TypeScript project structure and shared package boundaries.
+- Strengthen package publishing configuration and export validation.
+- Improve CI quality gates with dependency auditing and coverage validation.
+- Remove obsolete workspace release exclusions.
+
+### 🧪 Testing
+
+- Run code coverage as part of CI and release workflows.
+- Improve API validation script with full type safety.
+- Improve linting support for workspace scripts without relaxing project rules.
+
+### 📚 Documentation
+
+- Export public configuration types for a more discoverable API.
+- Update Node.js version requirements.
+
 ## 0.2.0
 
 ### 🛠 Improvements
