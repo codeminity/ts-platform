@@ -6,15 +6,32 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/**/*.{test,spec}.ts', 'scripts/validate-api.test.ts'],
+    include: ['packages/**/*.{test,spec}.ts', 'scripts/**/*.{test,spec}.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
 
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['packages/**/src/**/*.{ts,js}', 'scripts/**/*.ts'],
-      exclude: ['**/*.test.ts', '**/*.spec.ts', '**/*.d.ts', '**/node_modules/**']
-    }
+      exclude: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        '**/*.d.ts',
+        '**/node_modules/**',
+        '**/index.ts',
+        '**/interfaces/**',
+        '**/types/**',
+        'scripts/validate-api-run.ts'
+      ],
+      thresholds: {
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100
+      }
+    },
+
+    reporters: ['dot']
   },
 
   resolve: {
