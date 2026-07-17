@@ -1,6 +1,6 @@
 {
   "name": "@codeminity/request-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "description": "Production-ready request infrastructure for retries, authentication, token refresh, queues and shared networking utilities.",
   "keywords": [
