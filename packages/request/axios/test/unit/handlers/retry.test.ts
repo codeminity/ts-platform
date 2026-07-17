@@ -73,4 +73,61 @@ describe('handleRetry', () => {
     expect(getRetryDelay).toHaveBeenCalledWith(3, error)
     expect(delay).toHaveBeenCalledWith(1000)
   })
+
+  it('uses retryDelay when getRetryDelay returns undefined', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('../../../src/handlers/retry')
+
+    const getRetryDelay = vi.fn().mockReturnValue(undefined)
+
+    const result = await handleRetry({} as AxiosError, 2, {
+      retryDelay: 300,
+      getRetryDelay
+    })
+
+    expect(result).toBe(true)
+    expect(getRetryDelay).toHaveBeenCalledWith(2, expect.any(Object))
+    expect(delay).toHaveBeenCalledWith(300)
+  })
+
+  it('returns true without delay when no retry delay is configured', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('../../../src/handlers/retry')
+
+    const result = await handleRetry({} as AxiosError, 1, {})
+
+    expect(result).toBe(true)
+    expect(delay).not.toHaveBeenCalled()
+  })
+
+  it('does not delay when retryDelay is negative', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('../../../src/handlers/retry')
+
+    const result = await handleRetry({} as AxiosError, 1, {
+      retryDelay: -100
+    })
+
+    expect(result).toBe(true)
+    expect(delay).not.toHaveBeenCalled()
+  })
+
+  it('falls back when getRetryDelay returns null', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('../../../src/handlers/retry')
+
+    const getRetryDelay = vi.fn().mockReturnValue(null)
+
+    const result = await handleRetry({} as AxiosError, 1, {
+      retryDelay: 200,
+      getRetryDelay
+    })
+
+    expect(result).toBe(true)
+    expect(delay).toHaveBeenCalledWith(200)
+  })
 })

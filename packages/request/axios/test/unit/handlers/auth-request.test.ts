@@ -108,4 +108,68 @@ describe('handleAuthRequest', () => {
 
     expect(onError).toHaveBeenCalledWith(error)
   })
+
+  it('emits error callback when getToken fails with a non axios error', async () => {
+    const onError = vi.fn()
+
+    const error = new Error('token failed')
+
+    const config: Config = {
+      getToken: vi.fn().mockRejectedValue(error),
+      onError
+    }
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
+
+    await handleAuthRequest(createRequestConfig(), config, createRefreshQueue())
+
+    expect(onError).toHaveBeenCalledWith(error)
+  })
+
+  it('skips auth when getToken is not configured', async () => {
+    const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken')
+
+    const config = createAuthConfig({
+      tokenMode: TokenModeEnum.JWT,
+      getToken: undefined
+    })
+
+    const request = createRequestConfig()
+    const queue = createRefreshQueue()
+
+    const result = await handleAuthRequest(request, config, queue)
+
+    expect(refreshSpy).not.toHaveBeenCalled()
+    expect(result).toBe(request)
+  })
+
+  it('does not attach Authorization header when token is empty', async () => {
+    const config = createAuthConfig({
+      getToken: vi.fn().mockResolvedValue(undefined)
+    })
+
+    const request = createRequestConfig()
+
+    const result = await handleAuthRequest(request, config, createRefreshQueue())
+
+    expect(result.headers.get('Authorization')).toBeUndefined()
+  })
+
+  it('emits token failed event when getToken throws axios error', async () => {
+    const onEvent = vi.fn()
+
+    const error = new Error('token failed') as AxiosError
+    error.isAxiosError = true
+
+    const config: Config = {
+      getToken: vi.fn().mockRejectedValue(error),
+      onEvent
+    }
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
+
+    await handleAuthRequest(createRequestConfig(), config, createRefreshQueue())
+
+    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
+  })
 })

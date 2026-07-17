@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { type RetryConfig } from '../../../src/interfaces/retry-config'
 import { shouldRetry } from '../../../src/utils/should-retry'
@@ -108,5 +108,67 @@ describe('shouldRetry', () => {
     }
 
     expect(shouldRetry(error, 1, config)).toBe(true)
+  })
+
+  it('uses zero retries when retries is undefined', () => {
+    const error = createError({ code: 'ERR_NETWORK' })
+
+    expect(shouldRetry(error, 1, {})).toBe(false)
+  })
+
+  it('allows retry on first attempt when retries is configured', () => {
+    const error = createError({ code: 'ERR_NETWORK' })
+
+    expect(
+      shouldRetry(error, 0, {
+        retries: 1
+      })
+    ).toBe(true)
+  })
+
+  it('handles status retry config when retryOnStatuses is undefined', () => {
+    const error = createError({ status: 500 })
+
+    expect(
+      shouldRetry(error, 1, {
+        retries: 2
+      })
+    ).toBe(false)
+  })
+
+  it('does not retry when status is null and code is unknown', () => {
+    const error = createError()
+
+    expect(
+      shouldRetry(error, 1, {
+        retries: 2,
+        retryOnStatuses: [500]
+      })
+    ).toBe(false)
+  })
+
+  it('calls custom shouldRetry with correct arguments', () => {
+    const error = createError({ status: 500 })
+
+    const custom = vi.fn().mockReturnValue(true)
+
+    expect(
+      shouldRetry(error, 2, {
+        retries: 3,
+        shouldRetry: custom
+      })
+    ).toBe(true)
+
+    expect(custom).toHaveBeenCalledWith(error, 2)
+  })
+
+  it('does not retry when attempt equals retries+1', () => {
+    const error = createError({ code: 'ERR_NETWORK' })
+
+    expect(
+      shouldRetry(error, 3, {
+        retries: 2
+      })
+    ).toBe(false)
   })
 })

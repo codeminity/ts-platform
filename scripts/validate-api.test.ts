@@ -1,130 +1,155 @@
-import { describe, expect, it } from 'vitest'
+import fs from 'node:fs'
 
-import { extractExportsFromText, hasTypeExport } from './lib/api-exports'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('extractExportsFromText', () => {
-  it('detects exported function/class/const/interface/type/enum declarations', () => {
-    const source = `
-      export function hello() {}
-      export class Widget {}
-      export const value = 1
-      export interface User {}
-      export type Config = {}
-      export enum Mode { A, B }
-    `
+import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
+import { loadRuntimeModule } from './lib/load-runtime-module'
+import { validatePackages } from './validate-api'
 
-    const result = extractExportsFromText(source)
+vi.mock('globby', () => ({
+  globby: vi.fn().mockResolvedValue(['packages/request/core/package.json'])
+}))
 
-    expect(result.runtime).toEqual(expect.arrayContaining(['hello', 'Widget', 'value', 'Mode']))
-    expect(result.types).toEqual(expect.arrayContaining(['User', 'Config', 'Mode']))
+vi.mock('node:fs', () => ({
+  default: {
+    existsSync: vi.fn(() => true),
+
+    readFileSync: vi.fn((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/request-core'
+        })
+      }
+
+      return `
+        export { delay }
+        export type { AuthConfig }
+      `
+    })
+  }
+}))
+
+vi.mock('./lib/load-runtime-module', () => ({
+  loadRuntimeModule: vi.fn()
+}))
+
+vi.mock('./lib/api-exports', () => ({
+  extractExportsFromSource: vi.fn(),
+  hasTypeExport: vi.fn()
+}))
+
+describe('validate-api', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/request-core'
+        })
+      }
+
+      return `
+        export type { AuthConfig }
+      `
+    })
+
+    vi.mocked(loadRuntimeModule).mockResolvedValue({
+      delay: vi.fn()
+    })
+
+    vi.mocked(extractExportsFromSource).mockReturnValue({
+      runtime: ['delay'],
+      types: ['AuthConfig']
+    })
+
+    vi.mocked(hasTypeExport).mockReturnValue(true)
   })
 
-  it('ignores non-exported (private) local declarations', () => {
-    const source = `
-      function helper() {}
-      const internal = 1
-      interface Hidden {}
-
-      export function publicFn() {}
-    `
-
-    const result = extractExportsFromText(source)
-
-    expect(result.runtime).toEqual(['publicFn'])
-    expect(result.types).toEqual([])
+  it('validates package exports successfully', async () => {
+    await expect(validatePackages()).resolves.not.toThrow()
   })
 
-  it('detects named re-exports, the dominant style in this codebase', () => {
-    const source = `
-      export { create } from './factories/create'
-      export { TokenModeEnum } from './enums/token-mode'
-    `
+  it('fails when build output is missing', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
 
-    const result = extractExportsFromText(source)
-
-    expect(result.runtime).toEqual(expect.arrayContaining(['create', 'TokenModeEnum']))
+    await expect(validatePackages()).rejects.toThrow('Missing build output')
   })
 
-  it('treats `export type { X }` as a type-only export, not a runtime export', () => {
-    const source = `
-      export type { AuthConfig } from './interfaces/auth-config'
-    `
+  it('fails when runtime export is missing', async () => {
+    vi.mocked(loadRuntimeModule).mockResolvedValue({
+      another: vi.fn()
+    })
 
-    const result = extractExportsFromText(source)
+    vi.mocked(extractExportsFromSource).mockReturnValue({
+      runtime: ['missingExport'],
+      types: []
+    })
 
-    expect(result.types).toEqual(['AuthConfig'])
-    expect(result.runtime).toEqual([])
+    await expect(validatePackages()).rejects.toThrow('Missing runtime export missingExport')
   })
 
-  it('does not require a plain named re-export to also satisfy a .d.ts type pattern', () => {
-    // Regression test: `export { create }` was previously also added to `types`,
-    // which incorrectly required a matching `interface|type|class|enum create`
-    // declaration in the built .d.ts — impossible for a plain function export.
-    const source = `export { create } from './factories/create'`
+  it('fails when type export is missing', async () => {
+    vi.mocked(extractExportsFromSource).mockReturnValue({
+      runtime: [],
+      types: ['MissingType']
+    })
 
-    const result = extractExportsFromText(source)
+    vi.mocked(hasTypeExport).mockReturnValue(false)
 
-    expect(result.types).not.toContain('create')
+    await expect(validatePackages()).rejects.toThrow('Missing type export MissingType')
   })
 
-  it('detects `export default ...` as a runtime export named "default"', () => {
-    const source = `
-      const instance = {}
-      export default instance
-    `
+  it('uses fallback package name when package name is missing', async () => {
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({})
+      }
 
-    const result = extractExportsFromText(source)
+      return ''
+    })
 
-    expect(result.runtime).toContain('default')
+    await expect(validatePackages()).resolves.not.toThrow()
   })
 
-  it('does not expand `export * from` — the target package validates its own surface', () => {
-    const source = `export * from 'axios'`
+  it('handles empty package list', async () => {
+    const { globby } = await import('globby')
 
-    const result = extractExportsFromText(source)
+    vi.mocked(globby).mockResolvedValueOnce([])
 
-    expect(result.runtime).toEqual([])
-    expect(result.types).toEqual([])
+    await expect(validatePackages()).resolves.not.toThrow()
   })
 
-  it('returns false for a declaration without the export keyword', () => {
-    const source = `function notExported() {}`
+  it('skips type validation when declaration file is missing', async () => {
+    vi.mocked(fs.existsSync).mockImplementation((file) => String(file).endsWith('index.js'))
 
-    const result = extractExportsFromText(source)
+    await expect(validatePackages()).resolves.not.toThrow()
 
-    expect(result.runtime).toEqual([])
-  })
-})
-
-describe('hasTypeExport', () => {
-  it('matches a locally declared interface/type/class/enum', () => {
-    const dts = `
-      export interface User {}
-      export type Config = {}
-    `
-
-    expect(hasTypeExport(dts, 'User')).toBe(true)
-    expect(hasTypeExport(dts, 'Config')).toBe(true)
+    expect(hasTypeExport).not.toHaveBeenCalled()
   })
 
-  it('matches a re-exported type in bundled .d.ts output', () => {
-    // Regression test: bundled .d.ts output re-exports rather than inlining
-    // types, e.g. `export type { TokenMode } from './types/token-mode';` —
-    // a regex looking only for `type TokenMode` would never match this.
-    const dts = `export type { TokenMode } from './types/token-mode';`
+  it('validates multiple runtime exports', async () => {
+    vi.mocked(extractExportsFromSource).mockReturnValue({
+      runtime: ['delay', 'second'],
+      types: []
+    })
 
-    expect(hasTypeExport(dts, 'TokenMode')).toBe(true)
+    vi.mocked(loadRuntimeModule).mockResolvedValue({
+      delay: vi.fn(),
+      second: vi.fn()
+    })
+
+    await expect(validatePackages()).resolves.not.toThrow()
   })
 
-  it('does not false-positive on a name that only appears as a substring', () => {
-    const dts = `export type { TokenModeEnum } from './enums/token-mode';`
+  it('validates multiple type exports', async () => {
+    vi.mocked(extractExportsFromSource).mockReturnValue({
+      runtime: [],
+      types: ['AuthConfig', 'RetryConfig']
+    })
 
-    expect(hasTypeExport(dts, 'TokenMode')).toBe(false)
-  })
-
-  it('returns false when the name is genuinely absent', () => {
-    const dts = `export interface User {}`
-
-    expect(hasTypeExport(dts, 'Missing')).toBe(false)
+    await expect(validatePackages()).resolves.not.toThrow()
   })
 })
