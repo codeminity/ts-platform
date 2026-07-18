@@ -1,6 +1,9 @@
 import type { AuthConfig } from '../interfaces/auth-config'
 import type { RefreshQueue } from '../interfaces/refresh-queue'
 
+/**
+ * @public
+ */
 export async function handleRefreshToken(
   config: AuthConfig,
   refreshQueue: RefreshQueue

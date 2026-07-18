@@ -1,5 +1,8 @@
 import type { TokenMode } from '../types/token-mode'
 
+/**
+ * @public
+ */
 export interface AuthConfig {
   tokenMode?: TokenMode
   getToken?: () => string | null | Promise<string | null>

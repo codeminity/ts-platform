@@ -7,6 +7,9 @@ import { attachResponseInterceptor } from '../interceptors/attach-response'
 
 import type { AxiosInstance, CreateAxiosDefaults } from 'axios'
 
+/**
+ * @public
+ */
 export function create(config: CreateAxiosDefaults = {}): AxiosInstance {
   const { codeminity, ...axiosConfig } = config
 
