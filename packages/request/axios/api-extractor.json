@@ -4,7 +4,10 @@
   "mainEntryPointFilePath": "./dist/index.d.ts",
 
   "apiReport": {
-    "enabled": false
+    "enabled": true,
+    "reportFolder": "./etc",
+    "reportTempFolder": "./temp",
+    "reportFileName": "axios.api.md"
   },
 
   "docModel": {

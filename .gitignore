@@ -25,3 +25,6 @@ yarn-error.log*
 # changesets
 .changeset/*.md
 !.changeset/config.json
+
+# API Extractor temp files
+**/temp/
