@@ -31,7 +31,8 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "validate:api": "tsx scripts/validate-api-run.ts",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "verify:package": "tsx scripts/verify-package-run.ts packages/request/core"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
