@@ -51,7 +51,9 @@ Each package is:
 - independently testable
 - independently publishable
 
-Packages can be composed, but are never required to depend on each other.
+Packages are designed to remain independent and avoid unnecessary coupling.
+
+Packages may depend on other packages through their public APIs when composition requires it, but internal implementation details are never shared directly.
 
 ---
 
