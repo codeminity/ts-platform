@@ -46,6 +46,23 @@ ts-platform is a modular monorepo of independent packages within the Codeminity 
 
 ---
 
+## Package Verification
+
+Before opening a pull request, verify all workspace packages:
+
+```bash
+pnpm run verify:packages
+```
+
+This command runs the complete package verification pipeline, including:
+
+- Packing and installing the published tarball
+- Runtime import verification
+- publint
+- API Extractor
+
+---
+
 ## Commit Convention
 
 Use conventional commits:

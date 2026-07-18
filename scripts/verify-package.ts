@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import { runApiExtractor } from './lib/run-api-extractor'
 import { runCommand } from './lib/run-command'
 import { runPublint } from './lib/run-publint'
 
@@ -103,6 +104,7 @@ export async function verifyPackage({ packagePath }: VerifyPackageOptions): Prom
 
     await verifyRuntimeImport(consumerDir, packageJson.name)
     await runPublint(path.resolve(packagePath))
+    await runApiExtractor(path.resolve(packagePath))
   } finally {
     fs.rmSync(tempDir, {
       recursive: true,

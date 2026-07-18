@@ -63,6 +63,8 @@ Packages can be composed, but are never required to depend on each other.
 - Vitest for testing
 - ESLint for code quality
 - Prettier for formatting
+- API Extractor for public API verification
+- publint for package quality validation
 - ESM-first design
 
 ---
