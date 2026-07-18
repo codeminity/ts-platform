@@ -46,6 +46,9 @@ jobs:
       - name: API Validation
         run: pnpm run validate:api
 
+      - name: Verify Packages
+        run: pnpm run verify:packages
+
       - name: Release
         run: pnpm release
         env:
