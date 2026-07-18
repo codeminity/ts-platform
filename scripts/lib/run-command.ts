@@ -21,11 +21,14 @@ export type SpawnFn = (
   }
 ) => SpawnedProcess
 
-export function resolveCommand(command: string): {
+export function resolveCommand(
+  command: string,
+  platform: NodeJS.Platform = process.platform
+): {
   command: string
   argsPrefix: string[]
 } {
-  if (process.platform === 'win32' && command === 'pnpm') {
+  if (platform === 'win32' && command === 'pnpm') {
     return {
       command: 'cmd.exe',
       argsPrefix: ['/d', '/s', '/c', 'pnpm']

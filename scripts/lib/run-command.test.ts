@@ -31,17 +31,20 @@ describe('resolveCommand', () => {
     })
   })
 
-  it('resolves pnpm command correctly', () => {
-    if (process.platform === 'win32') {
-      expect(resolveCommand('pnpm')).toEqual({
-        command: 'cmd.exe',
-        argsPrefix: ['/d', '/s', '/c', 'pnpm']
-      })
+  it('resolves pnpm for Windows', () => {
+    expect(resolveCommand('pnpm', 'win32')).toEqual({
+      command: 'cmd.exe',
+      argsPrefix: ['/d', '/s', '/c', 'pnpm']
+    })
+  })
 
-      return
-    }
+  it('resolves pnpm for Linux/macOS', () => {
+    expect(resolveCommand('pnpm', 'linux')).toEqual({
+      command: 'pnpm',
+      argsPrefix: []
+    })
 
-    expect(resolveCommand('pnpm')).toEqual({
+    expect(resolveCommand('pnpm', 'darwin')).toEqual({
       command: 'pnpm',
       argsPrefix: []
     })
