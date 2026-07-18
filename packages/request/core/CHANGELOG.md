@@ -1,5 +1,30 @@
 # @codeminity/request-core
 
+## 0.4.0
+
+### 🛠 Improvements
+
+- Add automated package verification workflow for all workspace packages.
+- Add package discovery support to verify packages dynamically without package-specific configuration.
+- Add publint validation to ensure published packages follow npm package best practices.
+- Add API Extractor validation to track and validate public package APIs.
+- Add tarball verification by packing packages, installing generated artifacts, and validating runtime imports.
+- Improve CI and release workflows with package verification gates.
+- Improve package boundary validation and publishing confidence.
+
+### 🧪 Testing
+
+- Add verification tests for package discovery, package validation, publint execution, and API validation.
+- Improve test coverage enforcement with CI coverage thresholds.
+- Add deterministic mocks and isolated verification test flows.
+- Validate all workspace packages through automated verification commands.
+
+### 📚 Documentation
+
+- Add package verification guidance to contributing documentation.
+- Clarify monorepo package dependency model and public API boundaries.
+- Document verification requirements for publishing packages.
+
 ## 0.3.0
 
 ### 🛠 Improvements
