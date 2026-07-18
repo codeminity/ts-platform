@@ -21,7 +21,7 @@ export default defineConfig({
         '**/index.ts',
         '**/interfaces/**',
         '**/types/**',
-        'scripts/*-run.ts'
+        'scripts/**/*-run.ts'
       ],
       thresholds: {
         statements: 100,

@@ -50,7 +50,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Test
-        run: pnpm test:coverage
+        run: pnpm test:coverage --reporter verbose
 
       - name: API Validation
         run: pnpm run validate:api
