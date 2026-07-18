@@ -1,3 +1,6 @@
+/**
+ * @public
+ */
 export const ErrorEventEnum = {
   NETWORK: 'network',
   TIMEOUT: 'timeout',

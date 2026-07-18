@@ -1,5 +1,8 @@
 import type { RefreshQueue } from '../interfaces/refresh-queue'
 
+/**
+ * @public
+ */
 export function createRefreshQueue(): RefreshQueue {
   let currentPromise: Promise<void> | null = null
 
