@@ -18,7 +18,7 @@
   "author": "Masoud Fooladi",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codeminity/ts-platform.git",
+    "url": "git+https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/axios"
   },
   "homepage": "https://github.com/codeminity/ts-platform#readme",

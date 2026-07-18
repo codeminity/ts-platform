@@ -32,7 +32,8 @@
     "release": "changeset publish",
     "validate:api": "tsx scripts/validate-api-run.ts",
     "typecheck": "turbo run typecheck",
-    "verify:package": "tsx scripts/verify-package-run.ts packages/request/core"
+    "verify:package": "tsx scripts/verify-package-run.ts",
+    "verify:packages": "tsx scripts/verify-packages-run.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
@@ -46,6 +47,7 @@
     "globby": "^16.2.1",
     "jiti": "^2.7.0",
     "prettier": "^3.9.5",
+    "publint": "^0.3.21",
     "tsx": "^4.23.1",
     "turbo": "^2.10.5",
     "typescript": "^6.0.3",

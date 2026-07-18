@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { runCommand } from './lib/run-command'
+import { runPublint } from './lib/run-publint'
 
 export interface VerifyPackageOptions {
   packagePath: string
@@ -101,6 +102,7 @@ export async function verifyPackage({ packagePath }: VerifyPackageOptions): Prom
     })
 
     await verifyRuntimeImport(consumerDir, packageJson.name)
+    await runPublint(path.resolve(packagePath))
   } finally {
     fs.rmSync(tempDir, {
       recursive: true,
