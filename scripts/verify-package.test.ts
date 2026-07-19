@@ -155,4 +155,83 @@ describe('verifyPackage', () => {
       })
     ).rejects.toThrow('Invalid package.json')
   })
+
+  it('reuses a provided tarball instead of packing the target package again', async () => {
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    const writeSpy = vi.spyOn(fs, 'writeFileSync')
+
+    const localPackages = new Map([
+      ['ts-platform', '/tmp/ts-platform-0.0.0.tgz'],
+      ['@codeminity/request-core', '/tmp/request-core-0.4.0.tgz']
+    ])
+
+    await expect(
+      verifyPackage({
+        packagePath: '.',
+        localPackages
+      })
+    ).resolves.toBeUndefined()
+
+    const packCall = mockedRunCommand.mock.calls.find(
+      ([command, args]) => command === 'pnpm' && args?.includes('pack')
+    )
+
+    expect(packCall).toBeUndefined()
+
+    const addCall = mockedRunCommand.mock.calls.find(
+      ([command, args]) => command === 'pnpm' && args?.includes('add')
+    )
+
+    expect(addCall?.[1]?.[1]).toBe('/tmp/ts-platform-0.0.0.tgz')
+
+    const workspaceYamlWrite = writeSpy.mock.calls.find(
+      ([file]) => typeof file === 'string' && file.endsWith('pnpm-workspace.yaml')
+    )
+
+    expect(workspaceYamlWrite).toBeDefined()
+    expect(workspaceYamlWrite?.[1]).toContain(
+      '"@codeminity/request-core": "file:/tmp/request-core-0.4.0.tgz"'
+    )
+  })
+
+  it('falls back to packing the package when it is missing from localPackages', async () => {
+    mockPackCommand()
+
+    const localPackages = new Map([['@codeminity/request-core', '/tmp/request-core-0.0.0.tgz']])
+
+    await expect(
+      verifyPackage({
+        packagePath: '.',
+        localPackages
+      })
+    ).resolves.toBeUndefined()
+
+    const packCall = mockedRunCommand.mock.calls.find(
+      ([command, args]) => command === 'pnpm' && args?.includes('pack')
+    )
+
+    expect(packCall).toBeDefined()
+  })
+
+  it('omits pnpm overrides when no other local packages are known', async () => {
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    const writeSpy = vi.spyOn(fs, 'writeFileSync')
+
+    const localPackages = new Map([['ts-platform', '/tmp/ts-platform-0.0.0.tgz']])
+
+    await expect(
+      verifyPackage({
+        packagePath: '.',
+        localPackages
+      })
+    ).resolves.toBeUndefined()
+
+    const workspaceYamlWrite = writeSpy.mock.calls.find(
+      ([file]) => typeof file === 'string' && file.endsWith('pnpm-workspace.yaml')
+    )
+
+    expect(workspaceYamlWrite).toBeUndefined()
+  })
 })
