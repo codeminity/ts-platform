@@ -51,7 +51,7 @@ export function runCommand(
     const resolved = resolveCommand(command)
 
     const child = spawn(resolved.command, [...resolved.argsPrefix, ...args], {
-      cwd: options.cwd ? path.resolve(options.cwd) : undefined,
+      ...(options.cwd ? { cwd: path.resolve(options.cwd) } : {}),
       env: {
         ...process.env,
         ...options.env
