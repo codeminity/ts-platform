@@ -31,7 +31,7 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "validate:api": "tsx scripts/validate-api-run.ts",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit",
     "verify:package": "tsx scripts/verify-package-run.ts",
     "verify:packages": "tsx scripts/verify-packages-run.ts"
   },
