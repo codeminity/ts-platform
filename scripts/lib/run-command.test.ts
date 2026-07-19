@@ -108,6 +108,28 @@ describe('runCommand', () => {
     await expect(promise).rejects.toThrow('spawn failed')
   })
 
+  it('omits cwd entirely when not provided', async () => {
+    const child = createChild()
+
+    const spawn = createSpawnMock(child)
+
+    const promise = runCommand('node', ['build'], {}, spawn)
+
+    child.emit('close', 0)
+
+    await promise
+
+    const call = spawn.mock.calls.at(0)
+
+    expect(call).toBeDefined()
+
+    if (!call) {
+      return
+    }
+
+    expect('cwd' in call[2]).toBe(false)
+  })
+
   it('passes cwd and env options', async () => {
     const child = createChild()
 

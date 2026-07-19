@@ -16,7 +16,15 @@ export function findTarball(directory: string): string {
     )
   }
 
-  return path.join(directory, files[0])
+  const [tarball] = files
+
+  /* v8 ignore start -- unreachable: files.length === 1 here, so tarball is always defined; this only satisfies TS's noUncheckedIndexedAccess narrowing */
+  if (tarball === undefined) {
+    throw new Error(`Package tarball was not generated in ${directory}`)
+  }
+  /* v8 ignore stop */
+
+  return path.join(directory, tarball)
 }
 
 export async function packPackage(packagePath: string, outputDir: string): Promise<string> {

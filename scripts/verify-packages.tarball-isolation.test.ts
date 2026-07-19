@@ -77,8 +77,8 @@ describe('verifyPackages tarball isolation (regression)', () => {
 
     const [axiosCall, coreCall] = mockedVerifyPackage.mock.calls
 
-    const axiosLocalPackages = axiosCall[0].localPackages
-    const coreLocalPackages = coreCall[0].localPackages
+    const axiosLocalPackages = axiosCall?.[0].localPackages
+    const coreLocalPackages = coreCall?.[0].localPackages
 
     expect(axiosLocalPackages?.get('@codeminity/axios')).toMatch(/axios-0\.4\.0\.tgz$/)
     expect(axiosLocalPackages?.get('@codeminity/request-core')).toMatch(
