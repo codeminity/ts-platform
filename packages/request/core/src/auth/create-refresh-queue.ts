@@ -1,4 +1,4 @@
-import type { RefreshQueue } from '../interfaces/refresh-queue'
+import type { RefreshQueue } from './refresh-queue.interface'
 
 /**
  * @public

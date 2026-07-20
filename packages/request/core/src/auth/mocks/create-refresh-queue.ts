@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-import { type RefreshQueue } from '../../src'
+import type { RefreshQueue } from '../refresh-queue.interface'
 
 export function createRefreshQueue(): RefreshQueue & {
   run: ReturnType<typeof vi.fn>

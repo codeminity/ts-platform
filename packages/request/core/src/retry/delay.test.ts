@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
-import { delay } from '../../../src'
+import { delay } from './delay'
 
 describe('delay', () => {
   afterEach(() => {

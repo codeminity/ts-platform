@@ -1,4 +1,4 @@
-import type { TokenMode } from '../types/token-mode'
+import type { TokenMode } from './token-mode.type'
 
 /**
  * @public
