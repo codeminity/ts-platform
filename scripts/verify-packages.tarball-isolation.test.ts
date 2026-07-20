@@ -15,6 +15,14 @@ import { verifyPackages } from './verify-packages'
 // packages and resolving each one's own tarball afterwards. This is a
 // regression test: packing every package into one shared directory used
 // to let findTarball() pick up a sibling package's tarball by mistake.
+//
+// It uses a large, generically-named, arbitrarily-located set of fake
+// packages on purpose — findWorkspacePackages is mocked to return whatever
+// paths we give it, so this proves the isolation logic scales to any
+// package count and any location under the workspace, not just the two
+// real packages that happen to exist today (packages/request/axios and
+// packages/request/core). Adding a future package anywhere under
+// packages/** (e.g. packages/ACL/permission) needs zero changes here.
 vi.mock('./lib/run-command', () => ({
   runCommand: vi.fn()
 }))
@@ -31,24 +39,42 @@ const mockedRunCommand = vi.mocked(runCommand)
 const mockedFindPackages = vi.mocked(findWorkspacePackages)
 const mockedVerifyPackage = vi.mocked(verifyPackage)
 
-function createFakePackage(name: string): string {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'fake-package-'))
+interface FakePackage {
+  name: string
+  directory: string
+  tarballName: string
+}
+
+function createFakePackage(index: number): FakePackage {
+  const name = `@codeminity/fake-package-${String(index)}`
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), `fake-package-${String(index)}-`))
 
   fs.writeFileSync(path.join(directory, 'package.json'), JSON.stringify({ name }))
 
-  return directory
+  return {
+    name,
+    directory,
+    tarballName: `fake-package-${String(index)}-0.0.${String(index)}.tgz`
+  }
 }
+
+const PACKAGE_COUNT = 100
 
 describe('verifyPackages tarball isolation (regression)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('resolves each package to its own tarball, not a sibling package tarball', async () => {
-    const corePath = createFakePackage('@codeminity/request-core')
-    const axiosPath = createFakePackage('@codeminity/axios')
+  it(`resolves each of ${String(PACKAGE_COUNT)} packages to its own tarball, never a sibling's`, async () => {
+    const fakePackages = Array.from({ length: PACKAGE_COUNT }, (_, index) =>
+      createFakePackage(index)
+    )
 
-    mockedFindPackages.mockReturnValue([axiosPath, corePath])
+    const directoryToPackage = new Map(
+      fakePackages.map((pkg) => [path.resolve(pkg.directory), pkg])
+    )
+
+    mockedFindPackages.mockReturnValue(fakePackages.map((pkg) => pkg.directory))
 
     mockedRunCommand.mockImplementation((command, args = [], options) => {
       if (command === 'pnpm' && args.includes('pack')) {
@@ -59,11 +85,13 @@ describe('verifyPackages tarball isolation (regression)', () => {
           throw new Error('Missing pack destination')
         }
 
-        const isCore = options?.cwd === path.resolve(corePath)
+        const pkg = options?.cwd ? directoryToPackage.get(options.cwd) : undefined
 
-        const tarballName = isCore ? 'request-core-0.4.0.tgz' : 'axios-0.4.0.tgz'
+        if (!pkg) {
+          throw new Error(`Unexpected pack cwd: ${String(options?.cwd)}`)
+        }
 
-        fs.writeFileSync(path.join(destination, tarballName), '')
+        fs.writeFileSync(path.join(destination, pkg.tarballName), '')
 
         return Promise.resolve()
       }
@@ -75,22 +103,30 @@ describe('verifyPackages tarball isolation (regression)', () => {
 
     await verifyPackages()
 
-    const [axiosCall, coreCall] = mockedVerifyPackage.mock.calls
+    expect(mockedVerifyPackage).toHaveBeenCalledTimes(PACKAGE_COUNT)
 
-    const axiosLocalPackages = axiosCall?.[0].localPackages
-    const coreLocalPackages = coreCall?.[0].localPackages
+    // Every verifyPackage call received the same, fully-resolved map — check
+    // ALL of them, not just the call for "this" package, since the original
+    // bug corrupted entries for packages other than the one being packed.
+    for (const call of mockedVerifyPackage.mock.calls) {
+      const localPackages = call[0].localPackages
 
-    expect(axiosLocalPackages?.get('@codeminity/axios')).toMatch(/axios-0\.4\.0\.tgz$/)
-    expect(axiosLocalPackages?.get('@codeminity/request-core')).toMatch(
-      /request-core-0\.4\.0\.tgz$/
-    )
+      for (const pkg of fakePackages) {
+        const resolvedTarball = localPackages?.get(pkg.name)
 
-    // Both calls share the same map instance/content — the important
-    // regression check is that neither entry ever points at the wrong file.
-    expect(coreLocalPackages?.get('@codeminity/axios')).toMatch(/axios-0\.4\.0\.tgz$/)
-    expect(coreLocalPackages?.get('@codeminity/request-core')).toMatch(/request-core-0\.4\.0\.tgz$/)
+        expect(resolvedTarball).toBeDefined()
+        expect(path.basename(resolvedTarball ?? '')).toBe(pkg.tarballName)
+      }
+    }
 
-    fs.rmSync(corePath, { recursive: true, force: true })
-    fs.rmSync(axiosPath, { recursive: true, force: true })
+    // No two packages ever resolved to the exact same tarball path.
+    const [firstCall] = mockedVerifyPackage.mock.calls
+    const resolvedPaths = fakePackages.map((pkg) => firstCall?.[0].localPackages?.get(pkg.name))
+
+    expect(new Set(resolvedPaths).size).toBe(PACKAGE_COUNT)
+
+    for (const pkg of fakePackages) {
+      fs.rmSync(pkg.directory, { recursive: true, force: true })
+    }
   })
 })
