@@ -1,4 +1,4 @@
-import type { TokenModeEnum } from '../enums/token-mode'
+import type { TokenModeEnum } from './token-mode.enum'
 
 /**
  * @public

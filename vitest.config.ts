@@ -21,6 +21,9 @@ export default defineConfig({
         '**/index.ts',
         '**/interfaces/**',
         '**/types/**',
+        '**/*.interface.ts',
+        '**/*.type.ts',
+        '**/mocks/**',
         'scripts/**/*-run.ts'
       ],
       thresholds: {

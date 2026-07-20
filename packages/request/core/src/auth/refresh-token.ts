@@ -1,5 +1,5 @@
-import type { AuthConfig } from '../interfaces/auth-config'
-import type { RefreshQueue } from '../interfaces/refresh-queue'
+import type { AuthConfig } from './auth-config.interface'
+import type { RefreshQueue } from './refresh-queue.interface'
 
 /**
  * @public
