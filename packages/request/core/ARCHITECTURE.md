@@ -50,6 +50,22 @@ Continue Execution
 
 ---
 
+## Package Structure
+
+```text
+src/
+├── index.ts          # public entry point
+├── test-utils.ts      # public test-utils entry point (separate build, not bundled into index)
+├── auth/             # token lifecycle, refresh coordination, auth config shape
+│   └── mocks/        # factory-based mocks, re-exported via test-utils.ts
+├── retry/            # retry config shape, delay utility
+└── errors/           # error event classification enum
+```
+
+Only `src/index.ts` and `src/test-utils.ts` are considered part of the public API (see [Public API](#public-api)). Everything else is an implementation detail and may be restructured between minor versions without notice.
+
+---
+
 ## Design Constraints
 
 - No framework dependency
@@ -63,9 +79,25 @@ Continue Execution
 
 Only this surface is stable:
 
-- handleRefreshToken
-- createRefreshQueue
-- delay
+**Functions**
+
+- `handleRefreshToken`
+- `createRefreshQueue`
+- `delay`
+
+**Enums**
+
+- `TokenModeEnum`
+- `ErrorEventEnum`
+
+**Types**
+
+- `TokenMode`
+- `AuthConfig`
+- `RefreshQueue`
+- `RetryConfig`
+
+`@codeminity/request-core/test-utils` is a separate, published subpath export (`createAuthConfig`, `createRefreshQueue` mock) for adapter packages' own test suites — it is not part of the runtime API above and is never bundled into the main entry point.
 
 Everything else is internal and may change.
 

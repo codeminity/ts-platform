@@ -10,7 +10,7 @@ This package is part of a strict monorepo architecture and follows explicit desi
 
 ### 1. Public API only
 
-Only export from `src/index.ts`.
+Only export from `src/index.ts` or `src/test-utils.ts` — these are the package's two published entry points (`.` and `./test-utils`).
 
 ❌ Do not export from internal files directly.
 
