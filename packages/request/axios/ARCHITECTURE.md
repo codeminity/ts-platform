@@ -70,10 +70,13 @@ This one-directional dependency graph is what keeps the system testable in isola
 
 ```text
 src/
-├── handlers/       # translate request-core lifecycle events into Axios-facing behavior
-├── interceptors/   # Axios request/response interceptors that call into handlers
-├── factories/       # axios.create() wrapper, instance construction
-└── utils/          # internal helpers (not part of the public API)
+├── index.ts        # public entry point
+├── create.ts        # axios.create() wrapper, instance construction
+├── auth/            # auth header creation, auth interceptor, refresh dependency wiring
+├── retry/           # retry decision logic and its config shape
+├── errors/          # error event classification, mapping, emission
+├── shared/          # cross-feature orchestration (response/retry coordination) and shared config shapes
+└── mocks/           # test fixtures used across multiple features
 ```
 
 Only the top-level package export is considered part of the public API. Everything under `src/` is an implementation detail and may be restructured between minor versions without notice.
@@ -112,6 +115,8 @@ Retry and refresh are both "response interceptor" concerns: they only activate o
 ## Instance Isolation
 
 Each Axios instance created via `axios.create()` gets its own `codeminity` configuration and its own lifecycle state (in-flight refresh tracking, retry counters). Two instances pointed at different `baseURL`s are fully independent of one another.
+
+**Exception — the default export.** `import axios from '@codeminity/axios'` (without calling `.create()`) returns an object built by copying Axios's own default singleton's properties onto it. This means `axios.defaults` and `axios.interceptors` on that default export are the **same object references** as plain Axios's own global singleton — mutating them affects the global Axios instance too, exactly as it would with plain `axios.defaults.baseURL = '...'`. This is intentional, for parity with how plain Axios's default export already behaves; it is **not** true of anything created via `.create()`, which is always fully isolated. If you need isolation, always use `axios.create(...)` rather than configuring the default export directly.
 
 If your application creates **multiple instances against the same backend** and needs them to share a single in-flight refresh operation, don't assume that behavior — verify it against the specific version you have installed, since instance-scoping is exactly the kind of internal detail that can change between releases. When in doubt, prefer a single shared instance per backend rather than relying on cross-instance coordination.
 
