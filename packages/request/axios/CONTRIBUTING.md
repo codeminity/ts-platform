@@ -49,13 +49,16 @@ pnpm --filter @codeminity/axios dev
 
 ```text
 src/
-├── handlers/       # lifecycle event → Axios behavior translation
-├── interceptors/   # Axios request/response interceptors
-├── factories/       # instance creation (axios.create wrapper)
-└── utils/          # internal helpers
+├── index.ts        # public entry point
+├── create.ts        # instance creation (axios.create wrapper)
+├── auth/            # auth header creation, auth interceptor, refresh dependency wiring
+├── retry/           # retry decision logic and its config shape
+├── errors/          # error event classification, mapping, emission
+├── shared/          # cross-feature orchestration and shared config shapes
+└── mocks/           # test fixtures used across multiple features
 ```
 
-Only exports from the package root (`src/index.ts`) are public API. Changes inside `src/handlers`, `src/interceptors`, `src/factories`, or `src/utils` are internal and don't require a major version bump on their own, but should still be covered by tests and should not leak new behavior into the public surface without a corresponding types/README update.
+Only exports from the package root (`src/index.ts`) are public API. Changes inside `src/auth`, `src/retry`, `src/errors`, or `src/shared` are internal and don't require a major version bump on their own, but should still be covered by tests and should not leak new behavior into the public surface without a corresponding types/README update.
 
 ## Development Workflow
 
@@ -76,6 +79,7 @@ pnpm test:coverage
 Guidelines:
 
 - Unit test lifecycle logic in `@codeminity/request-core` independently of Axios where possible.
+- Shared auth config/refresh-queue mocks come from `@codeminity/request-core/test-utils` — don't duplicate them locally; if a new adapter package needs the same fixtures, they belong there too.
 - Integration-test the Axios adapter against a mock HTTP server rather than mocking `axios` internals directly.
 - Any bug fix should include a regression test that fails before the fix and passes after.
 - Concurrency-sensitive code (refresh coordination, retry counters) needs tests that simulate concurrent requests, not just sequential ones.

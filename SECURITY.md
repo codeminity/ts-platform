@@ -29,10 +29,9 @@ ts-platform provides low-level infrastructure primitives for the Codeminity ecos
 
 Security-sensitive areas include:
 
-- concurrency primitives
-- retry / queue mechanisms
-- async orchestration
-- plugin execution layers
+- concurrency primitives (refresh queue / async coordination)
+- retry orchestration
+- authentication/token handling
 
 This repository does **not** handle:
 
@@ -50,7 +49,7 @@ This project is designed with:
 - deterministic async execution
 - minimal external dependencies
 - explicit control flow
-- no global mutable state
+- no global mutable state, except one documented case in `@codeminity/axios`'s default export (shared with plain Axios's own singleton for API parity) — see [ARCHITECTURE.md](./ARCHITECTURE.md#state-rule)
 
 ---
 

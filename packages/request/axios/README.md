@@ -824,7 +824,7 @@ import type { AxiosInstance, AxiosResponse } from '@codeminity/axios'
 
 ### Public API Stability
 
-Only the documented API surface is stable. Internal modules (`src/handlers/`, `src/interceptors/`, `src/factories/`, `src/utils/`) are **not** part of the public contract — applications should only depend on exported package APIs.
+Only the documented API surface is stable. Internal modules (`src/auth/`, `src/retry/`, `src/errors/`, `src/shared/`) are **not** part of the public contract — applications should only depend on exported package APIs.
 
 ---
 
