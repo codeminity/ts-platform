@@ -19,8 +19,6 @@ export default defineConfig({
         '**/*.d.ts',
         '**/node_modules/**',
         '**/index.ts',
-        '**/interfaces/**',
-        '**/types/**',
         '**/*.interface.ts',
         '**/*.type.ts',
         '**/mocks/**',

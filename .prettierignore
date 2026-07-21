@@ -40,3 +40,6 @@ pnpm-debug.log*
 
 # Git
 .git
+
+# etc
+**/etc/
