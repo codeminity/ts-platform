@@ -69,7 +69,7 @@ Deep imports are forbidden.
 
 ## State Rule
 
-- no global mutable state
+- no global mutable state, with one documented exception: `@codeminity/axios`'s default export intentionally shares Axios's own global `.defaults`/`.interceptors` for parity with plain Axios — see [Instance Isolation](./packages/request/axios/ARCHITECTURE.md#instance-isolation). Anything created via `axios.create()` is fully isolated.
 - state must be explicit and scoped
 
 ---

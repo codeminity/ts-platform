@@ -48,18 +48,13 @@ ts-platform is a modular monorepo of independent packages within the Codeminity 
 
 ## Package Verification
 
-Before opening a pull request, verify all workspace packages:
+CI runs the complete package verification pipeline on every PR — packing and installing each package's real tarball, runtime import verification, publint, and API Extractor. You don't need to run it locally for every change.
+
+If you're touching packaging config, `package.json` exports, or public API surface specifically, it's worth running it yourself first to get faster feedback:
 
 ```bash
 pnpm run verify:packages
 ```
-
-This command runs the complete package verification pipeline, including:
-
-- Packing and installing the published tarball
-- Runtime import verification
-- publint
-- API Extractor
 
 ---
 
