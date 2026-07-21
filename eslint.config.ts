@@ -74,7 +74,12 @@ export default defineConfig(
       'import-x/no-duplicates': 'error',
       'import-x/no-cycle': 'error',
       'import-x/no-relative-parent-imports': 'error',
-      'import-x/no-internal-modules': 'error',
+      'import-x/no-internal-modules': [
+        'error',
+        {
+          allow: ['@codeminity/*/test-utils']
+        }
+      ],
 
       // typescript
       '@typescript-eslint/consistent-type-imports': [
