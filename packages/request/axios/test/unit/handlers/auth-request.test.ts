@@ -2,13 +2,15 @@ import { type AxiosError } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { TokenModeEnum } from '@codeminity/request-core'
+import {
+  createAuthConfig,
+  createRefreshQueue as createRefreshQueueMock
+} from '@codeminity/request-core/test-utils'
 
 import { ErrorEventEnum } from '../../../src/enum/error-event'
 import { handleAuthRequest } from '../../../src/handlers/auth-request'
 import { dependencies } from '../../../src/handlers/dependencies'
 import { type Config } from '../../../src/interfaces/config'
-import { createAuthConfig } from '../../mocks/create-auth-config'
-import { createRefreshQueue } from '../../mocks/create-refresh-queue'
 import { createRequestConfig } from '../../mocks/create-request-config'
 
 describe('handleAuthRequest', () => {
@@ -22,7 +24,7 @@ describe('handleAuthRequest', () => {
     })
 
     const request = createRequestConfig()
-    const queue = createRefreshQueue()
+    const queue = createRefreshQueueMock()
 
     const result = await handleAuthRequest(request, config, queue)
 
@@ -40,7 +42,7 @@ describe('handleAuthRequest', () => {
     })
 
     const request = createRequestConfig()
-    const queue = createRefreshQueue()
+    const queue = createRefreshQueueMock()
 
     const result = await handleAuthRequest(request, config, queue)
 
@@ -60,7 +62,7 @@ describe('handleAuthRequest', () => {
     })
 
     const request = createRequestConfig({ codeminity: { skipAuth: true } })
-    const queue = createRefreshQueue()
+    const queue = createRefreshQueueMock()
 
     await handleAuthRequest(request, config, queue)
 
@@ -83,7 +85,7 @@ describe('handleAuthRequest', () => {
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
     const request = createRequestConfig()
-    const queue = createRefreshQueue()
+    const queue = createRefreshQueueMock()
 
     const result = await handleAuthRequest(request, config, queue)
 
@@ -104,7 +106,7 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueue())
+    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
 
     expect(onError).toHaveBeenCalledWith(error)
   })
@@ -121,7 +123,7 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueue())
+    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
 
     expect(onError).toHaveBeenCalledWith(error)
   })
@@ -135,7 +137,7 @@ describe('handleAuthRequest', () => {
     })
 
     const request = createRequestConfig()
-    const queue = createRefreshQueue()
+    const queue = createRefreshQueueMock()
 
     const result = await handleAuthRequest(request, config, queue)
 
@@ -150,7 +152,7 @@ describe('handleAuthRequest', () => {
 
     const request = createRequestConfig()
 
-    const result = await handleAuthRequest(request, config, createRefreshQueue())
+    const result = await handleAuthRequest(request, config, createRefreshQueueMock())
 
     expect(result.headers.get('Authorization')).toBeUndefined()
   })
@@ -168,7 +170,7 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueue())
+    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
 
     expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
   })
