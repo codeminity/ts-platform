@@ -1,5 +1,34 @@
 # @codeminity/axios
 
+## 0.5.0
+
+### 🛠 Improvements
+
+- Restructure `src/` from type-based folders (`handlers/`, `interceptors/`, `factories/`, `utils/`, `enum/`, `types/`, `emit/`, `mapper/`, `interfaces/`) to feature-based folders (`auth/`, `retry/`, `errors/`, `shared/`), with tests colocated next to their implementation.
+- Switch to `@codeminity/request-core`'s new `./test-utils` export instead of maintaining local duplicates of `createAuthConfig`/`createRefreshQueue`.
+- Add automated typecheck coverage for the workspace `scripts/` folder (previously never typechecked).
+- Add a cross-platform (Ubuntu/Windows/macOS) CI test matrix.
+- Patch a high-severity `brace-expansion` DoS advisory via `pnpm.overrides` (transitive dependency of `eslint`/`api-extractor`).
+- Bump `pnpm`, `@changesets/cli`, and `globby`.
+
+### 🐛 Fixes
+
+- Fix `exactOptionalPropertyTypes` violations in test fixtures (`response-error.test.ts`, `error-to-event.test.ts`, `should-retry.test.ts`) surfaced by the new stricter workspace typecheck — these were previously invisible because test files weren't part of any typechecked TypeScript project.
+
+### 🧪 Testing
+
+- Generalize the `verify:packages` tarball-isolation regression test from 2 hardcoded packages to 100 arbitrarily-named, arbitrarily-located packages.
+
+### 📚 Documentation
+
+- Full documentation refresh: package structure diagrams across `README.md`, `ARCHITECTURE.md`, and `CONTRIBUTING.md` now match the current feature-based layout.
+- Document the one intentional exception to "no global mutable state" (the default export sharing Axios's own global singleton) in `ARCHITECTURE.md`'s Instance Isolation section.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.5.0
+
 ## 0.4.0
 
 ### 🛠 Improvements

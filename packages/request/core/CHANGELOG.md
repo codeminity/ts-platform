@@ -1,5 +1,35 @@
 # @codeminity/request-core
 
+## 0.5.0
+
+### 🚀 Features
+
+- Add a public `./test-utils` subpath export (`createAuthConfig`, `createRefreshQueue` mock) so adapter packages can share factory-based test fixtures instead of duplicating them, without pulling `vitest` into the main production bundle.
+
+### 🛠 Improvements
+
+- Restructure `src/` from type-based folders (`enums/`, `handlers/`, `interfaces/`, `types/`, `utils/`) to feature-based folders (`auth/`, `retry/`, `errors/`), with tests colocated next to their implementation.
+- Fix `verify:packages` to resolve unreleased internal workspace dependencies from local tarballs instead of the npm registry, so a package can be verified before it's ever published.
+- Add automated typecheck coverage for the workspace `scripts/` folder (previously never typechecked).
+- Add a cross-platform (Ubuntu/Windows/macOS) CI test matrix.
+- Patch a high-severity `brace-expansion` DoS advisory via `pnpm.overrides` (transitive dependency of `eslint`/`api-extractor`).
+- Bump `pnpm`, `@changesets/cli`, and `globby`.
+
+### 🐛 Fixes
+
+- Fix a real type-safety bug in the package-verification tooling where a packed tarball's path could be `undefined` under `noUncheckedIndexedAccess`.
+- Fix `createAuthConfig`'s mock to correctly allow explicit `undefined` overrides (simulating a missing dependency) under `exactOptionalPropertyTypes`.
+
+### 🧪 Testing
+
+- Add missing coverage for `TokenModeEnum` and `ErrorEventEnum`.
+- Generalize the tarball-isolation regression test from 2 hardcoded packages to 100 arbitrarily-named, arbitrarily-located packages, proving `verify:packages` scales to any future package added under `packages/**`.
+
+### 📚 Documentation
+
+- Full documentation refresh: package structure diagrams, public API listings (previously missing exported enums/types), and the new `/test-utils` export are now documented across `README.md`, `ARCHITECTURE.md`, and `CONTRIBUTING.md`.
+- Clarify this package is adapter-internal only and not meant for direct installation by application developers.
+
 ## 0.4.0
 
 ### 🛠 Improvements
