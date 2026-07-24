@@ -154,5 +154,13 @@ export default defineConfig(
       'import-x/no-internal-modules': 'off',
       'import-x/no-cycle': 'off'
     }
+  },
+
+  // test file
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off'
+    }
   }
 )
