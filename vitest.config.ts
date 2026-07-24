@@ -19,6 +19,7 @@ export default defineConfig({
         '**/*.d.ts',
         '**/node_modules/**',
         '**/index.ts',
+        '**/test-utils.ts',
         '**/*.interface.ts',
         '**/*.type.ts',
         '**/mocks/**',
