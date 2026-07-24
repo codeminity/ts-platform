@@ -454,7 +454,7 @@ Only one refresh operation runs; the rest wait for the result and continue after
 ```ts
 const api = axios.create({
   baseURL: 'https://api.example.com',
-  codeminity: { tokenMode: 'cookie' }
+  codeminity: { tokenMode: TokenModeEnum.COOKIE }
 })
 ```
 

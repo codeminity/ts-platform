@@ -43,7 +43,7 @@ const refreshQueue = createRefreshQueue()
 
 await handleRefreshToken(
   {
-    tokenMode: TokenModeEnum.BEARER,
+    tokenMode: TokenModeEnum.JWT,
     getToken: async () => localStorage.getItem('token'),
     isTokenExpired: async () => isExpired(localStorage.getItem('token')),
     refreshToken: async () => {
