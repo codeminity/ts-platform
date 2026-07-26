@@ -64,5 +64,8 @@ jobs:
       - name: API Validation
         run: pnpm run validate:api
 
+      - name: Document Validation
+        run: pnpm run validate:docs
+
       - name: Verify Packages
         run: pnpm run verify:packages
