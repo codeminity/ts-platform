@@ -1,5 +1,31 @@
 # @codeminity/axios
 
+## 0.5.1
+
+### 🛠 Improvements
+- Patch high-severity transitive dependency advisories by updating `postcss` and `brace-expansion` through `pnpm.overrides`.
+- Upgrade ESLint to v10.8.0.
+- Update development tooling and GitHub Actions to their latest compatible versions.
+- pgrade the workspace to pnpm v11.17.0.
+
+### 🧪 Testing
+- Add coverage for the `./test-utils` public export.
+- Improve coverage configuration by excluding the package entry file from coverage metrics.
+
+### 📚 Documentation
+- Fix incorrect `TokenModeEnum` usage in the README.
+- Introduce automated validation for TypeScript code blocks in documentation.
+- Refresh documentation examples across authentication, retry, events, advanced patterns, and README guides to ensure all TypeScript snippets remain valid and aligned with the current public API.
+
+### ⚙️ CI
+- Run documentation validation as part of the CI and release workflows to automatically validate all TypeScript code examples.
+
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.5.1
+
 ## 0.5.0
 
 ### 🛠 Improvements
