@@ -232,6 +232,10 @@ console.log(response.data)
 The instance behaves like a normal Axios instance:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.post('/users', { name: 'John Doe' })
 await api.put('/users/1', { name: 'Updated Name' })
 await api.delete('/users/1')
@@ -329,6 +333,8 @@ Keeping lifecycle logic outside the HTTP client gives you easier maintenance, re
 `@codeminity/axios` extends standard Axios configuration with an additional `codeminity` layer. Axios configuration itself is unchanged:
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   timeout: 5000
@@ -338,6 +344,8 @@ const api = axios.create({
 Lifecycle-related options live under `codeminity`:
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -356,6 +364,8 @@ The `codeminity` property is only used by `@codeminity/axios` and does not affec
 Configuration passed to `axios.create()` applies to all requests from that instance:
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -371,6 +381,10 @@ const api = axios.create({
 Individual requests can override lifecycle behavior via the `codeminity` request option — and this takes priority over instance-level configuration:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/public-data', {
   codeminity: { skipAuth: true }
 })
@@ -411,6 +425,8 @@ Send HTTP Request
 ### Token-Based Authentication
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -424,6 +440,8 @@ The token is automatically attached as `Authorization: Bearer <token>`.
 ### Refresh Token Handling
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -452,6 +470,9 @@ Only one refresh operation runs; the rest wait for the result and continue after
 ### Cookie Authentication
 
 ```ts
+import axios from '@codeminity/axios'
+import { TokenModeEnum } from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: { tokenMode: TokenModeEnum.COOKIE }
@@ -463,6 +484,10 @@ Requests are configured to send credentials with cookies.
 ### Skipping Authentication
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/public/config', {
   codeminity: { skipAuth: true }
 })
@@ -508,6 +533,8 @@ Retry Request
 ### Basic Configuration
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -522,6 +549,8 @@ Allows up to 3 retry attempts with a 1-second delay between attempts.
 ### Retry Status Codes
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 3,
@@ -533,6 +562,8 @@ const api = axios.create({
 ### Custom Retry Logic
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 5,
@@ -544,6 +575,8 @@ const api = axios.create({
 ### Custom Retry Delay
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 5,
@@ -557,6 +590,10 @@ Use this to implement linear backoff, exponential backoff, or any custom delay p
 ### Request-Level Retry Configuration
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/reports', {
   codeminity: { retries: 1, retryDelay: 500 }
 })
@@ -597,6 +634,8 @@ Application Handler
 ### Event Callback
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     onEvent: async (event, error) => {
@@ -610,6 +649,8 @@ const api = axios.create({
 ### Error Callback
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     onError: async (error) => console.error(error)
@@ -653,6 +694,11 @@ const api = axios.create({
 ### Logging & Monitoring Examples
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const logger: { capture: (data: Record<string, unknown>) => void }
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
+
 const api = axios.create({
   codeminity: {
     onEvent: async (event, error) => {
@@ -680,6 +726,10 @@ For advanced patterns (custom error pipelines, monitoring integration, app-wide 
 Request-level configuration lets individual requests override or customize lifecycle behavior without changing the Axios instance configuration.
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/users', {
   codeminity: { skipAuth: true }
 })
@@ -733,6 +783,10 @@ TypeScript provides autocomplete and validation for Axios configuration, Codemin
 The `codeminity` property is available on requests without extra type declarations:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/users', {
   codeminity: { skipAuth: true, retries: 2 }
 })
@@ -741,6 +795,8 @@ await api.get('/users', {
 ### Custom Error Handling
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     onEvent: (event, error) => {
@@ -773,6 +829,8 @@ Works with Node.js projects, browser applications, React / Vue / Angular, backen
 ### `axios.create()`
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -782,6 +840,8 @@ const api = axios.create({
 ```
 
 ```ts
+import type { Config } from '@codeminity/axios'
+
 interface CreateAxiosDefaults {
   // ...standard Axios options
   codeminity?: Config
@@ -833,6 +893,8 @@ Only the documented API surface is stable. Internal modules (`src/auth/`, `src/r
 ### Basic API Client
 
 ```ts
+import axios from '@codeminity/axios'
+
 export const api = axios.create({
   baseURL: 'https://api.example.com',
   timeout: 5000
@@ -844,6 +906,8 @@ const response = await api.get('/users')
 ### Authenticated API Client
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -857,6 +921,15 @@ Every request automatically receives `Authorization: Bearer <token>`.
 ### Authentication With Refresh Token
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const authStore: {
+  accessToken: string | null
+  setToken: (token: string) => void
+}
+
+declare const authService: { refresh: () => Promise<string> }
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -874,6 +947,10 @@ Concurrent requests share the same refresh lifecycle.
 ### Public Endpoints
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 await api.get('/configuration', {
   codeminity: { skipAuth: true }
 })
@@ -882,6 +959,8 @@ await api.get('/configuration', {
 ### Retry Failed Requests
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 3,
@@ -894,6 +973,8 @@ const api = axios.create({
 ### Custom Retry Strategy
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 5,
@@ -906,6 +987,10 @@ const api = axios.create({
 ### Error Monitoring
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const monitoring: { capture: (data: Record<string, unknown>) => void }
+
 const api = axios.create({
   codeminity: {
     onEvent: async (event, error) => {
@@ -918,6 +1003,10 @@ const api = axios.create({
 ### Multiple API Clients
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare function getToken(): Promise<string | null>
+
 const userApi = axios.create({
   baseURL: 'https://users.example.com',
   codeminity: { getToken }
@@ -932,6 +1021,10 @@ const paymentApi = axios.create({
 ### Framework Integration
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 export async function getUsers() {
   const response = await api.get('/users')
   return response.data
@@ -1025,6 +1118,10 @@ Refresh coordination is handled by `@codeminity/request-core`.
 Existing calls like `api.get('/users')` keep working. Add lifecycle options only where needed:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 api.get('/users', {
   codeminity: { skipAuth: true }
 })
@@ -1058,6 +1155,10 @@ Custom Axios interceptors are still fully supported — use them for application
 ✅ **Recommended**
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare function getToken(): Promise<string | null>
+
 export const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: { getToken }
@@ -1067,6 +1168,10 @@ export const api = axios.create({
 ❌ **Avoid**
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const token: string
+
 axios.get('/users', { headers: { Authorization: token } })
 ```
 
@@ -1084,6 +1189,8 @@ The package already provides token lifecycle handling, refresh coordination, ret
 ### Use Request-Level Configuration Only for Exceptions
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({ codeminity: { retries: 3 } })
 
 await api.get('/critical-data', { codeminity: { retries: 5 } })
@@ -1097,7 +1204,9 @@ Good candidates for retry: `GET` requests, idempotent operations, temporary infr
 Be careful with: payments, orders, and other irreversible mutations.
 
 ```ts
-codeminity: {
+import type { Config } from '@codeminity/axios'
+
+const config: Pick<Config, 'retryOnStatuses'> = {
   retryOnStatuses: [429, 500, 502, 503, 504]
 }
 ```
@@ -1105,6 +1214,10 @@ codeminity: {
 ### Centralize Error Handling
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const logger: { error: (event: string, error: unknown) => void }
+
 const api = axios.create({
   codeminity: {
     onEvent: async (event, error) => logger.error(event, error)
@@ -1128,6 +1241,8 @@ src/
 ### Prefer Multiple Clients for Different Backends
 
 ```ts
+import axios from '@codeminity/axios'
+
 const userApi = axios.create({ baseURL: 'https://users.example.com' })
 const paymentApi = axios.create({ baseURL: 'https://payments.example.com' })
 ```
@@ -1263,6 +1378,8 @@ Per-instance resources are intentionally small. Each `axios.create()` call gets 
 ### Multiple API Clients
 
 ```ts
+import axios from '@codeminity/axios'
+
 const usersApi = axios.create({ baseURL: 'https://users.example.com' })
 const paymentsApi = axios.create({ baseURL: 'https://payments.example.com' })
 ```

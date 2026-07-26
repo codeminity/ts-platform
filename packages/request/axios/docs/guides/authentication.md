@@ -20,6 +20,8 @@ This guide covers authentication patterns beyond the basics shown in the [README
 ## Recap: Basic Token Auth
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   codeminity: {
@@ -35,6 +37,10 @@ const api = axios.create({
 `getToken` can pull from anywhere — memory, a store, secure storage, or an in-memory cache with its own TTL:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const tokenStore: { read: () => Promise<{ token: string; expiresIn: number }> }
+
 let cachedToken: string | null = null
 let expiresAt = 0
 
@@ -62,6 +68,18 @@ Keep `getToken` fast and side-effect-light — it runs on every authenticated re
 The most common pattern: attempt the request, and if it fails with `401`, refresh once and retry.
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const authStore: {
+  accessToken: string | null
+  refreshToken: string | null
+  setTokens: (accessToken: string, refreshToken: string) => void
+}
+
+declare const authService: {
+  refresh: (refreshToken: string | null) => Promise<{ accessToken: string; refreshToken: string }>
+}
+
 const api = axios.create({
   codeminity: {
     getToken: async () => authStore.accessToken,
@@ -80,6 +98,15 @@ This is handled automatically — you don't need to detect the 401 yourself.
 If your tokens carry an expiry, you can refresh slightly ahead of time inside `getToken` itself, rather than waiting for a 401:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare function isExpiringSoon(token: string | null): boolean
+
+declare const authStore: {
+  accessToken: string | null
+  refresh: () => Promise<void>
+}
+
 const api = axios.create({
   codeminity: {
     getToken: async () => {
@@ -99,7 +126,10 @@ Both strategies can coexist: proactive refresh reduces how often the reactive pa
 In server-to-server contexts (no `localStorage`, no browser), token storage typically lives in memory or in a secrets manager:
 
 ```ts
-import { getServiceToken, refreshServiceToken } from './secrets-client'
+import axios from '@codeminity/axios'
+
+declare function getServiceToken(): Promise<string | null>
+declare function refreshServiceToken(): Promise<void>
 
 const api = axios.create({
   baseURL: 'https://internal-api.example.com',
@@ -120,6 +150,18 @@ For per-request-scoped identities (e.g., a backend forwarding a user's own token
 Combine `onEvent` with the authentication event types to react to failures distinctly from other errors:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const authStore: {
+  accessToken: string | null
+  refresh: () => Promise<void>
+  clear: () => void
+}
+
+declare function redirectToLogin(): void
+
+declare const logger: { warn: (message: string, error: unknown) => void }
+
 const api = axios.create({
   codeminity: {
     getToken: async () => authStore.accessToken,
@@ -144,6 +186,13 @@ const api = axios.create({
 For applications juggling multiple accounts or tenants, prefer one client per tenant over trying to make a single client's `getToken` branch on ambient state:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare function tokenStoreFor(tenantId: string): {
+  read: () => Promise<string | null>
+  refresh: () => Promise<void>
+}
+
 function createTenantApi(tenantId: string) {
   return axios.create({
     baseURL: `https://api.example.com/t/${tenantId}`,

@@ -16,7 +16,9 @@ declare module 'axios' {
   }
 }
 
+// @codeminity/request-core exports
 export type { AuthConfig } from '@codeminity/request-core'
+export { TokenModeEnum } from '@codeminity/request-core'
 
 export type { CallbackConfig } from './shared/callback-config.interface'
 export type { Config } from './shared/config.interface'

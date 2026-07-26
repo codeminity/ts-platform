@@ -11,6 +11,7 @@ import type { AxiosInstance } from 'axios';
 import { AxiosStatic } from 'axios';
 import type { CreateAxiosDefaults } from 'axios';
 import type { RetryConfig as RetryConfig_2 } from '@codeminity/request-core';
+import { TokenModeEnum } from '@codeminity/request-core';
 
 export { AuthConfig }
 
@@ -54,6 +55,8 @@ export interface RetryConfig extends RetryConfig_2 {
     // (undocumented)
     shouldRetry?: (error: AxiosError, attempt: number) => boolean;
 }
+
+export { TokenModeEnum }
 
 
 export * from "axios";

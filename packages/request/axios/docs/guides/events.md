@@ -20,6 +20,8 @@ This guide covers advanced usage of the request lifecycle event system introduce
 ## Recap: Event Basics
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     onEvent: async (event, error) => {
@@ -37,7 +39,12 @@ Events cover network failures, timeouts, cancellations, auth failures, and class
 Rather than a single flat `onEvent` handler, route events through a small pipeline of handlers so each concern stays isolated and testable:
 
 ```ts
-type EventHandler = (event: string, error: any) => void | Promise<void>
+import axios, { type AxiosError } from '@codeminity/axios'
+
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
+declare const sessionStore: { clear: () => void }
+
+type EventHandler = (event: string, error: AxiosError) => void | Promise<void>
 
 const handlers: EventHandler[] = [logToConsoleInDev, reportToMonitoring, handleAuthEvents]
 
@@ -51,14 +58,14 @@ const api = axios.create({
   }
 })
 
-function logToConsoleInDev(event: string, error: any) {
+function logToConsoleInDev(event: string, error: AxiosError) {
   if (process.env.NODE_ENV !== 'production') {
-    console.warn(`[api:${event}]`, error?.message)
+    console.warn(`[api:${event}]`, error.message)
   }
 }
 
-function reportToMonitoring(event: string, error: any) {
-  monitoring.track('api_error', { event, status: error?.response?.status })
+function reportToMonitoring(event: string, error: AxiosError) {
+  monitoring.track('api_error', { event, status: error.response?.status })
 }
 
 function handleAuthEvents(event: string) {
@@ -77,14 +84,22 @@ This makes it easy to add or remove a concern (e.g., disable console logging in 
 Tag events with enough context to be useful in a dashboard, without leaking sensitive data:
 
 ```ts
-onEvent: async (event, error) => {
-  monitoring.track('api_error', {
-    event,
-    status: error.response?.status,
-    method: error.config?.method,
-    url: error.config?.url // ensure this doesn't include tokens in query params
-  })
-}
+import axios from '@codeminity/axios'
+
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
+
+const api = axios.create({
+  codeminity: {
+    onEvent: async (event, error) => {
+      monitoring.track('api_error', {
+        event,
+        status: error.response?.status,
+        method: error.config?.method,
+        url: error.config?.url // ensure this doesn't include tokens in query params
+      })
+    }
+  }
+})
 ```
 
 ### Sampling High-Volume Events
@@ -92,10 +107,18 @@ onEvent: async (event, error) => {
 If `network` or `timeout` events are extremely frequent (e.g., during an outage), consider sampling to avoid overwhelming your monitoring pipeline:
 
 ```ts
-onEvent: async (event, error) => {
-  if (event === 'network' && Math.random() > 0.1) return // sample 10%
-  monitoring.track('api_error', { event })
-}
+import axios from '@codeminity/axios'
+
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
+
+const api = axios.create({
+  codeminity: {
+    onEvent: async (event) => {
+      if (event === 'network' && Math.random() > 0.1) return // sample 10%
+      monitoring.track('api_error', { event })
+    }
+  }
+})
 ```
 
 ### Severity Mapping
@@ -103,6 +126,10 @@ onEvent: async (event, error) => {
 Not all events deserve the same alerting severity:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const monitoring: { log: (severity: string, event: string, error: unknown) => void }
+
 const severity: Record<string, 'info' | 'warn' | 'error'> = {
   not_found: 'info',
   too_many_requests: 'warn',
@@ -113,9 +140,13 @@ const severity: Record<string, 'info' | 'warn' | 'error'> = {
   service_unavailable: 'error'
 }
 
-onEvent: async (event, error) => {
-  monitoring.log(severity[event] ?? 'warn', event, error)
-}
+const api = axios.create({
+  codeminity: {
+    onEvent: async (event, error) => {
+      monitoring.log(severity[event] ?? 'warn', event, error)
+    }
+  }
+})
 ```
 
 ## Turning Events into User-Facing Behavior
@@ -123,6 +154,15 @@ onEvent: async (event, error) => {
 Events are lifecycle signals, not UI logic — keep the mapping from event to user-facing message in application code, not inside the `onEvent` callback itself:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const eventBus: {
+  emit: (name: string, event: string) => void
+  on: (name: string, handler: (event: string) => void) => void
+}
+
+declare const toast: { warn: (message: string) => void; error: (message: string) => void }
+
 const api = axios.create({
   codeminity: {
     onEvent: (event) => eventBus.emit('api-event', event)
@@ -147,10 +187,9 @@ This keeps `onEvent` itself framework-agnostic and easy to test, while the UI-sp
 For tracing, attach a request ID at the interceptor boundary via a custom Axios request interceptor (independent of `codeminity`), and read it back off `error.config` inside `onEvent`:
 
 ```ts
-api.interceptors.request.use((config) => {
-  config.headers['X-Request-Id'] = crypto.randomUUID()
-  return config
-})
+import axios from '@codeminity/axios'
+
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
 
 const api = axios.create({
   codeminity: {
@@ -161,6 +200,11 @@ const api = axios.create({
       })
     }
   }
+})
+
+api.interceptors.request.use((config) => {
+  config.headers.set('X-Request-Id', crypto.randomUUID())
+  return config
 })
 ```
 
