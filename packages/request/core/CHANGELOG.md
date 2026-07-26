@@ -1,5 +1,25 @@
 # @codeminity/request-core
 
+## 0.5.1
+
+### 🛠 Improvements
+- Patch high-severity transitive dependency advisories by updating `postcss` and `brace-expansion` through `pnpm.overrides`.
+- Upgrade ESLint to v10.8.0.
+- Update development tooling and GitHub Actions to their latest compatible versions.
+- Upgrade the workspace to pnpm v11.17.0.
+
+### 🧪 Testing
+- Add coverage for the `./test-utils` public export.
+- Improve coverage configuration by excluding the package entry file from coverage metrics.
+
+### 📚 Documentation
+- Fix incorrect `TokenModeEnum` usage in the README.
+- Introduce automated validation for TypeScript code blocks in documentation.
+- Update documentation examples to ensure all TypeScript snippets remain valid and synchronized with the current public API.
+
+### ⚙️ CI
+- Run documentation validation as part of the CI and release workflows to prevent invalid TypeScript examples from being merged.
+
 ## 0.5.0
 
 ### 🚀 Features
