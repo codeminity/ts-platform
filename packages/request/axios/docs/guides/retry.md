@@ -21,6 +21,8 @@ This guide covers retry strategies beyond the basics in the [README](../../READM
 ## Recap: Basic Retry
 
 ```ts
+import axios from '@codeminity/axios'
+
 const api = axios.create({
   codeminity: {
     retries: 3,
@@ -37,18 +39,22 @@ Nothing retries unless `retries` (or `shouldRetry`) is set — see [ADR-003](../
 ### Linear Backoff
 
 ```ts
-codeminity: {
+import type { RetryConfig } from '@codeminity/axios'
+
+const config: RetryConfig = {
   retries: 5,
-  getRetryDelay: (attempt) => attempt * 1000, // 1s, 2s, 3s, 4s, 5s
+  getRetryDelay: (attempt) => attempt * 1000 // 1s, 2s, 3s, 4s, 5s
 }
 ```
 
 ### Exponential Backoff
 
 ```ts
-codeminity: {
+import type { RetryConfig } from '@codeminity/axios'
+
+const config: RetryConfig = {
   retries: 5,
-  getRetryDelay: (attempt) => Math.min(2 ** attempt * 100, 10_000), // 200ms, 400ms, 800ms... capped at 10s
+  getRetryDelay: (attempt) => Math.min(2 ** attempt * 100, 10_000) // 200ms, 400ms, 800ms... capped at 10s
 }
 ```
 
@@ -57,12 +63,14 @@ codeminity: {
 Uncapped exponential backoff across many concurrent clients can cause a "thundering herd" retrying in lockstep. Adding jitter spreads retries out:
 
 ```ts
-codeminity: {
+import type { RetryConfig } from '@codeminity/axios'
+
+const config: RetryConfig = {
   retries: 5,
   getRetryDelay: (attempt) => {
     const base = Math.min(2 ** attempt * 100, 10_000)
     return base / 2 + Math.random() * (base / 2) // randomize the top half
-  },
+  }
 }
 ```
 
@@ -71,13 +79,15 @@ codeminity: {
 If the API returns a `Retry-After` header (common with `429`), prefer honoring it over a fixed backoff curve:
 
 ```ts
-codeminity: {
+import type { RetryConfig } from '@codeminity/axios'
+
+const config: RetryConfig = {
   retries: 5,
   getRetryDelay: (attempt, error) => {
-    const retryAfter = error?.response?.headers?.['retry-after']
+    const retryAfter = error.response?.headers?.['retry-after']
     if (retryAfter) return Number(retryAfter) * 1000
     return attempt * 1000
-  },
+  }
 }
 ```
 
@@ -88,16 +98,21 @@ codeminity: {
 Use `shouldRetry` when status-code lists aren't precise enough — for example, retrying `500` only for specific error codes returned in the response body:
 
 ```ts
-codeminity: {
+import type { RetryConfig } from '@codeminity/axios'
+
+const config: RetryConfig = {
   retries: 3,
   shouldRetry: (error, attempt) => {
     if (attempt > 3) return false
     if (error.code === 'ECONNABORTED') return true // timeout
     if (!error.response) return true // network error, no response at all
     if (error.response.status === 429) return true
-    if (error.response.status === 500 && error.response.data?.code === 'TRANSIENT') return true
+
+    const data = error.response.data as { code?: string } | undefined
+    if (error.response.status === 500 && data?.code === 'TRANSIENT') return true
+
     return false
-  },
+  }
 }
 ```
 
@@ -117,11 +132,19 @@ General rule of thumb for classification:
 Retry is safe by default for `GET` requests. For `POST`/`PATCH`/`PUT`/`DELETE`, only enable retry when the operation is genuinely idempotent or when your backend deduplicates via an idempotency key:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+declare const payload: unknown
+declare const paymentId: string
+
 await api.post('/payments', payload, {
   headers: { 'Idempotency-Key': paymentId },
-  codeminity: { retries: 2, retryOnStatuses: [502, 503, 504] }
+  codeminity: { retries: 2 }
 })
 ```
+
+> Per-request overrides only support `retries`/`retryDelay`/`skipAuth` — status-list/backoff-shape customization (`retryOnStatuses`, `getRetryDelay`, `shouldRetry`) is global-config only.
 
 Without an idempotency key, retrying a `POST` that timed out — but actually succeeded server-side before the timeout — can create a duplicate resource (a duplicate charge, a duplicate order). Treat mutating endpoints as **retry-off by default**, and only opt specific, verified-safe endpoints in.
 
@@ -134,6 +157,10 @@ If a request fails with `401`, that's an authentication concern (handled via ref
 Global retry config is a good default; use request-level overrides for exceptions:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const payload: unknown
+
 const api = axios.create({
   codeminity: { retries: 3, retryOnStatuses: [502, 503, 504] }
 })
@@ -154,6 +181,10 @@ await api.post('/payments', payload, {
 Pair retry configuration with `onEvent` so retries are visible, not silent:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const monitoring: { increment: (metric: string, tags?: Record<string, unknown>) => void }
+
 const api = axios.create({
   codeminity: {
     retries: 3,

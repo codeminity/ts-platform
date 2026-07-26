@@ -39,6 +39,10 @@ pnpm add @codeminity/request-core
 ```ts
 import { createRefreshQueue, handleRefreshToken, TokenModeEnum } from '@codeminity/request-core'
 
+declare function isExpired(token: string | null): boolean
+
+declare function refreshFromServer(): Promise<string>
+
 const refreshQueue = createRefreshQueue()
 
 await handleRefreshToken(

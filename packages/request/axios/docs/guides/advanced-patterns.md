@@ -33,6 +33,12 @@ src/
 ```
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare function sharedGetToken(): Promise<string | null>
+declare function sharedRefreshToken(): Promise<void>
+declare function sharedOnEvent(event: string, error: unknown): void | Promise<void>
+
 // create-client.ts
 export function createClient(baseURL: string, overrides = {}) {
   return axios.create({
@@ -60,6 +66,10 @@ This keeps shared lifecycle behavior (auth, logging) consistent while still allo
 `@codeminity/axios` doesn't change Axios's native cancellation mechanism — `AbortController` still works as expected:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const api: ReturnType<typeof axios.create>
+
 const controller = new AbortController()
 
 api.get('/search', { signal: controller.signal }).catch((error) => {
@@ -77,6 +87,17 @@ The `abort` lifecycle event fires for cancellations, which is useful for disting
 A realistic production configuration typically combines all three lifecycle pieces:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const authStore: {
+  accessToken: string | null
+  refresh: () => Promise<void>
+  clear: () => void
+}
+
+declare const router: { push: (path: string) => void }
+declare const monitoring: { track: (name: string, data: Record<string, unknown>) => void }
+
 const api = axios.create({
   baseURL: 'https://api.example.com',
   timeout: 8000,
@@ -110,6 +131,11 @@ Reading order matters here for anyone maintaining this later: auth resolves firs
 For gradual rollouts (e.g., testing a new retry policy on a subset of traffic), keep the flag check outside the `codeminity` config object rather than inside callback bodies, so the resulting config is easy to log/debug:
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const featureFlags: { isEnabled: (flag: string) => boolean }
+declare function getToken(): Promise<string | null>
+
 const retryConfig = featureFlags.isEnabled('aggressive-retry')
   ? { retries: 5, getRetryDelay: (a: number) => a * 500 }
   : { retries: 2, retryDelay: 1000 }
@@ -127,6 +153,11 @@ const api = axios.create({
 When talking to several backends with different auth schemes (e.g., one OAuth-based, one API-key-based):
 
 ```ts
+import axios from '@codeminity/axios'
+
+declare const getOAuthToken: () => string | null
+declare const refreshOAuthToken: () => Promise<void>
+
 const oauthApi = axios.create({
   baseURL: 'https://oauth-service.example.com',
   codeminity: { getToken: getOAuthToken, refreshToken: refreshOAuthToken }
@@ -134,7 +165,7 @@ const oauthApi = axios.create({
 
 const apiKeyService = axios.create({
   baseURL: 'https://legacy-service.example.com',
-  codeminity: { getToken: async () => process.env.LEGACY_API_KEY }
+  codeminity: { getToken: async () => process.env.LEGACY_API_KEY ?? null }
 })
 ```
 
@@ -145,8 +176,10 @@ Because refresh coordination is scoped per instance (see [ARCHITECTURE.md](../..
 In SSR contexts, avoid creating a module-level singleton client that captures a per-request token in a closure — this can leak one user's token into another user's request if the client is reused across requests on the server:
 
 ```ts
+import axios from '@codeminity/axios'
+
 // ❌ Avoid: shared module-level client capturing per-request state
-let currentUserToken: string
+declare let currentUserToken: string
 export const api = axios.create({
   codeminity: { getToken: async () => currentUserToken }
 })
