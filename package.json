@@ -33,7 +33,8 @@
     "validate:api": "tsx scripts/validate-api-run.ts",
     "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit",
     "verify:package": "tsx scripts/verify-package-run.ts",
-    "verify:packages": "tsx scripts/verify-packages-run.ts"
+    "verify:packages": "tsx scripts/verify-packages-run.ts",
+    "validate:docs": "tsx scripts/validate-docs-run.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
