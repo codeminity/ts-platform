@@ -87,7 +87,9 @@ This prompts for the affected package(s), the semver bump (`patch` / `minor` / `
 
 Skip this only for changes that can't affect a published package: docs-only edits, CI/tooling config, internal test-only changes with no behavior implication. When unsure, add one — an unnecessary changeset is a much smaller problem than a shipped fix nobody ever gets.
 
-Versioning (`pnpm version-packages`) and publishing (`pnpm release`) are run separately, outside individual PRs — see the release workflow for the current process.
+Versioning (`pnpm version-packages`) and publishing (`pnpm release`) are run separately, outside individual PRs, by [`.github/workflows/release.yml`](./.github/workflows/release.yml) on every push to `main`.
+
+Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package is configured on npmjs.com to trust this exact repo and workflow, so the workflow requests a short-lived token from GitHub's OIDC provider instead of using a stored `NPM_TOKEN` secret. There is no long-lived npm token anywhere in this repo, and none should be added; see [SECURITY.md](./SECURITY.md#release--supply-chain-security) for why. Every published package also carries npm provenance, attesting the tarball back to the exact commit and workflow run that built it.
 
 ---
 

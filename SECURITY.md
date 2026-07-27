@@ -57,3 +57,13 @@ This project is designed with:
 
 We follow responsible disclosure.  
 Security fixes will be released as soon as patches are available.
+
+---
+
+## Release & Supply Chain Security
+
+Packages are published to npm exclusively via [`.github/workflows/release.yml`](./.github/workflows/release.yml), triggered on push to `main`. There is no manual `npm publish` process and no long-lived npm token stored anywhere in this repository or its secrets.
+
+- **npm Trusted Publisher (OIDC):** each package is configured on npmjs.com to trust this specific repository and workflow file. The workflow requests a short-lived OpenID Connect token from GitHub's identity provider (`permissions: id-token: write`) and npm exchanges it for a one-time publish credential — there is no static `NPM_TOKEN` secret to leak, rotate, or scope incorrectly. If the release job ever needs an `NPM_TOKEN` secret to work, that's a sign the trusted publisher configuration has regressed, not a gap to patch by adding one back.
+- **Provenance:** every publish sets `NPM_CONFIG_PROVENANCE=true`, so each package version carries a signed attestation linking the published tarball to the exact commit, workflow run, and source repository that built it. Consumers can verify this via `npm audit signatures` or the "Provenance" badge on the npm package page.
+- **What this buys you as a consumer:** installing `@codeminity/*` from npm gives you a package that provably came from a GitHub Actions run in this repository, on `main`, with no human able to publish a version by hand using a leaked or misused token.
