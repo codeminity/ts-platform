@@ -18,6 +18,29 @@ const { globby } = await import('globby')
 const mockedGlobby = vi.mocked(globby)
 const mockedRunCommand = vi.mocked(runCommand)
 
+const PACKAGE_MANIFEST = JSON.stringify({
+  name: '@codeminity/request-core',
+  exports: {
+    '.': { types: './dist/index.d.ts' },
+    './test-utils': { types: './dist/test-utils.d.ts' }
+  }
+})
+
+function mockGlobby(docFiles: string[], manifestFiles: string[] = ['packages/request/core/package.json']) {
+  mockedGlobby.mockImplementation((patterns: unknown) => {
+    const list = Array.isArray(patterns) ? patterns : [patterns]
+    const isManifestGlob = list.some((pattern) => String(pattern).includes('package.json'))
+
+    return Promise.resolve(isManifestGlob ? manifestFiles : docFiles)
+  })
+}
+
+function mockReadFile(markdown: string) {
+  vi.spyOn(fs, 'readFileSync').mockImplementation((file: unknown) => {
+    return String(file).endsWith('package.json') ? PACKAGE_MANIFEST : markdown
+  })
+}
+
 describe('validateDocs', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -25,25 +48,89 @@ describe('validateDocs', () => {
   })
 
   it('throws when no TypeScript code blocks are found', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue('# No code here')
+    mockGlobby(['README.md'])
+    mockReadFile('# No code here')
 
     await expect(validateDocs()).rejects.toThrow('No TypeScript code blocks were found')
 
     expect(mockedRunCommand).not.toHaveBeenCalled()
   })
 
-  it('throws when a package has not been built', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(['```ts', 'const a = 1', '```'].join('\n'))
+  it('throws when a discovered package has not been built', async () => {
+    mockGlobby(['README.md'])
+    mockReadFile(['```ts', 'const a = 1', '```'].join('\n'))
     vi.spyOn(fs, 'existsSync').mockReturnValue(false)
 
-    await expect(validateDocs()).rejects.toThrow('run "pnpm build" first')
+    await expect(validateDocs()).rejects.toThrow(
+      'Missing build output for @codeminity/request-core — run "pnpm build" first'
+    )
   })
 
-  it('extracts blocks, writes a temp tsconfig, and runs tsc via pnpm exec', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(['```ts', 'const a = 1', '```'].join('\n'))
+  it('skips packages with no exports map instead of failing', async () => {
+    mockGlobby(['README.md'], ['packages/request/core/package.json'])
+    vi.spyOn(fs, 'readFileSync').mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({ name: '@codeminity/no-exports' })
+      }
+
+      return ['```ts', 'const a = 1', '```'].join('\n')
+    })
+
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    await expect(validateDocs()).resolves.toBeUndefined()
+  })
+
+  it('skips a string-shorthand export entry (no types field to type-check against)', async () => {
+    mockGlobby(['README.md'], ['packages/legacy/package.json'])
+    vi.spyOn(fs, 'readFileSync').mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/legacy',
+          exports: { '.': './dist/index.js' }
+        })
+      }
+
+      return ['```ts', 'const a = 1', '```'].join('\n')
+    })
+
+    const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    await expect(validateDocs()).resolves.toBeUndefined()
+
+    const tsconfigWrite = writeSpy.mock.calls.find(([file]) => String(file).endsWith('tsconfig.json'))
+    const tsconfigContent = tsconfigWrite?.[1]
+    const tsconfig = JSON.parse(typeof tsconfigContent === 'string' ? tsconfigContent : '') as {
+      compilerOptions: { paths: Record<string, string[]> }
+    }
+
+    expect(tsconfig.compilerOptions.paths).toEqual({})
+  })
+
+  it('ignores private packages when building the paths map', async () => {
+    mockGlobby(['README.md'], ['packages/internal/package.json'])
+    vi.spyOn(fs, 'readFileSync').mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/internal',
+          private: true,
+          exports: { '.': { types: './dist/index.d.ts' } }
+        })
+      }
+
+      return ['```ts', 'const a = 1', '```'].join('\n')
+    })
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    await expect(validateDocs()).resolves.toBeUndefined()
+  })
+
+  it('extracts blocks, writes a temp tsconfig with dynamic paths, and runs tsc via pnpm exec', async () => {
+    mockGlobby(['README.md'])
+    mockReadFile(['```ts', 'const a = 1', '```'].join('\n'))
 
     const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
 
@@ -61,11 +148,21 @@ describe('validateDocs', () => {
     )
 
     expect(tsconfigWrite).toBeDefined()
+
+    const tsconfigContent = tsconfigWrite?.[1]
+    const tsconfig = JSON.parse(typeof tsconfigContent === 'string' ? tsconfigContent : '') as {
+      compilerOptions: { paths: Record<string, string[]> }
+    }
+
+    expect(Object.keys(tsconfig.compilerOptions.paths)).toEqual([
+      '@codeminity/request-core',
+      '@codeminity/request-core/test-utils'
+    ])
   })
 
   it('wraps a block with no top-level import/export in export {} to isolate module scope', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(['```ts', 'const a = 1', '```'].join('\n'))
+    mockGlobby(['README.md'])
+    mockReadFile(['```ts', 'const a = 1', '```'].join('\n'))
 
     const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
 
@@ -79,10 +176,8 @@ describe('validateDocs', () => {
   })
 
   it('does not add export {} when the block already has an import', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(
-      ['```ts', "import axios from '@codeminity/axios'", '```'].join('\n')
-    )
+    mockGlobby(['README.md'])
+    mockReadFile(["```ts", "import axios from '@codeminity/axios'", '```'].join('\n'))
 
     const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
 
@@ -96,8 +191,8 @@ describe('validateDocs', () => {
   })
 
   it('propagates a tsc failure', async () => {
-    mockedGlobby.mockResolvedValue(['README.md'])
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(['```ts', 'const a = 1', '```'].join('\n'))
+    mockGlobby(['README.md'])
+    mockReadFile(['```ts', 'const a = 1', '```'].join('\n'))
     vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
 
     mockedRunCommand.mockRejectedValue(new Error('tsc failed'))
