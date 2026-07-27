@@ -1,4 +1,7 @@
 /**
+ * Supported authentication strategies: header-based tokens (`JWT`) or
+ * browser-managed session cookies (`COOKIE`).
+ *
  * @public
  */
 export const TokenModeEnum = {
