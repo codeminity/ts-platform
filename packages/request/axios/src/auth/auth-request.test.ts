@@ -33,6 +33,19 @@ describe('handleAuthRequest', () => {
     expect(result.withCredentials).toBe(true)
   })
 
+  it('does not enable withCredentials in COOKIE mode when skipAuth is set for the request', async () => {
+    const config = createAuthConfig({
+      tokenMode: TokenModeEnum.COOKIE
+    })
+
+    const request = createRequestConfig({ codeminity: { skipAuth: true } })
+    const queue = createRefreshQueueMock()
+
+    const result = await handleAuthRequest(request, config, queue)
+
+    expect(result.withCredentials).toBeUndefined()
+  })
+
   it('calls refresh before token and sets header', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
