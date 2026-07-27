@@ -20,7 +20,7 @@ Only export from `src/index.ts` or `src/test-utils.ts` — these are the package
 
 Do not import internal files from other packages:
 
-```ts
+```text
 ❌ ../../other-package/src/internal
 ```
 
@@ -43,7 +43,7 @@ Do not break public API without changeset.
 
 Use:
 
-```ts
+```bash
 pnpm changeset
 ```
 
@@ -53,7 +53,7 @@ pnpm changeset
 
 #### Before pushing:
 
-```ts
+```bash
 pnpm build
 pnpm lint
 pnpm typecheck
