@@ -47,6 +47,8 @@ Use:
 pnpm changeset
 ```
 
+Every export reachable from `src/index.ts` needs a real TSDoc summary and a release tag (`@public`/`@internal`/etc.) — `pnpm verify:packages` runs API Extractor in strict mode (no `--local`) and fails on undocumented exports, missing release tags, or a report that's out of sync with the code. If it fails because you intentionally changed the public API, update `etc/request-core.api.md` to match by running `pnpm exec api-extractor run --local` inside this package and committing the result — don't work around the failure any other way.
+
 ---
 
 ## Build & Validation
