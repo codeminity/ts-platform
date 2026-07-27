@@ -1,25 +1,54 @@
 # @codeminity/axios
 
+## 0.6.0
+
+### 🚀 Features
+
+- Export `ErrorEvent` (type) and `ErrorEventEnum` (const) from the package root, so consumers can reference and compare against the lifecycle event identifiers passed to `onEvent` instead of relying on an unexported type or hardcoded string literals.
+
+### 🐛 Fixes
+
+- Make `skipAuth` take precedence over `tokenMode: COOKIE`: a per-request `codeminity: { skipAuth: true }` override was previously ignored when the instance used cookie mode, so `withCredentials` was still attached even though authentication was meant to be skipped entirely. See [ADR-007](./DECISIONS.md#adr-007-skipauth-takes-precedence-over-tokenmode-cookie).
+- Resolve two leaked internal exports (`ae-forgotten-export`) that were sitting unresolved in the public API report: the default export's inferred type referenced the internal `getAxiosInstance` function by name, and `CallbackConfig.onEvent` was typed with a value (`ErrorEvent`) that was never exported.
+
+### 📚 Documentation
+
+- Add real TSDoc summaries to every public export (`CallbackConfig`, `Config`, `create`, `RequestConfig`, `RetryConfig`) — previously each carried only a bare `@public` tag with no description.
+- Broaden the documentation validator to scan every Markdown file in the repository (not just `README.md` and `docs/guides/*.md`), and derive the list of packages to type-check doc examples against dynamically instead of a hardcoded list.
+- Document the npm Trusted Publisher (OIDC) release authentication flow and provenance attestation in `SECURITY.md` and `CONTRIBUTING.md`.
+
+### ⚙️ CI
+
+- Enforce strict API Extractor validation: `verify:packages` no longer runs with `--local`, so a stale or drifted public API report now fails the build instead of being silently rewritten; all extractor messages (including `ae-forgotten-export`) are now treated as errors.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.6.0
+
 ## 0.5.1
 
 ### 🛠 Improvements
+
 - Patch high-severity transitive dependency advisories by updating `postcss` and `brace-expansion` through `pnpm.overrides`.
 - Upgrade ESLint to v10.8.0.
 - Update development tooling and GitHub Actions to their latest compatible versions.
 - pgrade the workspace to pnpm v11.17.0.
 
 ### 🧪 Testing
+
 - Add coverage for the `./test-utils` public export.
 - Improve coverage configuration by excluding the package entry file from coverage metrics.
 
 ### 📚 Documentation
+
 - Fix incorrect `TokenModeEnum` usage in the README.
 - Introduce automated validation for TypeScript code blocks in documentation.
 - Refresh documentation examples across authentication, retry, events, advanced patterns, and README guides to ensure all TypeScript snippets remain valid and aligned with the current public API.
 
 ### ⚙️ CI
-- Run documentation validation as part of the CI and release workflows to automatically validate all TypeScript code examples.
 
+- Run documentation validation as part of the CI and release workflows to automatically validate all TypeScript code examples.
 
 ### Patch Changes
 

@@ -1,23 +1,39 @@
 # @codeminity/request-core
 
+## 0.6.0
+
+### 📚 Documentation
+
+- Add real TSDoc summaries to every public export (`AuthConfig`, `RefreshQueue`, `RetryConfig`, `TokenMode`, `TokenModeEnum`, `ErrorEventEnum`, `createRefreshQueue`, `delay`, `handleRefreshToken`) — previously each carried only a bare `@public` tag with no description.
+- Broaden the documentation validator to scan every Markdown file in the repository (not just `README.md` and `docs/guides/*.md`), and derive the list of packages to type-check doc examples against dynamically from each package's `package.json` instead of a hardcoded list.
+- Document the npm Trusted Publisher (OIDC) release authentication flow and provenance attestation in `SECURITY.md` and `CONTRIBUTING.md`.
+
+### ⚙️ CI
+
+- Enforce strict API Extractor validation: `verify:packages` no longer runs with `--local`, so a stale or drifted public API report now fails the build instead of being silently rewritten; all extractor messages (including `ae-forgotten-export`) are now treated as errors.
+
 ## 0.5.1
 
 ### 🛠 Improvements
+
 - Patch high-severity transitive dependency advisories by updating `postcss` and `brace-expansion` through `pnpm.overrides`.
 - Upgrade ESLint to v10.8.0.
 - Update development tooling and GitHub Actions to their latest compatible versions.
 - Upgrade the workspace to pnpm v11.17.0.
 
 ### 🧪 Testing
+
 - Add coverage for the `./test-utils` public export.
 - Improve coverage configuration by excluding the package entry file from coverage metrics.
 
 ### 📚 Documentation
+
 - Fix incorrect `TokenModeEnum` usage in the README.
 - Introduce automated validation for TypeScript code blocks in documentation.
 - Update documentation examples to ensure all TypeScript snippets remain valid and synchronized with the current public API.
 
 ### ⚙️ CI
+
 - Run documentation validation as part of the CI and release workflows to prevent invalid TypeScript examples from being merged.
 
 ## 0.5.0
