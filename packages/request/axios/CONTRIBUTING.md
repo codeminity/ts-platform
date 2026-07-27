@@ -103,7 +103,7 @@ This is used to generate changelogs automatically, so accuracy matters — a `fi
 1. Fill out the PR template, including what changed and why.
 2. Link the related issue, if any.
 3. Ensure CI passes (build, lint, test).
-4. If the change affects runtime behavior or the public API of `@codeminity/axios` or `@codeminity/request-core`, run `pnpm changeset` from the repo root and commit the generated file — this is required for the change to ever be published (see the [root CONTRIBUTING.md](../../../CONTRIBUTING.md#releasing-changesets)).
+4. If the change affects runtime behavior or the public API of `@codeminity/axios` or `@codeminity/request-core`, run `pnpm changeset` from the repo root and commit the generated file — this is required for the change to ever be published (see the [root CONTRIBUTING.md](../../../CONTRIBUTING.md#releasing-changesets)). Every export reachable from `src/index.ts` also needs a real TSDoc summary and release tag — `pnpm verify:packages` runs API Extractor in strict mode and fails on undocumented exports or a stale report. If it fails because the change was intentional, sync `etc/axios.api.md` by running `pnpm exec api-extractor run --local` inside this package and committing the result.
 5. A maintainer will review for correctness, API surface impact, and documentation accuracy.
 6. PRs that change public configuration shape (new/renamed `codeminity` options) require a corresponding update to the TypeScript types, the README API reference table, and any affected guide under `docs/guides/`.
 7. PRs that change internal-but-observable behavior (e.g., scope of shared state between instances) must update the docs in the same PR — see [DECISIONS.md](./DECISIONS.md) for how these tradeoffs get recorded.

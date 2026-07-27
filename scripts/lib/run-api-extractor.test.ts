@@ -15,13 +15,9 @@ describe('runApiExtractor', () => {
 
     await expect(runApiExtractor('packages/request/core')).resolves.toBeUndefined()
 
-    expect(mockedRunCommand).toHaveBeenCalledWith(
-      'pnpm',
-      ['exec', 'api-extractor', 'run', '--local'],
-      {
-        cwd: 'packages/request/core'
-      }
-    )
+    expect(mockedRunCommand).toHaveBeenCalledWith('pnpm', ['exec', 'api-extractor', 'run'], {
+      cwd: 'packages/request/core'
+    })
   })
 
   it('propagates failures', async () => {
