@@ -4,31 +4,24 @@
 
 ```ts
 
-// @public (undocumented)
+// @public
 export interface AuthConfig {
-    // (undocumented)
     getToken?: () => string | null | Promise<string | null>;
-    // (undocumented)
     isTokenExpired?: () => boolean | Promise<boolean>;
-    // (undocumented)
     onRefreshFail?: (error: unknown) => void | Promise<void>;
-    // (undocumented)
     onRefreshStart?: () => void | Promise<void>;
-    // (undocumented)
     onRefreshSuccess?: () => void | Promise<void>;
-    // (undocumented)
     refreshToken?: () => void | Promise<void>;
-    // (undocumented)
     tokenMode?: TokenMode;
 }
 
-// @public (undocumented)
+// @public
 export function createRefreshQueue(): RefreshQueue;
 
-// @public (undocumented)
+// @public
 export function delay(ms: number): Promise<void>;
 
-// @public (undocumented)
+// @public
 export const ErrorEventEnum: {
     readonly NETWORK: "network";
     readonly TIMEOUT: "timeout";
@@ -38,27 +31,24 @@ export const ErrorEventEnum: {
     readonly UNKNOWN: "unknown";
 };
 
-// @public (undocumented)
+// @public
 export function handleRefreshToken(config: AuthConfig, refreshQueue: RefreshQueue): Promise<void>;
 
-// @public (undocumented)
+// @public
 export interface RefreshQueue {
-    // (undocumented)
     run(task: () => Promise<void>): Promise<void>;
 }
 
-// @public (undocumented)
+// @public
 export interface RetryConfig {
-    // (undocumented)
     retries?: number;
-    // (undocumented)
     retryDelay?: number;
 }
 
-// @public (undocumented)
+// @public
 export type TokenMode = (typeof TokenModeEnum)[keyof typeof TokenModeEnum];
 
-// @public (undocumented)
+// @public
 export const TokenModeEnum: {
     readonly JWT: "JWT";
     readonly COOKIE: "COOKIE";

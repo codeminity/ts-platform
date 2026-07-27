@@ -8,51 +8,65 @@ import { AuthConfig } from '@codeminity/request-core';
 import axios from 'axios';
 import type { AxiosError } from 'axios';
 import type { AxiosInstance } from 'axios';
-import { AxiosStatic } from 'axios';
 import type { CreateAxiosDefaults } from 'axios';
 import type { RetryConfig as RetryConfig_2 } from '@codeminity/request-core';
 import { TokenModeEnum } from '@codeminity/request-core';
 
 export { AuthConfig }
 
-// @public (undocumented)
+// @public
 export interface CallbackConfig {
-    // (undocumented)
     onError?: (error: unknown) => void | Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "ErrorEvent_2" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     onEvent?: (event: ErrorEvent_2, error: AxiosError) => void | Promise<void>;
 }
 
-// @public (undocumented)
+// @public
 export interface Config extends AuthConfig, CallbackConfig, RetryConfig {
 }
 
-// @public (undocumented)
-export function create(config?: CreateAxiosDefaults): AxiosInstance;
-
-// Warning: (ae-forgotten-export) The symbol "getAxiosInstance" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-const _default: typeof getAxiosInstance & AxiosStatic & {
+// @public
+const configuredAxios: typeof axios & {
     create: typeof create;
 };
-export default _default;
+export default configuredAxios;
 
-// @public (undocumented)
+// @public
+export function create(config?: CreateAxiosDefaults): AxiosInstance;
+
+// @public
+type ErrorEvent_2 = (typeof ErrorEventEnum)[keyof typeof ErrorEventEnum];
+export { ErrorEvent_2 as ErrorEvent }
+
+// @public
+export const ErrorEventEnum: {
+    readonly BAD_REQUEST: "bad_request";
+    readonly UNAUTHORIZED: "unauthorized";
+    readonly FORBIDDEN: "forbidden";
+    readonly NOT_FOUND: "not_found";
+    readonly CONFLICT: "conflict";
+    readonly UNPROCESSABLE_ENTITY: "unprocessable_entity";
+    readonly TOO_MANY_REQUESTS: "too_many_requests";
+    readonly INTERNAL_ERROR: "internal_error";
+    readonly BAD_GATEWAY: "bad_gateway";
+    readonly SERVICE_UNAVAILABLE: "service_unavailable";
+    readonly GATEWAY_TIMEOUT: "gateway_timeout";
+    readonly NETWORK: "network";
+    readonly TIMEOUT: "timeout";
+    readonly ABORT: "abort";
+    readonly AUTH_REFRESH_FAILED: "auth_refresh_failed";
+    readonly AUTH_TOKEN_FAILED: "auth_token_failed";
+    readonly UNKNOWN: "unknown";
+};
+
+// @public
 export interface RequestConfig extends Pick<RetryConfig, 'retries' | 'retryDelay'> {
-    // (undocumented)
     skipAuth?: boolean;
 }
 
-// @public (undocumented)
+// @public
 export interface RetryConfig extends RetryConfig_2 {
-    // (undocumented)
     getRetryDelay?: (attempt: number, error: AxiosError) => number;
-    // (undocumented)
     retryOnStatuses?: number[];
-    // (undocumented)
     shouldRetry?: (error: AxiosError, attempt: number) => boolean;
 }
 

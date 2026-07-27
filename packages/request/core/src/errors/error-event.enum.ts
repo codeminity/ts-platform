@@ -1,4 +1,6 @@
 /**
+ * Identifiers for the lifecycle error events emitted during a request.
+ *
  * @public
  */
 export const ErrorEventEnum = {

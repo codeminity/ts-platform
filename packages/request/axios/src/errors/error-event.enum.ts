@@ -1,5 +1,11 @@
 import { ErrorEventEnum as CoreErrorEventEnum } from '@codeminity/request-core'
 
+/**
+ * Identifiers for the lifecycle error events emitted via `onEvent`. Extends
+ * `@codeminity/request-core`'s network/auth events with classified HTTP status events.
+ *
+ * @public
+ */
 export const ErrorEventEnum = {
   ...CoreErrorEventEnum,
 

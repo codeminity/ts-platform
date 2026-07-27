@@ -8,6 +8,9 @@ import { attachResponseInterceptor } from './shared/attach-response'
 import type { AxiosInstance, CreateAxiosDefaults } from 'axios'
 
 /**
+ * Creates an Axios instance wired with `@codeminity/axios` behavior — auth
+ * lifecycle, refresh coordination, and retry — configured via `config.codeminity`.
+ *
  * @public
  */
 export function create(config: CreateAxiosDefaults = {}): AxiosInstance {
