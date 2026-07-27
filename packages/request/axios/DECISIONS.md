@@ -12,6 +12,7 @@ This document records significant design decisions for `@codeminity/axios`, usin
 - [ADR-004: Refresh coordination scope — per-instance vs. shared](#adr-004-refresh-coordination-scope--per-instance-vs-shared)
 - [ADR-005: `shouldRetry` is a full override, not an additional filter](#adr-005-shouldretry-is-a-full-override-not-an-additional-filter)
 - [ADR-006: Per-request retry config is merged with global config, not replaced](#adr-006-per-request-retry-config-is-merged-with-global-config-not-replaced)
+- [ADR-007: `skipAuth` takes precedence over `tokenMode: COOKIE`](#adr-007-skipauth-takes-precedence-over-tokenmode-cookie)
 
 ---
 
@@ -74,6 +75,16 @@ This document records significant design decisions for `@codeminity/axios`, usin
 **Decision:** Per-request retry config is shallow-merged on top of the global config (`{ ...globalConfig, ...requestConfig.codeminity }`). A per-request override replaces only the specific fields it declares; every other field falls back to the instance-level default.
 
 **Consequences:** Per-request overrides can stay minimal (override only what's different for that endpoint) without silently losing the rest of the instance's retry behavior. Contributors adding new fields to `RetryConfig` should keep this merge semantic in mind — a field that should NOT be inherited per-request (if one is ever introduced) would need explicit handling, not just addition to the interface.
+
+---
+
+## ADR-007: `skipAuth` takes precedence over `tokenMode: COOKIE`
+
+**Context:** `handleAuthRequest` checked `tokenMode === COOKIE` before checking `codeminity?.skipAuth`, and returned early on the COOKIE branch. As a result, a per-request `skipAuth: true` override had no effect when the instance was configured with `tokenMode: COOKIE` — `withCredentials` was still set to `true`. This contradicted the documented meaning of `skipAuth` ("Skip authentication handling for this request," README) and the "Skipping Authentication" example, neither of which carve out an exception for cookie mode.
+
+**Decision:** `skipAuth` is checked first, before any `tokenMode` branching. When `skipAuth: true` is set for a request, authentication handling is skipped entirely regardless of `tokenMode` — including cookie mode, so `withCredentials` is left untouched.
+
+**Consequences:** `skipAuth` now behaves consistently across every `tokenMode`, matching its documented contract. Anyone relying on the previous (undocumented) behavior — where cookie credentials were attached even to requests marked `skipAuth: true` — needs to remove that per-request override and instead configure `withCredentials` directly via Axios's own request config if cookies must still be sent on an unauthenticated request.
 
 ---
 

@@ -18,12 +18,14 @@ export async function handleAuthRequest(
   const requestConfig = request as InternalRequestConfig
   const codeminity = requestConfig.codeminity
 
+  if (codeminity?.skipAuth) return request
+
   if (config.tokenMode === TokenModeEnum.COOKIE) {
     request.withCredentials = true
     return request
   }
 
-  if (codeminity?.skipAuth || !config.getToken) {
+  if (!config.getToken) {
     return request
   }
 
