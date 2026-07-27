@@ -14,13 +14,15 @@ import { TokenModeEnum } from '@codeminity/request-core';
 
 export { AuthConfig }
 
-// @public
+// @public (undocumented)
 export interface CallbackConfig {
+    // (undocumented)
     onError?: (error: unknown) => void | Promise<void>;
+    // (undocumented)
     onEvent?: (event: ErrorEvent_2, error: AxiosError) => void | Promise<void>;
 }
 
-// @public
+// @public (undocumented)
 export interface Config extends AuthConfig, CallbackConfig, RetryConfig {
 }
 
@@ -30,7 +32,7 @@ const configuredAxios: typeof axios & {
 };
 export default configuredAxios;
 
-// @public
+// @public (undocumented)
 export function create(config?: CreateAxiosDefaults): AxiosInstance;
 
 // @public
@@ -58,15 +60,19 @@ export const ErrorEventEnum: {
     readonly UNKNOWN: "unknown";
 };
 
-// @public
+// @public (undocumented)
 export interface RequestConfig extends Pick<RetryConfig, 'retries' | 'retryDelay'> {
+    // (undocumented)
     skipAuth?: boolean;
 }
 
-// @public
+// @public (undocumented)
 export interface RetryConfig extends RetryConfig_2 {
+    // (undocumented)
     getRetryDelay?: (attempt: number, error: AxiosError) => number;
+    // (undocumented)
     retryOnStatuses?: number[];
+    // (undocumented)
     shouldRetry?: (error: AxiosError, attempt: number) => boolean;
 }
 
