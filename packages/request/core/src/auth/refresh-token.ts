@@ -2,6 +2,10 @@ import type { AuthConfig } from './auth-config.interface'
 import type { RefreshQueue } from './refresh-queue.interface'
 
 /**
+ * Runs the configured refresh flow if the current token is expired, coordinating
+ * concurrent callers through the given refresh queue so only one refresh executes
+ * at a time.
+ *
  * @public
  */
 export async function handleRefreshToken(
