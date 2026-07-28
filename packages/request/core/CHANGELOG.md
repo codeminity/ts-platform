@@ -1,5 +1,15 @@
 # @codeminity/request-core
 
+## 0.7.0
+
+### 🚀 Features
+
+- Add `dependencies` (a spy-friendly re-export of `handleRefreshToken` through a mutable object, for adapter test suites) and `emitterCallback`/`EventCallbacks<TEvent, TOutcome>` (generic "call `onEvent` then `onError`, swallowing callback errors") as new public exports — protocol-agnostic primitives previously duplicated identically inside `@codeminity/axios` and `@codeminity/fetch`.
+
+### 🛠 Improvements
+
+- Bump `turbo` to v2.10.7 and `globals` to v17.8.0.
+
 ## 0.6.0
 
 ### 📚 Documentation
