@@ -88,6 +88,16 @@ importers:
         specifier: ^8.5.1
         version: 8.5.1(@microsoft/api-extractor@7.58.12(@types/node@26.1.1))(jiti@2.7.0)(postcss@8.5.23)(supports-color@8.1.1)(tsx@4.23.1)(typescript@6.0.3)
 
+  packages/request/fetch:
+    dependencies:
+      '@codeminity/request-core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@microsoft/api-extractor@7.58.12(@types/node@26.1.1))(jiti@2.7.0)(postcss@8.5.23)(supports-color@8.1.1)(tsx@4.23.1)(typescript@6.0.3)
+
 packages:
 
   '@babel/helper-string-parser@7.29.7':
