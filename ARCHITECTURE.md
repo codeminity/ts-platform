@@ -30,6 +30,12 @@ Each package:
 - deep internal package imports
 - circular dependencies
 
+### Enforcement
+
+`core → adapter` and circular dependencies are enforced automatically by [`dependency-cruiser`](https://github.com/sverweij/dependency-cruiser) (`pnpm run validate:deps`, run in CI) — see [`scripts/validate-deps.ts`](./scripts/validate-deps.ts). The rule matches any `packages/<category>/core/src` importing a sibling under that same `<category>`, so it covers both future adapters within an existing category and a `core` package inside any future category, without needing an update either time.
+
+Deep internal package imports don't need a separate rule: each package's `package.json` `exports` field already makes anything outside `.`/declared subpaths unresolvable at the module-resolution level (Node's own package encapsulation) — there's nothing for a linter to additionally catch there.
+
 ---
 
 ## Package Layers

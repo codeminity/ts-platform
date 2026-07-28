@@ -22,7 +22,7 @@ import { verifyPackages } from './verify-packages'
 // package count and any location under the workspace, not just the two
 // real packages that happen to exist today (packages/request/axios and
 // packages/request/core). Adding a future package anywhere under
-// packages/** (e.g. packages/ACL/permission) needs zero changes here.
+// packages/** needs zero changes here.
 vi.mock('./lib/run-command', () => ({
   runCommand: vi.fn()
 }))
