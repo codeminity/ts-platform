@@ -22,6 +22,14 @@ export function createRefreshQueue(): RefreshQueue;
 export function delay(ms: number): Promise<void>;
 
 // @public
+export const dependencies: {
+    handleRefreshToken: typeof handleRefreshToken;
+};
+
+// @public
+export function emitterCallback<TEvent, TOutcome>(event: TEvent, outcome: TOutcome, callbacks: EventCallbacks<TEvent, TOutcome>): Promise<void>;
+
+// @public
 export const ErrorEventEnum: {
     readonly NETWORK: "network";
     readonly TIMEOUT: "timeout";
@@ -30,6 +38,12 @@ export const ErrorEventEnum: {
     readonly AUTH_TOKEN_FAILED: "auth_token_failed";
     readonly UNKNOWN: "unknown";
 };
+
+// @public
+export interface EventCallbacks<TEvent, TOutcome> {
+    onError?: (outcome: TOutcome) => void | Promise<void>;
+    onEvent?: (event: TEvent, outcome: TOutcome) => void | Promise<void>;
+}
 
 // @public
 export function handleRefreshToken(config: AuthConfig, refreshQueue: RefreshQueue): Promise<void>;

@@ -70,6 +70,7 @@ Only `src/index.ts` and `src/test-utils.ts` are considered part of the public AP
 
 - No framework dependency
 - No HTTP client dependency
+- No protocol-specific vocabulary — event/outcome classification (HTTP status codes, GraphQL error codes, WebSocket close codes, ...) stays adapter-local; see [DECISIONS.md](./DECISIONS.md)
 - No global state
 - Fully deterministic async behavior
 
@@ -84,6 +85,11 @@ Only this surface is stable:
 - `handleRefreshToken`
 - `createRefreshQueue`
 - `delay`
+- `emitterCallback`
+
+**Objects**
+
+- `dependencies`
 
 **Enums**
 
@@ -96,6 +102,7 @@ Only this surface is stable:
 - `AuthConfig`
 - `RefreshQueue`
 - `RetryConfig`
+- `EventCallbacks`
 
 `@codeminity/request-core/test-utils` is a separate, published subpath export (`createAuthConfig`, `createRefreshQueue` mock) for adapter packages' own test suites — it is not part of the runtime API above and is never bundled into the main entry point.
 

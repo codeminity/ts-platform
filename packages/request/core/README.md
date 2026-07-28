@@ -61,6 +61,25 @@ await handleRefreshToken(
 
 This is the primitive that transport adapters (like `@codeminity/axios`) wire into their own request/response interceptors — see [its ARCHITECTURE.md](../axios/ARCHITECTURE.md) for how that wiring works in practice.
 
+## Example: emitting a failure event
+
+`emitterCallback` is the shared piece of an adapter's own error-event pipeline — the adapter still owns classifying its own transport's error into an event name (e.g. mapping an HTTP status code, a GraphQL error code, or a WebSocket close code):
+
+```ts
+import { emitterCallback, type EventCallbacks } from '@codeminity/request-core'
+
+interface MyOutcome {
+  status?: number
+  error?: unknown
+}
+
+declare const callbacks: EventCallbacks<string, MyOutcome>
+declare const outcome: MyOutcome
+declare const event: string
+
+await emitterCallback(event, outcome, callbacks)
+```
+
 ---
 
 ## Test Utilities
@@ -150,6 +169,11 @@ The package exposes a minimal and stable API:
 - `handleRefreshToken`
 - `createRefreshQueue`
 - `delay`
+- `emitterCallback`
+
+**Objects**
+
+- `dependencies` — `handleRefreshToken` re-exported through a mutable object, so adapter test suites can spy on it without mocking the whole module
 
 **Enums**
 
@@ -162,6 +186,7 @@ The package exposes a minimal and stable API:
 - `AuthConfig`
 - `RefreshQueue`
 - `RetryConfig`
+- `EventCallbacks`
 
 **`@codeminity/request-core/test-utils`** (separate subpath, for adapter test suites only)
 
