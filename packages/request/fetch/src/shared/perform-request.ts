@@ -1,7 +1,6 @@
-import type { RefreshQueue } from '@codeminity/request-core'
+import { emitterCallback, type RefreshQueue } from '@codeminity/request-core'
 
 import { handleAuthRequest } from '../auth/handle-auth-request'
-import { emitterCallback } from '../errors/emit-error-event'
 import { classifyOutcome } from '../errors/outcome-to-event'
 import { handleRetry } from '../retry/retry'
 
