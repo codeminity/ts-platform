@@ -1,5 +1,17 @@
 # @codeminity/axios
 
+## 0.7.0
+
+### 🛠 Improvements
+
+- Use `@codeminity/request-core`'s new `dependencies` and `emitterCallback` exports instead of maintaining local copies — internal refactor only, no behavior or public API change.
+- Bump `turbo` to v2.10.7 and `globals` to v17.8.0.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.7.0
+
 ## 0.6.0
 
 ### 🚀 Features
