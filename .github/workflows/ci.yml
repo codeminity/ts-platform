@@ -61,6 +61,9 @@ jobs:
       - name: Test
         run: pnpm test:coverage
 
+      - name: Dependency Architecture Validation
+        run: pnpm run validate:deps
+
       - name: API Validation
         run: pnpm run validate:api
 

@@ -34,7 +34,8 @@
     "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit",
     "verify:package": "tsx scripts/verify-package-run.ts",
     "verify:packages": "tsx scripts/verify-packages-run.ts",
-    "validate:docs": "tsx scripts/validate-docs-run.ts"
+    "validate:docs": "tsx scripts/validate-docs-run.ts",
+    "validate:deps": "tsx scripts/validate-deps-run.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
@@ -42,6 +43,7 @@
     "@microsoft/api-extractor": "^7.58.12",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
+    "dependency-cruiser": "^18.1.0",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.17.1",

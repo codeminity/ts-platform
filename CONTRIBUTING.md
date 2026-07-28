@@ -24,6 +24,8 @@ ts-platform is a modular monorepo of independent packages within the Codeminity 
 - no deep imports between internal modules
 - shared utilities must live in dedicated packages
 
+The `core → adapter` direction and circular dependencies aren't just documented — they're enforced by `dependency-cruiser` (`pnpm run validate:deps`, also run in CI). A PR that adds an import violating either fails the build; see [ARCHITECTURE.md](./ARCHITECTURE.md#enforcement).
+
 ---
 
 ## Code Style
