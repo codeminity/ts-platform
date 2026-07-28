@@ -1,10 +1,13 @@
-import { TokenModeEnum, type RefreshQueue } from '@codeminity/request-core'
+import {
+  dependencies,
+  emitterCallback,
+  TokenModeEnum,
+  type RefreshQueue
+} from '@codeminity/request-core'
 
-import { emitterCallback } from '../errors/emit-error-event'
 import { ErrorEventEnum } from '../errors/error-event.enum'
 
 import { createAuthorizationHeader } from './create-auth-header'
-import { dependencies } from './dependencies'
 
 import type { Config } from '../shared/config.interface'
 import type { FetchRequestInit } from '../shared/request-config.interface'

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { TokenModeEnum } from '@codeminity/request-core'
+import { dependencies, TokenModeEnum } from '@codeminity/request-core'
 import {
   createAuthConfig,
   createRefreshQueue as createRefreshQueueMock
@@ -8,7 +8,6 @@ import {
 
 import { createRequestInit } from '../mocks/create-request-init'
 
-import { dependencies } from './dependencies'
 import { handleAuthRequest } from './handle-auth-request'
 
 import type { Config } from '../shared/config.interface'
