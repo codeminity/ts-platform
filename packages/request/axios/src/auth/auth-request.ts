@@ -1,11 +1,10 @@
 import { type InternalAxiosRequestConfig, isAxiosError } from 'axios'
 
-import { TokenModeEnum, type RefreshQueue } from '@codeminity/request-core'
+import { dependencies, TokenModeEnum, type RefreshQueue } from '@codeminity/request-core'
 
 import { ErrorEventEnum } from '../errors/error-event.enum'
 
 import { createAuthorizationHeader } from './create-auth-header'
-import { dependencies } from './dependencies'
 
 import type { Config } from '../shared/config.interface'
 import type { InternalRequestConfig } from '../shared/request-config.interface'

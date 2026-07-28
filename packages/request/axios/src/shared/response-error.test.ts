@@ -1,7 +1,8 @@
 import { AxiosError } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { emitterCallback } from '../errors/emit-error-event'
+import { emitterCallback } from '@codeminity/request-core'
+
 import { mapErrorToEvent } from '../errors/error-to-event'
 import { handleRetry } from '../retry/retry'
 
@@ -11,7 +12,7 @@ import type { Config } from './config.interface'
 import type { InternalRequestConfig } from './request-config.interface'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 
-vi.mock('../errors/emit-error-event.ts', () => ({
+vi.mock('@codeminity/request-core', () => ({
   emitterCallback: vi.fn()
 }))
 

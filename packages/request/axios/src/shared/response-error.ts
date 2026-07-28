@@ -1,6 +1,7 @@
 import { isAxiosError, type AxiosInstance, type AxiosResponse } from 'axios'
 
-import { emitterCallback } from '../errors/emit-error-event'
+import { emitterCallback } from '@codeminity/request-core'
+
 import { mapErrorToEvent } from '../errors/error-to-event'
 import { handleRetry } from '../retry/retry'
 

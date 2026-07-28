@@ -1,7 +1,7 @@
 import { type AxiosError } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { TokenModeEnum } from '@codeminity/request-core'
+import { dependencies, TokenModeEnum } from '@codeminity/request-core'
 import {
   createAuthConfig,
   createRefreshQueue as createRefreshQueueMock
@@ -11,7 +11,6 @@ import { ErrorEventEnum } from '../errors/error-event.enum'
 import { createRequestConfig } from '../mocks/create-request-config'
 
 import { handleAuthRequest } from './auth-request'
-import { dependencies } from './dependencies'
 
 import type { Config } from '../shared/config.interface'
 
