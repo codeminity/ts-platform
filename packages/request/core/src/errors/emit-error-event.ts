@@ -23,12 +23,16 @@ export async function emitterCallback<TEvent, TOutcome>(
   callbacks: EventCallbacks<TEvent, TOutcome>
 ): Promise<void> {
   try {
+    // Stryker disable next-line OptionalChaining: equivalent mutant — this
+    // catch already swallows a missing-callback TypeError the same way it
+    // swallows any other callback failure.
     await callbacks.onEvent?.(event, outcome)
   } catch {
     /* empty */
   }
 
   try {
+    // Stryker disable next-line OptionalChaining: equivalent mutant — see above.
     await callbacks.onError?.(outcome)
   } catch {
     /* empty */

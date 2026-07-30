@@ -36,6 +36,16 @@ describe('shouldRetry', () => {
     expect(shouldRetry(error, 2, config)).toBe(false)
   })
 
+  it('still allows retry when attempt equals retries (boundary)', () => {
+    const error = createError({ code: 'ERR_NETWORK' })
+
+    const config: RetryConfig = {
+      retries: 1
+    }
+
+    expect(shouldRetry(error, 1, config)).toBe(true)
+  })
+
   it('uses custom shouldRetry as filter with valid retry context', () => {
     const error = createError({ code: 'ERR_NETWORK' })
 

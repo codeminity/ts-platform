@@ -27,6 +27,10 @@ export async function handleRefreshToken(
       await onRefreshSuccess?.()
     } catch (error) {
       try {
+        // Stryker disable next-line OptionalChaining: equivalent mutant — the
+        // surrounding catch already swallows a missing-callback TypeError
+        // identically to how it swallows any other callback failure, so no
+        // observable behavior can distinguish `?.()` from a bare call here.
         await onRefreshFail?.(error)
       } catch {
         // ignore callback failure
