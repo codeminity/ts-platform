@@ -57,6 +57,12 @@ Integration layer for external systems.
 
 ---
 
+## Testing Infrastructure
+
+- **Unit tests** live next to the code they test, inside each package's `src/`.
+- **`e2e/`** (repo root) holds real-browser (Playwright) tests — deliberately outside any single package, since it's a shared harness meant to serve every package that has browser-dependent behavior, not just the first one that needed it.
+- **`stryker.config.ts`** (repo root) runs mutation testing across every package's production code, on-demand (`pnpm run test:mutation`), not CI-gated.
+
 ## Public API Rule
 
 Only `exports` defined in `package.json` are public.
