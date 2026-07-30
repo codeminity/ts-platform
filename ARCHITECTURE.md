@@ -60,7 +60,7 @@ Integration layer for external systems.
 ## Testing Infrastructure
 
 - **Unit tests** live next to the code they test, inside each package's `src/`.
-- **`e2e/`** (repo root) holds real-browser (Playwright) tests — deliberately outside any single package, since it's a shared harness meant to serve every package that has browser-dependent behavior, not just the first one that needed it.
+- **Real-browser (Playwright) end-to-end tests** live in each package's own `e2e/` — a sibling to `src/`, not inside it, since `vitest`'s own test discovery is scoped to `src/` and a `.spec.ts` file anywhere else under `packages/**` would otherwise collide with it. Shared harness code used across packages (fixtures, `playwright.config.ts`) lives at the repo root `e2e/`, the same role `scripts/` plays for cross-cutting tooling — neither is a package, so "tests live next to packages" doesn't apply to them.
 - **`stryker.config.ts`** (repo root) runs mutation testing across every package's production code, on-demand (`pnpm run test:mutation`), not CI-gated.
 
 ## Public API Rule
