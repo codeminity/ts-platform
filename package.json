@@ -17,7 +17,7 @@
   "engines": {
     "node": "^22.13.0 || >=24.0.0"
   },
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@11.18.0",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -48,7 +48,7 @@
     "@stryker-mutator/api": "^9.6.1",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@vitest/coverage-v8": "^4.1.10",
     "dependency-cruiser": "^18.1.0",
     "esbuild": "^0.28.1",
