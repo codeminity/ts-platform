@@ -108,6 +108,22 @@ describe('handleAuthRequest', () => {
     expect(result.headers.get('Authorization')).toBe('Bearer token')
   })
 
+  it('does not throw when refresh fails with an axios error and onEvent is not provided', async () => {
+    const config: Config = {
+      getToken: vi.fn().mockResolvedValue('token')
+    }
+
+    const error = new Error('refresh failed') as AxiosError
+
+    error.isAxiosError = true
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
+
+    await expect(
+      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
+    ).resolves.toBeDefined()
+  })
+
   it('emits error callback when refresh fails with a non axios error', async () => {
     const onError = vi.fn()
 
@@ -140,6 +156,18 @@ describe('handleAuthRequest', () => {
     await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
 
     expect(onError).toHaveBeenCalledWith(error)
+  })
+
+  it('does not throw when getToken fails with a non axios error and onError is not provided', async () => {
+    const config: Config = {
+      getToken: vi.fn().mockRejectedValue(new Error('token failed'))
+    }
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
+
+    await expect(
+      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
+    ).resolves.toBeDefined()
   })
 
   it('skips auth when getToken is not configured', async () => {
@@ -187,5 +215,20 @@ describe('handleAuthRequest', () => {
     await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
 
     expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
+  })
+
+  it('does not throw when getToken fails with an axios error and onEvent is not provided', async () => {
+    const error = new Error('token failed') as AxiosError
+    error.isAxiosError = true
+
+    const config: Config = {
+      getToken: vi.fn().mockRejectedValue(error)
+    }
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
+
+    await expect(
+      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
+    ).resolves.toBeDefined()
   })
 })

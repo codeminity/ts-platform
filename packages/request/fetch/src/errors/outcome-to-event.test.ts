@@ -51,14 +51,18 @@ describe('classifyOutcome', () => {
     expect(classifyOutcome(createFetchOutcome({ error: 'not an error instance' }))).toBe('unknown')
   })
 
+  it('returns unknown for a nullish thrown value, without throwing', () => {
+    expect(classifyOutcome(createFetchOutcome({ error: null }))).toBe('unknown')
+  })
+
   it('returns unknown for an unrecognized DOMException name', () => {
     const error = new DOMException('Something else', 'SyntaxError')
     expect(classifyOutcome(createFetchOutcome({ error }))).toBe('unknown')
   })
 
   it('prioritizes response over error when both are somehow present', () => {
-    expect(
-      classifyOutcome({ ...responseOutcome(404), error: new TypeError('x') })
-    ).toBe('not_found')
+    expect(classifyOutcome({ ...responseOutcome(404), error: new TypeError('x') })).toBe(
+      'not_found'
+    )
   })
 })
