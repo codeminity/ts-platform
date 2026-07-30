@@ -45,6 +45,16 @@ The `core → adapter` direction and circular dependencies aren't just documente
 - no flaky or time-dependent tests
 - mocks must be explicit (no auto-mocking)
 - tests live next to packages
+- `stryker.config.ts`'s `mutate` glob mirrors `vitest.config.ts`'s coverage
+  `include`/`exclude` — any new production file is mutation-tested
+  automatically, no config edits needed
+- run `pnpm run test:mutation` before relying on 100% coverage as proof a new
+  test actually verifies behavior — coverage alone doesn't catch e.g. a
+  missing `?.` or an off-by-one that no test's inputs happen to expose
+- a mutant may legitimately be unkillable (e.g. a redundant `?.` inside a
+  catch that already swallows the same failure) — mark it with
+  `// Stryker disable next-line <Mutator>: <reason>` instead of writing a
+  test that can't actually observe a difference
 
 ---
 
