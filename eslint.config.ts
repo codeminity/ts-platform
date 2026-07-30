@@ -7,7 +7,16 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig(
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/.turbo/**', '**/node_modules/**']
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/.turbo/**',
+      '**/node_modules/**',
+      '**/.stryker-tmp/**',
+      '**/reports/**',
+      '**/test-results/**',
+      '**/playwright-report/**'
+    ]
   },
 
   js.configs.recommended,
