@@ -1,5 +1,18 @@
 # @codeminity/axios
 
+## 0.7.1
+
+### 🛠 Improvements
+
+- Simplify HTTP status-to-event mapping: remove a redundant guard that overlapped with the `switch` statement's own `default` case — internal refactor only, no behavior change.
+- Add `dependency-cruiser`-based architecture enforcement, Socket.dev supply-chain scanning, and a real-browser (Playwright) end-to-end test covering this package's `COOKIE` auth mode cross-origin, in a real browser, against the actual built package.
+- Bump `pnpm` to v11.18.0, `@types/node` to v26.1.2, and `github/codeql-action` to v4.37.4.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.7.1
+
 ## 0.7.0
 
 ### 🛠 Improvements

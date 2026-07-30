@@ -1,5 +1,18 @@
 # @codeminity/request-core
 
+## 0.7.1
+
+### 🐛 Fixes
+
+- Externalize `vitest` from the `./test-utils` build so it's no longer bundled into `dist/test-utils.js` — this had grown the file from ~1KB to 554KB and inlined `vitest`'s own transitive dependency `magic-string`, including its source URLs, into the published package.
+
+### 🛠 Improvements
+
+- Add `dependency-cruiser`-based architecture enforcement (no circular dependencies; a category's own `core` package may never depend on its sibling adapters) as an automated CI gate, replacing a documentation-only rule.
+- Add Socket.dev supply-chain security scanning, both as a local `validate:socket` command and a CI gate.
+- Add real-browser (Playwright) end-to-end testing and mutation testing (Stryker) covering all three packages, with mutation score at 100%.
+- Bump `pnpm` to v11.18.0, `@types/node` to v26.1.2, and `github/codeql-action` to v4.37.4.
+
 ## 0.7.0
 
 ### 🚀 Features
