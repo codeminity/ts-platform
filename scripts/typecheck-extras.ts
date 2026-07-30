@@ -1,0 +1,25 @@
+import { globby } from 'globby'
+
+import { runCommand } from './lib/run-command'
+
+// Areas that always exist, regardless of how many packages there are.
+const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'stryker.tsconfig.json']
+
+/**
+ * Finds every tsconfig outside `turbo run typecheck`'s reach (each package's
+ * own src/), so a new package's e2e/ folder is covered automatically —
+ * nothing here needs updating when one is added.
+ */
+export async function findExtraTsconfigs(): Promise<string[]> {
+  const packageE2eTsconfigs = await globby('packages/*/*/e2e/tsconfig.json')
+
+  return [...FIXED_TSCONFIGS, ...packageE2eTsconfigs].sort()
+}
+
+export async function typecheckExtras(): Promise<void> {
+  const tsconfigs = await findExtraTsconfigs()
+
+  for (const tsconfig of tsconfigs) {
+    await runCommand('pnpm', ['exec', 'tsc', '-p', tsconfig, '--noEmit'])
+  }
+}

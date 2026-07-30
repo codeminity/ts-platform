@@ -31,7 +31,7 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "validate:api": "tsx scripts/validate-api-run.ts",
-    "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit && tsc -p e2e/tsconfig.json --noEmit && tsc -p stryker.tsconfig.json --noEmit",
+    "typecheck": "turbo run typecheck && tsx scripts/typecheck-extras-run.ts",
     "verify:package": "tsx scripts/verify-package-run.ts",
     "verify:packages": "tsx scripts/verify-packages-run.ts",
     "validate:docs": "tsx scripts/validate-docs-run.ts",
