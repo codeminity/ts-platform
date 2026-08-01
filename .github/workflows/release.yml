@@ -27,9 +27,13 @@ on:
 # per-package on npmjs.com, associated with this exact repo + workflow file) uses
 # that token to authenticate the publish — no long-lived NPM_TOKEN secret exists
 # in this repo, and none should ever be added back. See SECURITY.md.
+#
+# actions: read is only for downloading CI's build-output artifact below —
+# nothing here writes to Actions.
 permissions:
   contents: read
   id-token: write
+  actions: read
 
 jobs:
   release:
@@ -39,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Pin to the exact commit CI validated — without this, checkout
           # defaults to the latest commit on main, which could differ if more
@@ -50,7 +54,7 @@ jobs:
         run: corepack enable
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 24
           cache: pnpm
@@ -62,14 +66,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      # Deliberately not rebuilding here: this job holds npm publish
+      # permission (id-token: write), and re-running the build toolchain on
+      # arbitrary source with that permission active is exactly the risk
+      # OpenSSF Scorecard's "Dangerous workflow" check flags — a malicious
+      # build script could exploit it. CI already built this exact commit
+      # (and this job doesn't run at all unless that CI run succeeded), so
+      # reuse its output instead of regenerating it under elevated permissions.
+      - name: Download build artifacts from CI
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: build-output
+          path: packages
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Generate SBOMs
         run: pnpm run sbom
 
       - name: Upload SBOMs
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: sbom
           path: sbom/
