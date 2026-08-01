@@ -61,6 +61,7 @@
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.17.1",
+    "fast-check": "^4.9.0",
     "globals": "^17.8.0",
     "globby": "^16.2.2",
     "husky": "^9.1.7",
