@@ -35,3 +35,7 @@ playwright-report
 blob-report
 .stryker-tmp
 reports
+
+# Generated SBOMs
+sbom/
+results.sarif

@@ -15,7 +15,8 @@ export default defineConfig(
       '**/.stryker-tmp/**',
       '**/reports/**',
       '**/test-results/**',
-      '**/playwright-report/**'
+      '**/playwright-report/**',
+      '**/sbom/**'
     ]
   },
 
