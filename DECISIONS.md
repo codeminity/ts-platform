@@ -94,3 +94,14 @@ Stryker's `mutate` glob in [`stryker.config.ts`](./stryker.config.ts) mirrors `v
 - a hand-picked list silently misses new concurrency-critical code under an unfamiliar filename
 - a glob covering every source file stays correct as new packages are added, with no config edits
 - kept as an on-demand local command, not CI-gated, since it reruns the suite once per generated mutant — full-repo mutation testing on every push doesn't scale as package count grows
+
+---
+
+## Property-Based Testing Scope
+
+`fast-check` tests (`*.property.test.ts`, alongside the regular `*.test.ts` for the same file) are added deliberately, not everywhere — chosen for functions with a real invariant across a wide input space: boundary conditions (`shouldRetry`'s `attempt`/`retries` comparison), classification tables (status-code → event mapping), value-preserving transforms (header construction), and concurrency coalescing (`createRefreshQueue`). Orchestration/wiring code (interceptor registration, factory functions) isn't a target — there's no invariant to sweep, just sequencing already covered by example-based tests.
+
+### Reason:
+
+- example-based tests prove specific cases work; property tests prove a _rule_ holds across a range no one would hand-write examples for
+- found real issues immediately: a `Response` status-range constraint the test didn't account for, and a native `Headers`/`AxiosHeaders` whitespace-trimming behavior — both caught by generated inputs no manually-written example happened to include
