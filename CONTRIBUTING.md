@@ -97,7 +97,7 @@ pnpm changeset
 
 This prompts for the affected package(s), the semver bump (`patch` / `minor` / `major`), and a short summary — then writes a file to `.changeset/`. Commit that file as part of the PR.
 
-This is enforced in CI (`pnpm run validate:changeset`, i.e. `changeset status --since=main`) — a PR that changes a package without an accompanying changeset fails the `Changeset Required` check. If a change genuinely doesn't need a release (docs, CI, tests only), run `pnpm changeset add --empty` instead of skipping this.
+This is enforced in CI (`pnpm run validate:changeset`, i.e. `changeset status --since=origin/main`) — a PR that changes a package without an accompanying changeset fails the `Changeset Required` check. If a change genuinely doesn't need a release (docs, CI, tests only), run `pnpm changeset add --empty` instead of skipping this.
 
 Skip this only for changes that can't affect a published package: docs-only edits, CI/tooling config, internal test-only changes with no behavior implication. When unsure, add one — an unnecessary changeset is a much smaller problem than a shipped fix nobody ever gets.
 
