@@ -31,7 +31,7 @@ describe('findExtraTsconfigs', () => {
       'packages/request/axios/e2e/tsconfig.json',
       'packages/request/fetch/e2e/tsconfig.json',
       'scripts/tsconfig.json',
-      'stryker.tsconfig.json'
+      'tsconfig.tooling.json'
     ])
   })
 
@@ -40,7 +40,7 @@ describe('findExtraTsconfigs', () => {
 
     const result = await findExtraTsconfigs()
 
-    expect(result).toEqual(['e2e/tsconfig.json', 'scripts/tsconfig.json', 'stryker.tsconfig.json'])
+    expect(result).toEqual(['e2e/tsconfig.json', 'scripts/tsconfig.json', 'tsconfig.tooling.json'])
   })
 })
 

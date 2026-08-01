@@ -3,7 +3,7 @@ import { globby } from 'globby'
 import { runCommand } from './lib/run-command'
 
 // Areas that always exist, regardless of how many packages there are.
-const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'stryker.tsconfig.json']
+const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'tsconfig.tooling.json']
 
 /**
  * Finds every tsconfig outside `turbo run typecheck`'s reach (each package's

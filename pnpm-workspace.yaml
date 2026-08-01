@@ -11,3 +11,6 @@ overrides:
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - lint-staged@17.3.0
