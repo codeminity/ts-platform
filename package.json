@@ -37,6 +37,7 @@
     "validate:docs": "tsx scripts/validate-docs-run.ts",
     "validate:deps": "tsx scripts/validate-deps-run.ts",
     "validate:socket": "socket ci",
+    "validate:changeset": "changeset status --since=main",
     "test:e2e": "playwright test --config=e2e/browser/playwright.config.ts",
     "test:mutation": "tsx node_modules/@stryker-mutator/core/bin/stryker.js run stryker.config.ts"
   },
