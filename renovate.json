@@ -11,6 +11,11 @@
     {
       "matchManagers": ["github-actions"],
       "groupName": "github actions"
+    },
+    {
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }
