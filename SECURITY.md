@@ -75,3 +75,9 @@ Packages are published to npm exclusively via [`.github/workflows/release.yml`](
 - **Socket.dev:** every push and pull request is scanned for supply-chain risk in the dependency tree (`pnpm run validate:socket` locally, gated in CI) — install scripts, obfuscated code, typosquatting, and similar signals on every direct and transitive dependency.
 - **CodeQL:** static analysis for common vulnerability classes runs on every push/PR and on a weekly schedule, independent of the Socket.dev dependency-focused scan.
 - **Renovate:** checks weekly for outdated/vulnerable dependencies (both npm packages and GitHub Actions) across the whole pnpm workspace and opens a PR per update — grouped by minor/patch to reduce noise, with a Dependency Dashboard issue tracking everything in one place. Chosen over Dependabot for its more reliable monorepo/workspace grouping at package-count scale. PRs go through the same CI gates as any other PR; nothing merges automatically.
+- **OpenSSF Scorecard:** runs on every push to `main` and weekly, scoring the repo's own security posture (branch protection, CI presence, dependency pinning, and similar signals) — published to the public Scorecard API and uploaded to this repo's Code Scanning tab.
+- **Secret scanning:** GitHub's secret scanning and push protection are enabled on this repository — a commit containing a recognizable credential is blocked before it's ever pushed, not just flagged after the fact.
+
+## Software Bill of Materials
+
+Every release generates a [CycloneDX](https://cyclonedx.org/) SBOM per package (`pnpm run sbom`, production dependencies only — devDependencies aren't part of what a consumer installs), uploaded as a workflow artifact on the `Release` run. Consumers who need to verify exactly what's inside a given version of `@codeminity/axios`, `@codeminity/fetch`, or `@codeminity/request-core` can download it from that run instead of reconstructing the dependency tree themselves.
