@@ -74,3 +74,4 @@ Packages are published to npm exclusively via [`.github/workflows/release.yml`](
 
 - **Socket.dev:** every push and pull request is scanned for supply-chain risk in the dependency tree (`pnpm run validate:socket` locally, gated in CI) — install scripts, obfuscated code, typosquatting, and similar signals on every direct and transitive dependency.
 - **CodeQL:** static analysis for common vulnerability classes runs on every push/PR and on a weekly schedule, independent of the Socket.dev dependency-focused scan.
+- **Dependabot:** checks weekly for outdated/vulnerable dependencies (both npm packages and GitHub Actions) and opens a PR per update — grouped by minor/patch to reduce noise, security updates surfaced individually. PRs go through the same CI gates as any other PR; nothing merges automatically.
