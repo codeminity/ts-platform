@@ -7,6 +7,9 @@ on:
   schedule:
     # Weekly on Saturdays.
     - cron: '30 1 * * 6'
+  # Lets us check current state on demand — e.g. after a branch-protection
+  # setting change, which has no push event of its own to react to.
+  workflow_dispatch:
 
 permissions:
   contents: read
