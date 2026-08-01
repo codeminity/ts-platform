@@ -7,8 +7,6 @@ export default {
   mutate: [
     'packages/*/*/src/**/*.ts',
     '!packages/*/*/src/**/*.test.ts',
-    '!packages/*/*/src/**/*.spec.ts',
-    '!packages/*/*/src/**/*.d.ts',
     '!packages/*/*/src/**/index.ts',
     '!packages/*/*/src/**/*.interface.ts',
     '!packages/*/*/src/**/*.type.ts',
