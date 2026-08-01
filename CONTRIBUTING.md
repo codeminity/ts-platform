@@ -79,6 +79,8 @@ Use conventional commits:
 - refactor: simplify async pipeline
 - chore: update tooling
 
+This is enforced mechanically, not just by reviewer discipline: a `commit-msg` git hook (Husky + commitlint, `commitlint.config.ts`) rejects a non-conventional commit message locally, before it's ever pushed. A `pre-commit` hook (`lint-staged.config.ts`) also runs ESLint and Prettier on staged files. Both install automatically on `pnpm install` (the `prepare` script) — no manual setup needed.
+
 Avoid:
 
 - "fix stuff"

@@ -9,5 +9,5 @@
     "types": ["node"]
   },
 
-  "include": ["stryker.config.ts"]
+  "include": ["stryker.config.ts", "commitlint.config.ts", "lint-staged.config.ts"]
 }

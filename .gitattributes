@@ -18,3 +18,4 @@
 # Git / tooling
 .editorconfig text eol=lf
 .gitignore text eol=lf
+.husky/* text eol=lf
