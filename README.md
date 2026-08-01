@@ -49,7 +49,7 @@ No assumptions about environment, framework, or deployment target.
 | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | [`@codeminity/request-core`](./packages/request/core) | [![npm](https://img.shields.io/npm/v/@codeminity/request-core.svg)](https://www.npmjs.com/package/@codeminity/request-core) | Framework-agnostic request lifecycle engine (auth, refresh coordination, retry orchestration). |
 | [`@codeminity/axios`](./packages/request/axios)       | [![npm](https://img.shields.io/npm/v/@codeminity/axios.svg)](https://www.npmjs.com/package/@codeminity/axios)               | Axios adapter built on top of `@codeminity/request-core`.                                      |
-| [`@codeminity/fetch`](./packages/request/fetch)       | [![npm](https://img.shields.io/npm/v/@codeminity/fetch.svg)](https://www.npmjs.com/package/@codeminity/fetch)               | Native `fetch` adapter built on top of `@codeminity/request-core`.                              |
+| [`@codeminity/fetch`](./packages/request/fetch)       | [![npm](https://img.shields.io/npm/v/@codeminity/fetch.svg)](https://www.npmjs.com/package/@codeminity/fetch)               | Native `fetch` adapter built on top of `@codeminity/request-core`.                             |
 
 Each package has its own README with installation instructions, a quick start, and full documentation.
 
@@ -78,6 +78,7 @@ Packages may depend on other packages through their public APIs when composition
 - TurboRepo for orchestration
 - TypeScript for type safety
 - Vitest for testing
+- fast-check for property-based testing
 - Stryker for mutation testing
 - Playwright for real-browser end-to-end testing
 - dependency-cruiser for architecture-boundary enforcement

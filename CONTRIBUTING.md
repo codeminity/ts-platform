@@ -55,6 +55,15 @@ The `core → adapter` direction and circular dependencies aren't just documente
   catch that already swallows the same failure) — mark it with
   `// Stryker disable next-line <Mutator>: <reason>` instead of writing a
   test that can't actually observe a difference
+- functions with a real invariant across a wide input space (boundary
+  conditions, classification tables, value-preserving transforms,
+  concurrency coalescing) get a property-based test with `fast-check`
+  alongside the regular one, named `<file>.property.test.ts` — see
+  [DECISIONS.md](./DECISIONS.md#property-based-testing-scope). This
+  doesn't conflict with "no flaky tests": a failing property means the
+  _rule_ doesn't hold, not that the test infrastructure is unreliable —
+  `fast-check` shrinks every failure to a minimal, reproducible
+  counterexample
 
 ---
 
