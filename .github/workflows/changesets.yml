@@ -16,6 +16,11 @@ jobs:
     # It will always legitimately show package changes with no changeset
     # left to find — that's expected, not a violation. See
     # CONTRIBUTING.md#releasing-changesets.
+    #
+    # This name is reserved exclusively for that purpose and nothing checks
+    # its actual contents here — it must be deleted right after merge and
+    # never reused for anything else, or this exemption would silently
+    # cover unrelated changes too.
     if: github.head_ref != 'release/version-packages'
 
     steps:
