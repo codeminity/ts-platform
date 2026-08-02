@@ -49,6 +49,9 @@ export interface EventCallbacks<TEvent, TOutcome> {
 export function handleRefreshToken(config: AuthConfig, refreshQueue: RefreshQueue): Promise<void>;
 
 // @public
+export function isInsecureUrl(url: string): boolean;
+
+// @public
 export interface RefreshQueue {
     run(task: () => Promise<void>): Promise<void>;
 }
@@ -67,6 +70,9 @@ export const TokenModeEnum: {
     readonly JWT: "JWT";
     readonly COOKIE: "COOKIE";
 };
+
+// @public
+export function warnIfInsecureUrl(url: string): void;
 
 // (No @packageDocumentation comment for this package)
 
