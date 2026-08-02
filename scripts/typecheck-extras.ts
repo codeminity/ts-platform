@@ -7,13 +7,16 @@ const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'tsconfig
 
 /**
  * Finds every tsconfig outside `turbo run typecheck`'s reach (each package's
- * own src/), so a new package's e2e/ folder is covered automatically —
- * nothing here needs updating when one is added.
+ * own src/), so a new package's e2e/ or bench/ folder is covered
+ * automatically — nothing here needs updating when one is added.
  */
 export async function findExtraTsconfigs(): Promise<string[]> {
-  const packageE2eTsconfigs = await globby('packages/*/*/e2e/tsconfig.json')
+  const [packageE2eTsconfigs, packageBenchTsconfigs] = await Promise.all([
+    globby('packages/*/*/e2e/tsconfig.json'),
+    globby('packages/*/*/bench/tsconfig.json')
+  ])
 
-  return [...FIXED_TSCONFIGS, ...packageE2eTsconfigs].sort()
+  return [...FIXED_TSCONFIGS, ...packageE2eTsconfigs, ...packageBenchTsconfigs].sort()
 }
 
 export async function typecheckExtras(): Promise<void> {

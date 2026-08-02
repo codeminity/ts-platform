@@ -35,3 +35,6 @@ reports
 # Generated SBOMs
 sbom/
 results.sarif
+
+# Local benchmark baseline (machine-specific timing, not meant to be shared)
+bench-baseline.json
