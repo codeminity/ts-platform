@@ -98,6 +98,23 @@ Avoid:
 
 ---
 
+## Developer Certificate of Origin (DCO)
+
+By contributing, you certify that you wrote the contribution yourself, or
+otherwise have the right to submit it under the project's license, per the
+[Developer Certificate of Origin](https://developercertificate.org/).
+
+Sign off every commit to confirm this:
+
+```bash
+git commit -s -m "feat: add retry strategy"
+```
+
+`-s` appends a `Signed-off-by: Your Name <your.email@example.com>` trailer
+using your configured git identity — no separate CLA or account needed.
+
+---
+
 ## Releasing (Changesets)
 
 Every PR that changes the runtime behavior, public API, or fixes a bug in any package under `packages/` **must** include a changeset:
