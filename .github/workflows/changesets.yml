@@ -10,6 +10,13 @@ jobs:
   changesets:
     name: Changeset Required
     runs-on: ubuntu-latest
+    # A `release/version-packages` PR is the *output* of consuming
+    # changesets: `changeset version` bumps package.json/CHANGELOG.md and
+    # deletes every .changeset/*.md file it consumed in the same commit.
+    # It will always legitimately show package changes with no changeset
+    # left to find — that's expected, not a violation. See
+    # CONTRIBUTING.md#releasing-changesets.
+    if: github.head_ref != 'release/version-packages'
 
     steps:
       - name: Checkout repository
