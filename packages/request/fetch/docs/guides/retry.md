@@ -114,14 +114,14 @@ const config: RetryConfig = {
 
 General rule of thumb for classification:
 
-| Situation                   | Retry?                                    |
-| --------------------------- | ------------------------------------------ |
-| Network error / no response | Usually yes                               |
-| Timeout (`AbortSignal.timeout()`) | Usually yes                         |
-| `408 Request Timeout`       | Yes                                       |
-| `429 Too Many Requests`     | Yes, respecting backoff/`Retry-After`     |
-| `500/502/503/504`           | Often yes, if the operation is idempotent |
-| `400/401/403/404/409/422`   | No — these are not transient              |
+| Situation                         | Retry?                                    |
+| --------------------------------- | ----------------------------------------- |
+| Network error / no response       | Usually yes                               |
+| Timeout (`AbortSignal.timeout()`) | Usually yes                               |
+| `408 Request Timeout`             | Yes                                       |
+| `429 Too Many Requests`           | Yes, respecting backoff/`Retry-After`     |
+| `500/502/503/504`                 | Often yes, if the operation is idempotent |
+| `400/401/403/404/409/422`         | No — these are not transient              |
 
 ## Idempotency: What's Safe to Retry
 

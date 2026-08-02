@@ -33,7 +33,12 @@ export default defineConfig({
       }
     },
 
-    reporters: ['dot']
+    reporters: ['dot'],
+
+    benchmark: {
+      include: ['packages/**/bench/*.bench.ts'],
+      exclude: ['**/node_modules/**', '**/dist/**']
+    }
   },
 
   resolve: {

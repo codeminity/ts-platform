@@ -96,7 +96,7 @@ const apiFetch = createFetch({
 })
 ```
 
-`shouldRetry` runs *before* the retried attempt re-applies auth, so setting `expired = true` there is what makes the next attempt see `isTokenExpired() === true` and actually call `refreshToken`. `onEvent`/`onError` won't help here — they only fire on the final outcome of the whole retry sequence, not between individual attempts.
+`shouldRetry` runs _before_ the retried attempt re-applies auth, so setting `expired = true` there is what makes the next attempt see `isTokenExpired() === true` and actually call `refreshToken`. `onEvent`/`onError` won't help here — they only fire on the final outcome of the whole retry sequence, not between individual attempts.
 
 ### Proactive Refresh (before expiry)
 

@@ -26,7 +26,10 @@ const PACKAGE_MANIFEST = JSON.stringify({
   }
 })
 
-function mockGlobby(docFiles: string[], manifestFiles: string[] = ['packages/request/core/package.json']) {
+function mockGlobby(
+  docFiles: string[],
+  manifestFiles: string[] = ['packages/request/core/package.json']
+) {
   mockedGlobby.mockImplementation((patterns: unknown) => {
     const list = Array.isArray(patterns) ? patterns : [patterns]
     const isManifestGlob = list.some((pattern) => String(pattern).includes('package.json'))
@@ -99,7 +102,9 @@ describe('validateDocs', () => {
 
     await expect(validateDocs()).resolves.toBeUndefined()
 
-    const tsconfigWrite = writeSpy.mock.calls.find(([file]) => String(file).endsWith('tsconfig.json'))
+    const tsconfigWrite = writeSpy.mock.calls.find(([file]) =>
+      String(file).endsWith('tsconfig.json')
+    )
     const tsconfigContent = tsconfigWrite?.[1]
     const tsconfig = JSON.parse(typeof tsconfigContent === 'string' ? tsconfigContent : '') as {
       compilerOptions: { paths: Record<string, string[]> }
@@ -177,7 +182,7 @@ describe('validateDocs', () => {
 
   it('does not add export {} when the block already has an import', async () => {
     mockGlobby(['README.md'])
-    mockReadFile(["```ts", "import axios from '@codeminity/axios'", '```'].join('\n'))
+    mockReadFile(['```ts', "import axios from '@codeminity/axios'", '```'].join('\n'))
 
     const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
 

@@ -125,7 +125,7 @@ Both packages are adapters over the same `@codeminity/request-core` lifecycle en
 
 They deliberately do **not** share transport-specific code with each other (retry config shapes, error event classification, header-attachment helpers are each implemented locally per adapter) — only `request-core`'s transport-agnostic primitives (`handleRefreshToken`, `createRefreshQueue`, `delay`, `TokenModeEnum`, `AuthConfig`, `RefreshQueue`) are shared. Whether any of the adapter-local logic should be promoted into `request-core` is a deliberate, separate evaluation (tracked in the project roadmap), not something either adapter should do unilaterally.
 
-The two packages differ in one fundamental way worth calling out explicitly: `@codeminity/axios` throws on non-2xx responses (matching Axios's own contract); `@codeminity/fetch` resolves with the `Response` regardless of status (matching native `fetch`'s own contract). Each adapter is faithful to *its own* transport's actual behavior rather than converging on one shared error contract — see [ADR-001](./DECISIONS.md#adr-001-mirror-native-fetchs-resolvethrow-contract-exactly).
+The two packages differ in one fundamental way worth calling out explicitly: `@codeminity/axios` throws on non-2xx responses (matching Axios's own contract); `@codeminity/fetch` resolves with the `Response` regardless of status (matching native `fetch`'s own contract). Each adapter is faithful to _its own_ transport's actual behavior rather than converging on one shared error contract — see [ADR-001](./DECISIONS.md#adr-001-mirror-native-fetchs-resolvethrow-contract-exactly).
 
 ## Non-Goals
 

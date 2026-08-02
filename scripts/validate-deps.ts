@@ -36,6 +36,8 @@ export async function validateDeps(): Promise<void> {
   })
 
   if (result.exitCode !== 0) {
-    throw new Error(typeof result.output === 'string' ? result.output : JSON.stringify(result.output))
+    throw new Error(
+      typeof result.output === 'string' ? result.output : JSON.stringify(result.output)
+    )
   }
 }

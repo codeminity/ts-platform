@@ -43,7 +43,10 @@
     "release-notes": "tsx scripts/release-notes-run.ts",
     "sbom": "pnpm sbom --sbom-format cyclonedx --prod --split --out sbom/%s.cdx.json",
     "test:e2e": "playwright test --config=e2e/browser/playwright.config.ts",
-    "test:mutation": "tsx node_modules/@stryker-mutator/core/bin/stryker.js run stryker.config.ts"
+    "test:mutation": "tsx node_modules/@stryker-mutator/core/bin/stryker.js run stryker.config.ts",
+    "bench": "vitest bench --run",
+    "bench:baseline": "vitest bench --run --outputJson bench-baseline.json",
+    "bench:compare": "vitest bench --run --compare bench-baseline.json"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
@@ -58,7 +61,7 @@
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
     "@types/node": "^26.1.2",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "4.1.10",
     "dependency-cruiser": "^18.1.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.8.0",
@@ -78,6 +81,6 @@
     "turbo": "^2.10.7",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
-    "vitest": "^4.1.10"
+    "vitest": "4.1.10"
   }
 }

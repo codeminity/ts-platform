@@ -17,25 +17,30 @@ const mockedGlobby = vi.mocked(globby)
 const mockedRunCommand = vi.mocked(runCommand)
 
 describe('findExtraTsconfigs', () => {
-  it('combines the fixed tsconfigs with discovered per-package e2e tsconfigs', async () => {
-    mockedGlobby.mockResolvedValue([
-      'packages/request/fetch/e2e/tsconfig.json',
-      'packages/request/axios/e2e/tsconfig.json'
-    ])
+  it('combines the fixed tsconfigs with discovered per-package e2e and bench tsconfigs', async () => {
+    mockedGlobby.mockImplementation((pattern) =>
+      Promise.resolve(
+        pattern === 'packages/*/*/e2e/tsconfig.json'
+          ? ['packages/request/fetch/e2e/tsconfig.json', 'packages/request/axios/e2e/tsconfig.json']
+          : ['packages/request/core/bench/tsconfig.json']
+      )
+    )
 
     const result = await findExtraTsconfigs()
 
     expect(mockedGlobby).toHaveBeenCalledWith('packages/*/*/e2e/tsconfig.json')
+    expect(mockedGlobby).toHaveBeenCalledWith('packages/*/*/bench/tsconfig.json')
     expect(result).toEqual([
       'e2e/tsconfig.json',
       'packages/request/axios/e2e/tsconfig.json',
+      'packages/request/core/bench/tsconfig.json',
       'packages/request/fetch/e2e/tsconfig.json',
       'scripts/tsconfig.json',
       'tsconfig.tooling.json'
     ])
   })
 
-  it('returns just the fixed tsconfigs when no package has an e2e folder', async () => {
+  it('returns just the fixed tsconfigs when no package has an e2e or bench folder', async () => {
     mockedGlobby.mockResolvedValue([])
 
     const result = await findExtraTsconfigs()
@@ -46,7 +51,13 @@ describe('findExtraTsconfigs', () => {
 
 describe('typecheckExtras', () => {
   it('runs tsc for every discovered tsconfig', async () => {
-    mockedGlobby.mockResolvedValue(['packages/request/axios/e2e/tsconfig.json'])
+    mockedGlobby.mockImplementation((pattern) =>
+      Promise.resolve(
+        pattern === 'packages/*/*/e2e/tsconfig.json'
+          ? ['packages/request/axios/e2e/tsconfig.json']
+          : []
+      )
+    )
     mockedRunCommand.mockResolvedValue(undefined)
 
     await typecheckExtras()

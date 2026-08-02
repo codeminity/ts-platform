@@ -30,7 +30,7 @@ const apiFetch = createFetch({
 })
 ```
 
-Events cover network failures, timeouts, aborts, and classified HTTP status errors — see the full table in the [README](../../README.md#available-events). Unlike `@codeminity/axios`'s `AxiosError`, the second argument here is a `FetchOutcome`: a `response` (possibly not `ok`) *or* an `error` (a thrown value), never both — plus `input`/`init`, the original request that produced this outcome.
+Events cover network failures, timeouts, aborts, and classified HTTP status errors — see the full table in the [README](../../README.md#available-events). Unlike `@codeminity/axios`'s `AxiosError`, the second argument here is a `FetchOutcome`: a `response` (possibly not `ok`) _or_ an `error` (a thrown value), never both — plus `input`/`init`, the original request that produced this outcome.
 
 ## Building a Custom Error Pipeline
 
