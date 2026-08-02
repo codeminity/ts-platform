@@ -99,6 +99,26 @@ Every published entry point has a brotli size limit enforced in CI (`pnpm run va
 
 ---
 
+## Benchmarks
+
+Performance-sensitive code (refresh queue concurrency, auth-attach overhead, retry decisions and orchestration, error classification, event dispatch) has [Vitest's built-in `bench()`](https://vitest.dev/guide/features.html#benchmarking) benchmarks colocated in each package's `bench/` folder, named `<file>.bench.ts` (Vitest's benchmarking runs on [tinybench](https://github.com/tinylibs/tinybench) under the hood — no separate benchmarking dependency or custom runner needed). Run all of them with:
+
+```bash
+pnpm run bench
+```
+
+Before making a performance-sensitive change, save a baseline; after, compare against it:
+
+```bash
+pnpm run bench:baseline   # writes bench-baseline.json (gitignored, machine-specific)
+# ...make your change...
+pnpm run bench:compare    # shows each result next to the baseline, e.g. "[0.85x] ⇓"
+```
+
+`--compare` is visual only — it annotates results, it does **not** fail the command on a regression, and neither `bench` nor `bench:compare` is wired into CI: shared runners are too noisy for benchmark numbers to be a meaningful pass/fail gate. Judge a regression by eye and mention the numbers in the PR if something meaningful moved.
+
+---
+
 ## Commit Convention
 
 Use conventional commits:
