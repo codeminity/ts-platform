@@ -1,0 +1,23 @@
+[
+  {
+    "name": "@codeminity/request-core",
+    "path": "packages/request/core/dist/index.js",
+    "limit": "1 kB"
+  },
+  {
+    "name": "@codeminity/request-core/test-utils",
+    "path": "packages/request/core/dist/test-utils.js",
+    "ignore": ["vitest"],
+    "limit": "1 kB"
+  },
+  {
+    "name": "@codeminity/axios",
+    "path": "packages/request/axios/dist/index.js",
+    "limit": "25 kB"
+  },
+  {
+    "name": "@codeminity/fetch",
+    "path": "packages/request/fetch/dist/index.js",
+    "limit": "2 kB"
+  }
+]
