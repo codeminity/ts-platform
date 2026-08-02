@@ -115,6 +115,8 @@ Packages may depend on other packages through their public APIs when composition
 - [Decisions](./DECISIONS.md)
 - [Contributing](./CONTRIBUTING.md)
 - [Security](./SECURITY.md)
+- [Governance](./GOVERNANCE.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ---
 
