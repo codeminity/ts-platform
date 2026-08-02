@@ -69,6 +69,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Installs gitsign and configures git (tag.gpgsign true, gpg.format
+      # x509) to sign every tag we create below. Keyless: gitsign uses this
+      # job's own GitHub Actions OIDC token (the same `id-token: write`
+      # permission already granted above for npm) to get a short-lived
+      # signing certificate from Sigstore's Fulcio — there is no private
+      # signing key to store as a secret, consistent with the OIDC-only
+      # approach used for npm publishing. See SECURITY.md.
+      - name: Setup gitsign
+        uses: chainguard-dev/actions/setup-gitsign@b2555de0cf9724fb9b49d050ff18bd1f49562ba7 # v1.6.29
+
       # Deliberately not rebuilding here: this job holds npm publish
       # permission (id-token: write), and re-running the build toolchain on
       # arbitrary source with that permission active is exactly the risk
@@ -143,7 +153,7 @@ jobs:
               continue
             fi
 
-            git tag -a "$tag" -m "$tag"
+            git tag -s "$tag" -m "$tag"
             git push origin "$tag"
 
             notes=$(npx tsx scripts/release-notes-run.ts "$tag")
