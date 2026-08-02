@@ -108,8 +108,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # `socket ci` intermittently fails with "Unexpected error reading
+      # response text" on Socket's own full-scans report endpoint
+      # (unrelated to any real finding — confirmed by re-running the exact
+      # same commit and seeing it pass). Retry a few times before actually
+      # failing the build, since there's no CLI flag to skip the report
+      # step that triggers it.
       - name: Socket Security Scan
-        run: pnpm run validate:socket
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm run validate:socket; then
+              exit 0
+            fi
+
+            echo "Socket scan attempt $attempt failed."
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "Retrying in 30s..."
+              sleep 30
+            fi
+          done
+
+          echo "Socket scan failed after 3 attempts."
+          exit 1
         env:
           SOCKET_CLI_API_TOKEN: ${{ secrets.SOCKET_CLI_API_TOKEN }}
 
