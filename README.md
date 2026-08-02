@@ -2,6 +2,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/codeminity/ts-platform/ci.yml?label=CI)](https://github.com/codeminity/ts-platform/actions)
 [![license](https://img.shields.io/npm/l/%40codeminity%2Faxios.svg)](./LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13923/badge)](https://www.bestpractices.dev/projects/13923)
 
 ts-platform is a universal, modular monorepo platform within the Codeminity ecosystem.
 
@@ -117,6 +118,7 @@ Packages may depend on other packages through their public APIs when composition
 - [Security](./SECURITY.md)
 - [Governance](./GOVERNANCE.md)
 - [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Roadmap](./ROADMAP.md)
 
 ---
 
