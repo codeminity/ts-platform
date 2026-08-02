@@ -1,5 +1,9 @@
 # Security Policy
 
+See also [ASSURANCE_CASE.md](./ASSURANCE_CASE.md) for the threat model,
+trust boundaries, and the reasoning behind the security decisions
+summarized in this document.
+
 ## Supported Versions
 
 Only the latest release of each package in `ts-platform` is supported.
