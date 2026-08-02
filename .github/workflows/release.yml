@@ -30,8 +30,11 @@ on:
 #
 # actions: read is only for downloading CI's build-output artifact below —
 # nothing here writes to Actions.
+#
+# contents: write is only used to push the git tags created after a
+# successful publish (below) — this workflow never pushes to a branch.
 permissions:
-  contents: read
+  contents: write
   id-token: write
   actions: read
 
@@ -101,6 +104,48 @@ jobs:
       # NPM_CONFIG_PROVENANCE additionally attests the published tarball back to
       # this exact commit/workflow run (visible as the "Provenance" badge on npm).
       - name: Release
-        run: pnpm release
+        id: release
+        run: |
+          output=$(pnpm release)
+          echo "$output"
+          {
+            echo "publish_output<<PUBLISH_OUTPUT_EOF"
+            echo "$output"
+            echo "PUBLISH_OUTPUT_EOF"
+          } >> "$GITHUB_OUTPUT"
         env:
           NPM_CONFIG_PROVENANCE: true
+
+      # `changeset publish` prints a "New tag: <name>@<version>" line per
+      # package it actually published (the same signal changesets/action
+      # itself parses to create GitHub releases). We can't use that action
+      # directly — it wants a long-lived NPM_TOKEN, which this repo
+      # deliberately doesn't have (OIDC Trusted Publisher instead, see
+      # SECURITY.md) — so replicate just the tagging + release step here.
+      - name: Tag & release published packages
+        env:
+          PUBLISH_OUTPUT: ${{ steps.release.outputs.publish_output }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          tags=$(echo "$PUBLISH_OUTPUT" | grep 'New tag:' | sed -E 's/.*New tag:[[:space:]]*//' || true)
+
+          if [ -z "$tags" ]; then
+            echo "No packages published in this run — nothing to tag."
+            exit 0
+          fi
+
+          echo "$tags" | while IFS= read -r tag; do
+            if git rev-parse "$tag" >/dev/null 2>&1; then
+              echo "Tag $tag already exists, skipping."
+              continue
+            fi
+
+            git tag -a "$tag" -m "$tag"
+            git push origin "$tag"
+
+            notes=$(npx tsx scripts/release-notes-run.ts "$tag")
+            gh release create "$tag" --title "$tag" --notes "$notes"
+          done
