@@ -139,7 +139,7 @@ const users: unknown = await res.json()
 
 ### Responsibility Separation
 
-`@codeminity/request-core` owns *what* the lifecycle rules are (when to refresh, how retries are coordinated). `@codeminity/fetch` owns *how* those rules apply to a native `fetch` call (attaching a header, reading `response.status`, re-invoking `fetch`).
+`@codeminity/request-core` owns _what_ the lifecycle rules are (when to refresh, how retries are coordinated). `@codeminity/fetch` owns _how_ those rules apply to a native `fetch` call (attaching a header, reading `response.status`, re-invoking `fetch`).
 
 ### Adapter Philosophy
 
@@ -344,25 +344,25 @@ const apiFetch = createFetch({
 
 ### Available Events
 
-| Event                    | Trigger                                     |
-| ------------------------- | -------------------------------------------- |
-| `network`                 | Thrown `TypeError` (connection/DNS/CORS failure) |
-| `timeout`                 | `AbortSignal.timeout()` fired                 |
-| `abort`                   | `AbortController.abort()` was called manually |
-| `bad_request`              | HTTP 400                                      |
-| `unauthorized`             | HTTP 401                                      |
-| `forbidden`                | HTTP 403                                      |
-| `not_found`                | HTTP 404                                      |
-| `conflict`                 | HTTP 409                                      |
-| `unprocessable_entity`     | HTTP 422                                      |
-| `too_many_requests`        | HTTP 429                                      |
-| `internal_error`           | HTTP 500                                      |
-| `bad_gateway`              | HTTP 502                                      |
-| `service_unavailable`      | HTTP 503                                      |
-| `gateway_timeout`          | HTTP 504                                      |
-| `auth_refresh_failed`      | `refreshToken()` threw                        |
-| `auth_token_failed`        | `getToken()` threw                            |
-| `unknown`                  | Anything else                                 |
+| Event                  | Trigger                                          |
+| ---------------------- | ------------------------------------------------ |
+| `network`              | Thrown `TypeError` (connection/DNS/CORS failure) |
+| `timeout`              | `AbortSignal.timeout()` fired                    |
+| `abort`                | `AbortController.abort()` was called manually    |
+| `bad_request`          | HTTP 400                                         |
+| `unauthorized`         | HTTP 401                                         |
+| `forbidden`            | HTTP 403                                         |
+| `not_found`            | HTTP 404                                         |
+| `conflict`             | HTTP 409                                         |
+| `unprocessable_entity` | HTTP 422                                         |
+| `too_many_requests`    | HTTP 429                                         |
+| `internal_error`       | HTTP 500                                         |
+| `bad_gateway`          | HTTP 502                                         |
+| `service_unavailable`  | HTTP 503                                         |
+| `gateway_timeout`      | HTTP 504                                         |
+| `auth_refresh_failed`  | `refreshToken()` threw                           |
+| `auth_token_failed`    | `getToken()` threw                               |
+| `unknown`              | Anything else                                    |
 
 Events fire once, on the attempt that ends the retry loop — not on every intermediate retry.
 
@@ -387,7 +387,7 @@ This is classified as the `'timeout'` event (not `'abort'`) and is retried by de
 ### Available Options
 
 | Option       | Type      | Description                                   |
-| ------------ | --------- | ---------------------------------------------- |
+| ------------ | --------- | --------------------------------------------- |
 | `skipAuth`   | `boolean` | Skip authentication handling for this request |
 | `retries`    | `number`  | Maximum retry attempts for this request       |
 | `retryDelay` | `number`  | Delay between retry attempts (ms)             |
@@ -428,11 +428,7 @@ Returns `(input: RequestInfo | URL, init?: FetchRequestInit) => Promise<Response
 ### Exports
 
 ```ts
-import {
-  createFetch,
-  TokenModeEnum,
-  ErrorEventEnum
-} from '@codeminity/fetch'
+import { createFetch, TokenModeEnum, ErrorEventEnum } from '@codeminity/fetch'
 
 import type {
   AuthConfig,

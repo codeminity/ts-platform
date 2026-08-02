@@ -27,7 +27,7 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 
 **Context:** `@codeminity/axios` has a `timeout` option (backed by Axios's own `ECONNABORTED` code) distinct from user-initiated cancellation. Native `fetch` has no built-in `timeout` option, but the platform already provides `AbortSignal.timeout(ms)`, which a caller can pass as `init.signal` to get the same effect, producing a `DOMException` named `TimeoutError` when it fires (distinct from a manually-triggered `AbortController.abort()`, which produces `AbortError`).
 
-**Decision:** No `timeout` config field is added to `Config`/`RequestConfig`. Instead, `src/errors/outcome-to-event.ts` classifies the abort *reason*: a `TimeoutError` DOMException maps to the `'timeout'` event, an `AbortError` DOMException maps to `'abort'` — the same two events axios exposes, with zero new configuration surface. Callers who want a per-request or per-instance timeout pass `signal: AbortSignal.timeout(ms)` themselves (or merge it with their own signal).
+**Decision:** No `timeout` config field is added to `Config`/`RequestConfig`. Instead, `src/errors/outcome-to-event.ts` classifies the abort _reason_: a `TimeoutError` DOMException maps to the `'timeout'` event, an `AbortError` DOMException maps to `'abort'` — the same two events axios exposes, with zero new configuration surface. Callers who want a per-request or per-instance timeout pass `signal: AbortSignal.timeout(ms)` themselves (or merge it with their own signal).
 
 **Consequences:** Consumers coming from `@codeminity/axios` need to know there's no `timeout` option here — the migration is "pass `AbortSignal.timeout(ms)` as `init.signal`" rather than "pass `timeout: ms`" — should be called out explicitly in the README and any future migration guide. The upside: this package never has to duplicate or fight with the platform's own timeout primitive, and correctly composes with a caller's own `AbortController` for manual cancellation.
 
@@ -45,7 +45,7 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 
 ## ADR-004: Streaming request bodies + retries is a documented limitation, not solved
 
-**Context:** If `init.body` is a `ReadableStream`, the Fetch spec consumes it after one `fetch()` call — a second `fetch()` call reusing the same `init.body` on retry would throw. This only matters when a caller both streams a request body *and* opts into `retries` (off by default).
+**Context:** If `init.body` is a `ReadableStream`, the Fetch spec consumes it after one `fetch()` call — a second `fetch()` call reusing the same `init.body` on retry would throw. This only matters when a caller both streams a request body _and_ opts into `retries` (off by default).
 
 **Decision:** This package does not buffer or clone stream bodies to make them retry-safe. It's documented as a known limitation in the README: don't combine a `ReadableStream` request body with `retries > 0`.
 

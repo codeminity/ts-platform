@@ -43,8 +43,7 @@ describe('validateDeps', () => {
     await validateDeps()
 
     const call = cruise.mock.calls[0] as
-      | [string[], { validate?: boolean; ruleSet?: { forbidden?: { name?: string }[] } }]
-      | undefined
+      [string[], { validate?: boolean; ruleSet?: { forbidden?: { name?: string }[] } }] | undefined
 
     expect(call?.[0]).toEqual(['packages'])
     expect(call?.[1].validate).toBe(true)
