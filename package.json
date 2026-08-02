@@ -46,7 +46,8 @@
     "test:mutation": "tsx node_modules/@stryker-mutator/core/bin/stryker.js run stryker.config.ts",
     "bench": "vitest bench --run",
     "bench:baseline": "vitest bench --run --outputJson bench-baseline.json",
-    "bench:compare": "vitest bench --run --compare bench-baseline.json"
+    "bench:compare": "vitest bench --run --compare bench-baseline.json",
+    "check": "tsx scripts/full-check-run.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
