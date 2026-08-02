@@ -6,6 +6,20 @@ ts-platform is a modular monorepo of independent packages within the Codeminity 
 
 ---
 
+## Development Setup
+
+```bash
+git clone https://github.com/codeminity/ts-platform.git
+cd ts-platform
+corepack enable
+pnpm install
+pnpm test
+```
+
+`pnpm install` also sets up the Husky git hooks (commit-msg, pre-commit) automatically — no separate setup step needed. The only prerequisites are Node.js `^22.13.0 || >=24.0.0` and pnpm, whose exact version is pinned via `packageManager` in `package.json` and installed automatically by Corepack.
+
+---
+
 ## Core Principles
 
 - avoid unnecessary abstraction
