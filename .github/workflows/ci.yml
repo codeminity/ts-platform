@@ -85,6 +85,9 @@ jobs:
       - name: Verify Packages
         run: pnpm run verify:packages
 
+      - name: Bundle Size Validation
+        run: pnpm run validate:size
+
   security:
     name: Socket Security Scan
     runs-on: ubuntu-latest

@@ -93,6 +93,12 @@ pnpm run verify:packages
 
 ---
 
+## Bundle Size
+
+Every published entry point has a brotli size limit enforced in CI (`pnpm run validate:size`, via [size-limit](https://github.com/ai/size-limit)), configured in [`.size-limit.json`](./.size-limit.json). This exists because it's already bitten this project once: an unexternalized `vitest` import once grew `request-core`'s `test-utils` build from ~1KB to 554KB with nobody noticing until a manual audit. If a change legitimately needs a bigger budget, raise the relevant `limit` in `.size-limit.json` as part of the same PR — don't raise it reflexively just to make the check pass.
+
+---
+
 ## Commit Convention
 
 Use conventional commits:
