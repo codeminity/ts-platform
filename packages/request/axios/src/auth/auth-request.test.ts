@@ -32,6 +32,81 @@ describe('handleAuthRequest', () => {
     expect(result.withCredentials).toBe(true)
   })
 
+  it('warns about an insecure URL when in COOKIE mode', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ baseURL: 'http://insecure.example.com', url: '/api' })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('does not warn for a secure baseURL in COOKIE mode', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ baseURL: 'https://secure.example.com', url: '/api' })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+  })
+
+  it('falls back to the raw (already-absolute) url when it cannot be resolved against an invalid baseURL', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({
+      baseURL: 'not-a-valid-base',
+      url: 'http://insecure-fallback.example.com/x'
+    })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-fallback.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('prefers an absolute request url over a secure baseURL', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({
+      baseURL: 'https://secure-base.example.com',
+      url: 'http://insecure-absolute.example.com/x'
+    })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-absolute.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('resolves the baseURL alone when the request has no url', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ baseURL: 'http://insecure-no-path.example.com' })
+    delete request.url
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    warn.mockRestore()
+  })
+
   it('does not enable withCredentials in COOKIE mode when skipAuth is set for the request', async () => {
     const config = createAuthConfig({
       tokenMode: TokenModeEnum.COOKIE

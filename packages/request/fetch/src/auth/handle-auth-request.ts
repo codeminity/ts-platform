@@ -2,6 +2,7 @@ import {
   dependencies,
   emitterCallback,
   TokenModeEnum,
+  warnIfInsecureUrl,
   type RefreshQueue
 } from '@codeminity/request-core'
 
@@ -11,6 +12,18 @@ import { createAuthorizationHeader } from './create-auth-header'
 
 import type { Config } from '../shared/config.interface'
 import type { FetchRequestInit } from '../shared/request-config.interface'
+
+function resolveInputUrl(input: RequestInfo | URL): string {
+  // Stryker disable next-line ConditionalExpression: equivalent mutant —
+  // `new URL(...)` (this function's sole caller, via warnIfInsecureUrl)
+  // coerces a URL instance via its own `toString()`/`href`, so skipping
+  // this branch and falling through to `return input` produces the same
+  // resolved URL either way.
+  if (input instanceof URL) return input.href
+  if (input instanceof Request) return input.url
+
+  return input
+}
 
 export async function handleAuthRequest(
   input: RequestInfo | URL,
@@ -23,6 +36,7 @@ export async function handleAuthRequest(
   if (codeminity?.skipAuth) return init
 
   if (config.tokenMode === TokenModeEnum.COOKIE) {
+    warnIfInsecureUrl(resolveInputUrl(input))
     return { ...init, credentials: 'include' }
   }
 
@@ -40,6 +54,7 @@ export async function handleAuthRequest(
     const token = await config.getToken()
 
     if (token) {
+      warnIfInsecureUrl(resolveInputUrl(input))
       return { ...init, headers: createAuthorizationHeader(init.headers, token) }
     }
   } catch (error) {

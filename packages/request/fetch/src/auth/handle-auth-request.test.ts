@@ -29,6 +29,75 @@ describe('handleAuthRequest', () => {
     expect(result.credentials).toBe('include')
   })
 
+  it('warns about an insecure URL string when in COOKIE mode', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('http://insecure.example.com/test', init, config, queue)
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('warns about an insecure URL when input is a URL instance', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest(
+      new URL('http://insecure-url-instance.example.com/test'),
+      init,
+      config,
+      queue
+    )
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-url-instance.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('warns about an insecure URL when input is a Request instance', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest(
+      new Request('http://insecure-request-instance.example.com/test'),
+      init,
+      config,
+      queue
+    )
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-request-instance.example.com')
+
+    warn.mockRestore()
+  })
+
+  it('does not warn for a secure URL', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('https://secure.example.com/test', init, config, queue)
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+  })
+
   it('does not enable credentials: include in COOKIE mode when skipAuth is set for the request', async () => {
     const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
     const init = createRequestInit({ codeminity: { skipAuth: true } })
