@@ -13,6 +13,12 @@ name: Release
 # workflows that need write-ish permissions (here: OIDC publish access) to
 # run in response to a PR: `workflow_run` always executes the workflow file
 # as committed on the base branch, never a PR's own (possibly modified) copy.
+#
+# `workflow_dispatch` is a manual recovery path only: it never runs `pnpm
+# release` (no re-publish), it just (re)creates a signed tag + GitHub
+# Release for a package version that's already on npm — for when the
+# publish itself succeeded but tagging failed or was skipped for some
+# reason. See CONTRIBUTING.md#releasing-changesets.
 on:
   workflow_run:
     workflows:
@@ -21,12 +27,21 @@ on:
       - completed
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Comma-separated <name>@<version> tags to sign, tag, and release. Each package MUST already be published on npm at that version — this never runs `pnpm release`.'
+        required: true
+      sha:
+        description: 'Commit SHA to tag (defaults to the current main HEAD).'
+        required: false
 
 # id-token: write lets this workflow request a short-lived OIDC token from
 # GitHub's Actions identity provider. npm's Trusted Publisher feature (configured
 # per-package on npmjs.com, associated with this exact repo + workflow file) uses
 # that token to authenticate the publish — no long-lived NPM_TOKEN secret exists
-# in this repo, and none should ever be added back. See SECURITY.md.
+# in this repo, and none should ever be added back. See SECURITY.md. gitsign
+# (below) reuses this same token to sign tags, keyless.
 #
 # actions: read is only for downloading CI's build-output artifact below —
 # nothing here writes to Actions.
@@ -42,16 +57,19 @@ jobs:
   release:
     name: Build & Publish
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # Pin to the exact commit CI validated — without this, checkout
-          # defaults to the latest commit on main, which could differ if more
-          # commits landed on main between CI finishing and this job starting.
-          ref: ${{ github.event.workflow_run.head_sha }}
+          # workflow_run: pin to the exact commit CI validated — without
+          # this, checkout defaults to the latest commit on main, which
+          # could differ if more commits landed on main between CI
+          # finishing and this job starting.
+          # workflow_dispatch: pin to the given `sha` input, or main HEAD
+          # (the default ref this event already checks out) if omitted.
+          ref: ${{ github.event_name == 'workflow_dispatch' && (inputs.sha || github.sha) || github.event.workflow_run.head_sha }}
 
       - name: Enable Corepack
         run: corepack enable
@@ -79,14 +97,11 @@ jobs:
       - name: Setup gitsign
         uses: chainguard-dev/actions/setup-gitsign@b2555de0cf9724fb9b49d050ff18bd1f49562ba7 # v1.6.29
 
-      # Deliberately not rebuilding here: this job holds npm publish
-      # permission (id-token: write), and re-running the build toolchain on
-      # arbitrary source with that permission active is exactly the risk
-      # OpenSSF Scorecard's "Dangerous workflow" check flags — a malicious
-      # build script could exploit it. CI already built this exact commit
-      # (and this job doesn't run at all unless that CI run succeeded), so
-      # reuse its output instead of regenerating it under elevated permissions.
+      # Everything below is the real build-and-publish path — skipped
+      # entirely in workflow_dispatch recovery mode, since the package(s)
+      # named in `tags` are already published.
       - name: Download build artifacts from CI
+        if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: build-output
@@ -96,9 +111,11 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Generate SBOMs
+        if: github.event_name == 'workflow_run'
         run: pnpm run sbom
 
       - name: Upload SBOMs
+        if: github.event_name == 'workflow_run'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: sbom
@@ -115,6 +132,7 @@ jobs:
       # this exact commit/workflow run (visible as the "Provenance" badge on npm).
       - name: Release
         id: release
+        if: github.event_name == 'workflow_run'
         run: |
           output=$(pnpm release)
           echo "$output"
@@ -132,15 +150,29 @@ jobs:
       # directly — it wants a long-lived NPM_TOKEN, which this repo
       # deliberately doesn't have (OIDC Trusted Publisher instead, see
       # SECURITY.md) — so replicate just the tagging + release step here.
+      #
+      # In workflow_dispatch recovery mode, the tag list comes directly
+      # from the `tags` input instead of being parsed out of a publish run.
+      #
+      # Tag existence is checked via `refs/tags/<tag>` specifically, not a
+      # bare `git rev-parse "<tag>"` — a tag name like "@scope/pkg@1.2.3"
+      # can otherwise be ambiguous against git's own revision syntax
+      # (a leading "@" is shorthand for HEAD), which previously caused a
+      # false "already exists" match that silently skipped real tags.
       - name: Tag & release published packages
         env:
           PUBLISH_OUTPUT: ${{ steps.release.outputs.publish_output }}
+          DISPATCH_TAGS: ${{ inputs.tags }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          tags=$(echo "$PUBLISH_OUTPUT" | grep 'New tag:' | sed -E 's/.*New tag:[[:space:]]*//' || true)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tags=$(echo "$DISPATCH_TAGS" | tr ',' '\n' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+          else
+            tags=$(echo "$PUBLISH_OUTPUT" | grep 'New tag:' | sed -E 's/.*New tag:[[:space:]]*//' || true)
+          fi
 
           if [ -z "$tags" ]; then
             echo "No packages published in this run — nothing to tag."
@@ -148,7 +180,7 @@ jobs:
           fi
 
           echo "$tags" | while IFS= read -r tag; do
-            if git rev-parse "$tag" >/dev/null 2>&1; then
+            if git rev-parse --verify --quiet "refs/tags/$tag" >/dev/null 2>&1; then
               echo "Tag $tag already exists, skipping."
               continue
             fi
