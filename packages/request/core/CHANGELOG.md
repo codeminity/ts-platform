@@ -1,5 +1,18 @@
 # @codeminity/request-core
 
+## 0.8.0
+
+### 🔒 Security
+
+- Add `isInsecureUrl` and `warnIfInsecureUrl` as new public exports: a one-time-per-origin console warning when credentials (an `Authorization` header, or a cookie in `COOKIE` mode) are about to be sent over a non-HTTPS connection, excluding loopback addresses (`localhost`, `127.0.0.1`, `::1`).
+- Every published release now gets a cryptographically signed git tag (via `gitsign`, keyless/OIDC-based — no static signing key) and an automatically created GitHub Release with install instructions and the relevant changelog excerpt.
+
+### 🛠 Improvements
+
+- Add `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `ASSURANCE_CASE.md` (threat model, trust boundaries, secure design rationale, and how common implementation weaknesses are countered).
+- Add a Developer Certificate of Origin (DCO) requirement and a "Development Setup" section to `CONTRIBUTING.md`.
+- Add a public `ROADMAP.md` and earn the [OpenSSF Best Practices](https://www.bestpractices.dev/projects/13923) badge.
+
 ## 0.7.1
 
 ### 🐛 Fixes

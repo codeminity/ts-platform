@@ -1,5 +1,23 @@
 # @codeminity/axios
 
+## 0.8.0
+
+### 🔒 Security
+
+- Warn once per origin when an `Authorization` header or a `COOKIE`-mode credential is about to be sent over a non-HTTPS connection, excluding loopback addresses (`localhost`, `127.0.0.1`, `::1`). Uses `@codeminity/request-core`'s new `warnIfInsecureUrl`.
+- Every published release now gets a cryptographically signed git tag (via `gitsign`, keyless/OIDC-based — no static signing key) and an automatically created GitHub Release with install instructions and the relevant changelog excerpt.
+
+### 🛠 Improvements
+
+- Add `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `ASSURANCE_CASE.md` (threat model, trust boundaries, secure design rationale, and how common implementation weaknesses are countered) at the repository root.
+- Add a Developer Certificate of Origin (DCO) requirement and a "Development Setup" section to `CONTRIBUTING.md`.
+- Add a public `ROADMAP.md` and earn the [OpenSSF Best Practices](https://www.bestpractices.dev/projects/13923) badge.
+
+### Patch Changes
+
+- Updated dependencies
+  - @codeminity/request-core@0.8.0
+
 ## 0.7.1
 
 ### 🛠 Improvements
