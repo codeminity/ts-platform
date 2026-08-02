@@ -36,22 +36,12 @@ on:
         description: 'Commit SHA to tag (defaults to the current main HEAD).'
         required: false
 
-# id-token: write lets this workflow request a short-lived OIDC token from
-# GitHub's Actions identity provider. npm's Trusted Publisher feature (configured
-# per-package on npmjs.com, associated with this exact repo + workflow file) uses
-# that token to authenticate the publish — no long-lived NPM_TOKEN secret exists
-# in this repo, and none should ever be added back. See SECURITY.md. gitsign
-# (below) reuses this same token to sign tags, keyless.
-#
-# actions: read is only for downloading CI's build-output artifact below —
-# nothing here writes to Actions.
-#
-# contents: write is only used to push the git tags created after a
-# successful publish (below) — this workflow never pushes to a branch.
-permissions:
-  contents: write
-  id-token: write
-  actions: read
+# No top-level `permissions:` — scoped to the job below instead, per
+# least-privilege (this is a single-job workflow, so it makes no functional
+# difference, but a top-level grant applies to every job by default,
+# present or future, which is what OpenSSF Scorecard's Token-Permissions
+# check flags).
+permissions: {}
 
 jobs:
   release:
@@ -59,17 +49,50 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
 
+    # id-token: write lets this workflow request a short-lived OIDC token from
+    # GitHub's Actions identity provider. npm's Trusted Publisher feature (configured
+    # per-package on npmjs.com, associated with this exact repo + workflow file) uses
+    # that token to authenticate the publish — no long-lived NPM_TOKEN secret exists
+    # in this repo, and none should ever be added back. See SECURITY.md. gitsign
+    # (below) reuses this same token to sign tags, keyless.
+    #
+    # actions: read is only for downloading CI's build-output artifact below —
+    # nothing here writes to Actions.
+    #
+    # contents: write is only used to push the git tags created after a
+    # successful publish (below) — this workflow never pushes to a branch.
+    permissions:
+      contents: write
+      id-token: write
+      actions: read
+
     steps:
-      - name: Checkout repository
+      # Split into two steps (one per trigger) instead of one step with a
+      # combined ref expression: OpenSSF Scorecard's Dangerous-Workflow
+      # check pattern-matches for `github.event.workflow_run.head_sha`
+      # checkouts and couldn't recognize this as the same already-reviewed
+      # safe pattern once folded into a larger ternary. Each step's `ref:`
+      # is simple and only evaluated for its own trigger.
+      - name: Checkout repository (workflow_run)
+        if: github.event_name == 'workflow_run'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # workflow_run: pin to the exact commit CI validated — without
-          # this, checkout defaults to the latest commit on main, which
-          # could differ if more commits landed on main between CI
-          # finishing and this job starting.
-          # workflow_dispatch: pin to the given `sha` input, or main HEAD
-          # (the default ref this event already checks out) if omitted.
-          ref: ${{ github.event_name == 'workflow_dispatch' && (inputs.sha || github.sha) || github.event.workflow_run.head_sha }}
+          # Pin to the exact commit CI validated — without this, checkout
+          # defaults to the latest commit on main, which could differ if
+          # more commits landed on main between CI finishing and this job
+          # starting.
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Checkout repository (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Pin to the given `sha` input, or main HEAD (the default ref
+          # this event already checks out) if omitted. workflow_dispatch
+          # can only be triggered by someone with write access to this
+          # repo, so — unlike workflow_run's head_sha — this isn't an
+          # untrusted value.
+          ref: ${{ inputs.sha || github.sha }}
 
       - name: Enable Corepack
         run: corepack enable
