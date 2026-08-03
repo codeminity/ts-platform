@@ -57,6 +57,7 @@ The `core → adapter` direction and circular dependencies aren't just documente
 - strict mode enabled
 - no eslint-disable unless justified
 - prefer explicit return types for public APIs
+- relative imports/exports in `packages/*/*/src` must include an explicit `.js` extension (e.g. `from './create.js'`), even though the dev-facing `moduleResolution: "Bundler"` doesn't require it — `tsc --emitDeclarationOnly` copies the specifier into the published `.d.ts` essentially verbatim, and a real consumer using `moduleResolution: "NodeNext"`/`"node16"` needs that extension to resolve it. Checked by `pnpm run validate:node-resolution`; see [DECISIONS.md](./DECISIONS.md#explicit-js-extensions-for-relative-imports).
 
 ---
 

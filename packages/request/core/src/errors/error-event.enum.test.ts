@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ErrorEventEnum } from './error-event.enum'
+import { ErrorEventEnum } from './error-event.enum.js'
 
 describe('ErrorEventEnum', () => {
   it('exposes the expected error event kinds', () => {

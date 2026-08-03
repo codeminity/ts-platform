@@ -1,6 +1,6 @@
 import { AxiosHeaders } from 'axios'
 
-import type { InternalRequestConfig } from '../shared/request-config.interface'
+import type { InternalRequestConfig } from '../shared/request-config.interface.js'
 
 export function createRequestConfig(
   overrides: Partial<InternalRequestConfig> = {}

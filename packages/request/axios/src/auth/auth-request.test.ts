@@ -7,12 +7,12 @@ import {
   createRefreshQueue as createRefreshQueueMock
 } from '@codeminity/request-core/test-utils'
 
-import { ErrorEventEnum } from '../errors/error-event.enum'
-import { createRequestConfig } from '../mocks/create-request-config'
+import { ErrorEventEnum } from '../errors/error-event.enum.js'
+import { createRequestConfig } from '../mocks/create-request-config.js'
 
-import { handleAuthRequest } from './auth-request'
+import { handleAuthRequest } from './auth-request.js'
 
-import type { Config } from '../shared/config.interface'
+import type { Config } from '../shared/config.interface.js'
 
 describe('handleAuthRequest', () => {
   beforeEach(() => {

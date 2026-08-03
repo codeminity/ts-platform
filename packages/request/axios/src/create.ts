@@ -2,8 +2,8 @@ import axios from 'axios'
 
 import { createRefreshQueue } from '@codeminity/request-core'
 
-import { attachAuthInterceptor } from './auth/attach-auth'
-import { attachResponseInterceptor } from './shared/attach-response'
+import { attachAuthInterceptor } from './auth/attach-auth.js'
+import { attachResponseInterceptor } from './shared/attach-response.js'
 
 import type { AxiosInstance, CreateAxiosDefaults } from 'axios'
 

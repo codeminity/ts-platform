@@ -1,5 +1,5 @@
-import type { ErrorEvent } from '../errors/error-event.type'
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { ErrorEvent } from '../errors/error-event.type.js'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 /**
  * Lifecycle callbacks for classified and unclassified errors.

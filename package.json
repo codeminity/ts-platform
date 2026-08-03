@@ -38,6 +38,7 @@
     "verify:packages": "tsx scripts/verify-packages-run.ts",
     "validate:docs": "tsx scripts/validate-docs-run.ts",
     "validate:deps": "tsx scripts/validate-deps-run.ts",
+    "validate:node-resolution": "tsc -p tsconfig.esm-strict.json --noEmit",
     "validate:socket": "socket ci",
     "validate:size": "size-limit",
     "validate:changeset": "changeset status --since=origin/main",

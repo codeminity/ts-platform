@@ -1,5 +1,5 @@
-import type { AuthConfig } from './auth-config.interface'
-import type { RefreshQueue } from './refresh-queue.interface'
+import type { AuthConfig } from './auth-config.interface.js'
+import type { RefreshQueue } from './refresh-queue.interface.js'
 
 /**
  * Runs the configured refresh flow if the current token is expired, coordinating

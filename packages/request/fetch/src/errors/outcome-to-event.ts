@@ -1,5 +1,5 @@
-import type { ErrorEvent } from './error-event.type'
-import type { FetchOutcome } from './fetch-outcome.interface'
+import type { ErrorEvent } from './error-event.type.js'
+import type { FetchOutcome } from './fetch-outcome.interface.js'
 
 function classifyThrown(error: unknown): ErrorEvent {
   if (error instanceof DOMException) {

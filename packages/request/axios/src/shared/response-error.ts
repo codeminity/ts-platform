@@ -2,11 +2,11 @@ import { isAxiosError, type AxiosInstance, type AxiosResponse } from 'axios'
 
 import { emitterCallback } from '@codeminity/request-core'
 
-import { mapErrorToEvent } from '../errors/error-to-event'
-import { handleRetry } from '../retry/retry'
+import { mapErrorToEvent } from '../errors/error-to-event.js'
+import { handleRetry } from '../retry/retry.js'
 
-import type { Config } from './config.interface'
-import type { InternalRequestConfig } from './request-config.interface'
+import type { Config } from './config.interface.js'
+import type { InternalRequestConfig } from './request-config.interface.js'
 
 export async function handleResponseError(
   instance: AxiosInstance,

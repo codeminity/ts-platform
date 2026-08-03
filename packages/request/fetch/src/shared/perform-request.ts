@@ -1,12 +1,12 @@
 import { emitterCallback, type RefreshQueue } from '@codeminity/request-core'
 
-import { handleAuthRequest } from '../auth/handle-auth-request'
-import { classifyOutcome } from '../errors/outcome-to-event'
-import { handleRetry } from '../retry/retry'
+import { handleAuthRequest } from '../auth/handle-auth-request.js'
+import { classifyOutcome } from '../errors/outcome-to-event.js'
+import { handleRetry } from '../retry/retry.js'
 
-import type { Config } from './config.interface'
-import type { FetchRequestInit } from './request-config.interface'
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { Config } from './config.interface.js'
+import type { FetchRequestInit } from './request-config.interface.js'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 async function runOnce(
   input: RequestInfo | URL,

@@ -2,7 +2,7 @@ import { AxiosError, type AxiosResponse } from 'axios'
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
 function errorWithStatus(status: number | undefined): AxiosError {
   const error = new AxiosError('error')

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { TokenModeEnum, createFetch } from './index'
+import { TokenModeEnum, createFetch } from './index.js'
 
 describe('package entry point (real, unmocked)', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ErrorEventEnum as CoreErrorEventEnum } from '@codeminity/request-core'
 
-import { ErrorEventEnum } from './error-event.enum'
+import { ErrorEventEnum } from './error-event.enum.js'
 
 describe('ErrorEventEnum', () => {
   it('includes all core error events', () => {

@@ -1,4 +1,4 @@
-import type { RetryConfig } from '../retry/retry-config.interface'
+import type { RetryConfig } from '../retry/retry-config.interface.js'
 
 /**
  * Per-request `codeminity` override, passed via a single call's `FetchRequestInit`.

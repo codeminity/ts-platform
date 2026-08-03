@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 
-import { createAuthConfig } from './mocks/create-auth-config'
-import { createRefreshQueue } from './mocks/create-refresh-queue'
-import { handleRefreshToken } from './refresh-token'
+import { createAuthConfig } from './mocks/create-auth-config.js'
+import { createRefreshQueue } from './mocks/create-refresh-queue.js'
+import { handleRefreshToken } from './refresh-token.js'
 
 describe('handleRefreshToken', () => {
   it('calls refreshToken when token is expired and triggers success flow', async () => {

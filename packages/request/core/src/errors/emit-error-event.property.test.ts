@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it, vi } from 'vitest'
 
-import { emitterCallback } from './emit-error-event'
+import { emitterCallback } from './emit-error-event.js'
 
 describe('emitterCallback (property-based)', () => {
   it('never rejects, regardless of whether onEvent/onError are present, throw, or resolve', async () => {

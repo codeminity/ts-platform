@@ -1,6 +1,6 @@
 import type { RetryConfig as CoreRetryConfig } from '@codeminity/request-core'
 
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 /**
  * Retry behavior for requests made through a `createFetch` instance.

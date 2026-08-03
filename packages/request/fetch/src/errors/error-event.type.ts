@@ -1,4 +1,4 @@
-import type { ErrorEventEnum } from './error-event.enum'
+import type { ErrorEventEnum } from './error-event.enum.js'
 
 /**
  * The event identifier passed to `onEvent` — one of the values of {@link ErrorEventEnum}.

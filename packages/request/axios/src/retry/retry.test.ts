@@ -21,7 +21,7 @@ describe('handleRetry', () => {
   it('returns false when retry is not allowed', async () => {
     shouldRetry.mockReturnValue(false)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry({} as AxiosError, 1, {})
 
@@ -32,7 +32,7 @@ describe('handleRetry', () => {
   it('returns true without delay when retryDelay is 0', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry({} as AxiosError, 1, {
       retryDelay: 0
@@ -45,7 +45,7 @@ describe('handleRetry', () => {
   it('waits using retryDelay when configured', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry({} as AxiosError, 2, {
       retryDelay: 500
@@ -60,7 +60,7 @@ describe('handleRetry', () => {
 
     const getRetryDelay = vi.fn().mockReturnValue(1000)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const error = {} as AxiosError
 
@@ -77,7 +77,7 @@ describe('handleRetry', () => {
   it('uses retryDelay when getRetryDelay returns undefined', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const getRetryDelay = vi.fn().mockReturnValue(undefined)
 
@@ -94,7 +94,7 @@ describe('handleRetry', () => {
   it('returns true without delay when no retry delay is configured', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry({} as AxiosError, 1, {})
 
@@ -105,7 +105,7 @@ describe('handleRetry', () => {
   it('does not delay when retryDelay is negative', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry({} as AxiosError, 1, {
       retryDelay: -100
@@ -118,7 +118,7 @@ describe('handleRetry', () => {
   it('falls back when getRetryDelay returns null', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const getRetryDelay = vi.fn().mockReturnValue(null)
 

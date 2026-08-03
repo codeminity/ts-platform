@@ -1,4 +1,4 @@
-import type { RetryConfig } from './retry-config.interface'
+import type { RetryConfig } from './retry-config.interface.js'
 import type { AxiosError } from 'axios'
 
 export function shouldRetry(error: AxiosError, attempt: number, config: RetryConfig): boolean {

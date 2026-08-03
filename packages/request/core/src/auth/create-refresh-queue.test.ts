@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 
-import { createRefreshQueue } from './create-refresh-queue'
+import { createRefreshQueue } from './create-refresh-queue.js'
 
 describe('createRefreshQueue', () => {
   it('runs the task', async () => {

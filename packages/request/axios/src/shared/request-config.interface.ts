@@ -1,4 +1,4 @@
-import type { RetryConfig } from '../retry/retry-config.interface'
+import type { RetryConfig } from '../retry/retry-config.interface.js'
 import type { InternalAxiosRequestConfig } from 'axios'
 
 /**

@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { createRefreshQueue } from './create-refresh-queue'
+import { createRefreshQueue } from './create-refresh-queue.js'
 
 describe('createRefreshQueue (property-based)', () => {
   it('runs the task exactly once no matter how many callers arrive concurrently', async () => {

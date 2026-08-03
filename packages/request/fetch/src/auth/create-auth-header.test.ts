@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createAuthorizationHeader } from './create-auth-header'
+import { createAuthorizationHeader } from './create-auth-header.js'
 
 describe('createAuthorizationHeader', () => {
   it('adds authorization header to existing headers', () => {

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
 
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 const delay = vi.fn()
 const shouldRetry = vi.fn()
@@ -25,7 +25,7 @@ describe('handleRetry', () => {
   it('returns false when retry is not allowed', async () => {
     shouldRetry.mockReturnValue(false)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 1, {})
 
@@ -36,7 +36,7 @@ describe('handleRetry', () => {
   it('returns true without delay when retryDelay is 0', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 1, { retryDelay: 0 })
 
@@ -47,7 +47,7 @@ describe('handleRetry', () => {
   it('waits using retryDelay when configured', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 2, { retryDelay: 500 })
 
@@ -60,7 +60,7 @@ describe('handleRetry', () => {
 
     const getRetryDelay = vi.fn().mockReturnValue(1000)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 3, { retryDelay: 500, getRetryDelay })
 
@@ -72,7 +72,7 @@ describe('handleRetry', () => {
   it('uses retryDelay when getRetryDelay returns undefined', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const getRetryDelay = vi.fn().mockReturnValue(undefined)
 
@@ -86,7 +86,7 @@ describe('handleRetry', () => {
   it('returns true without delay when no retry delay is configured', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 1, {})
 
@@ -97,7 +97,7 @@ describe('handleRetry', () => {
   it('does not delay when retryDelay is negative', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const result = await handleRetry(outcome, 1, { retryDelay: -100 })
 
@@ -108,7 +108,7 @@ describe('handleRetry', () => {
   it('falls back when getRetryDelay returns null', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const { handleRetry } = await import('./retry')
+    const { handleRetry } = await import('./retry.js')
 
     const getRetryDelay = vi.fn().mockReturnValue(null)
 

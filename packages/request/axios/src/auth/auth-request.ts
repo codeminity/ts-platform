@@ -7,12 +7,12 @@ import {
   type RefreshQueue
 } from '@codeminity/request-core'
 
-import { ErrorEventEnum } from '../errors/error-event.enum'
+import { ErrorEventEnum } from '../errors/error-event.enum.js'
 
-import { createAuthorizationHeader } from './create-auth-header'
+import { createAuthorizationHeader } from './create-auth-header.js'
 
-import type { Config } from '../shared/config.interface'
-import type { InternalRequestConfig } from '../shared/request-config.interface'
+import type { Config } from '../shared/config.interface.js'
+import type { InternalRequestConfig } from '../shared/request-config.interface.js'
 
 // No `if (!request.baseURL) return url` special case: `new URL(url,
 // undefined)` behaves identically to omitting the base entirely — it

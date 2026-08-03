@@ -1,9 +1,9 @@
 import { delay } from '@codeminity/request-core'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
-import type { RetryConfig } from './retry-config.interface'
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { RetryConfig } from './retry-config.interface.js'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 export async function handleRetry(
   outcome: FetchOutcome,

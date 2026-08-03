@@ -2,9 +2,9 @@ import { type AxiosInstance } from 'axios'
 
 import type { RefreshQueue } from '@codeminity/request-core'
 
-import { handleAuthRequest } from './auth-request'
+import { handleAuthRequest } from './auth-request.js'
 
-import type { Config } from '../shared/config.interface'
+import type { Config } from '../shared/config.interface.js'
 
 export function attachAuthInterceptor(
   instance: AxiosInstance,

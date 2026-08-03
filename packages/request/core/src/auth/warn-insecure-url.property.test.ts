@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { isInsecureUrl } from './warn-insecure-url'
+import { isInsecureUrl } from './warn-insecure-url.js'
 
 const protocol = fc.constantFrom('https:', 'http:', 'ftp:', 'ws:', 'wss:')
 const hostname = fc.constantFrom(
