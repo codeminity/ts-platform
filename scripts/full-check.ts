@@ -11,6 +11,7 @@ export interface CheckStep {
 export const CHECK_STEPS: CheckStep[] = [
   { name: 'Build', args: ['run', 'build'] },
   { name: 'Lint', args: ['run', 'lint'] },
+  { name: 'Format Validation', args: ['run', 'validate:format'] },
   { name: 'Typecheck', args: ['run', 'typecheck'] },
   { name: 'Test (coverage)', args: ['run', 'test:coverage'] },
   { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },

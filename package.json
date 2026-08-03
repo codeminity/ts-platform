@@ -28,6 +28,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "validate:format": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",

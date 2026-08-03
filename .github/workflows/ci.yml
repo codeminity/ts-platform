@@ -67,6 +67,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format Validation
+        run: pnpm run validate:format
+
       - name: Typecheck
         run: pnpm typecheck
 

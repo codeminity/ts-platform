@@ -189,7 +189,7 @@ Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package i
 
 ## Full Local Check
 
-`pnpm run full-check` runs every check CI runs — build, lint, typecheck, `test:coverage`, `validate:deps`, `validate:api`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job, plus mutation testing and browser e2e tests (both otherwise separate/manual):
+`pnpm run full-check` runs every check CI runs — build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job, plus mutation testing and browser e2e tests (both otherwise separate/manual):
 
 ```bash
 pnpm run full-check
