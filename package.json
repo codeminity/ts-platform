@@ -47,7 +47,8 @@
     "bench": "vitest bench --run",
     "bench:baseline": "vitest bench --run --outputJson bench-baseline.json",
     "bench:compare": "vitest bench --run --compare bench-baseline.json",
-    "check": "tsx scripts/full-check-run.ts"
+    "check": "tsx scripts/full-check-run.ts",
+    "clean": "node --import tsx scripts/clean-run.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",

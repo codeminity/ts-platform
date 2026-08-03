@@ -18,6 +18,14 @@ pnpm test
 
 `pnpm install` also sets up the Husky git hooks (commit-msg, pre-commit) automatically — no separate setup step needed. The only prerequisites are Node.js `^22.13.0 || >=24.0.0` and pnpm, whose exact version is pinned via `packageManager` in `package.json` and installed automatically by Corepack.
 
+To reset back to a fresh-clone state:
+
+```bash
+pnpm run clean
+```
+
+Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/clean.ts`, not `git clean`, so it can never reach further than intended.
+
 ---
 
 ## Core Principles
