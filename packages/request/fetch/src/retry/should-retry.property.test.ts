@@ -1,9 +1,9 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
 function statusOutcome(status: number) {
   return createFetchOutcome({ response: new Response(null, { status }) })

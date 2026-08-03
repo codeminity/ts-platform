@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
-import type { RetryConfig } from './retry-config.interface'
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { RetryConfig } from './retry-config.interface.js'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 function networkOutcome(): FetchOutcome {
   return createFetchOutcome({ error: new TypeError('fetch failed') })

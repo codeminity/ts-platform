@@ -6,12 +6,12 @@ import {
   type RefreshQueue
 } from '@codeminity/request-core'
 
-import { ErrorEventEnum } from '../errors/error-event.enum'
+import { ErrorEventEnum } from '../errors/error-event.enum.js'
 
-import { createAuthorizationHeader } from './create-auth-header'
+import { createAuthorizationHeader } from './create-auth-header.js'
 
-import type { Config } from '../shared/config.interface'
-import type { FetchRequestInit } from '../shared/request-config.interface'
+import type { Config } from '../shared/config.interface.js'
+import type { FetchRequestInit } from '../shared/request-config.interface.js'
 
 function resolveInputUrl(input: RequestInfo | URL): string {
   // Stryker disable next-line ConditionalExpression: equivalent mutant —

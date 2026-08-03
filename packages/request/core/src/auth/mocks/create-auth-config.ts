@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-import type { AuthConfig } from '../auth-config.interface'
+import type { AuthConfig } from '../auth-config.interface.js'
 
 const noop = async () => {
   /* empty */

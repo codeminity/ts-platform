@@ -17,7 +17,7 @@ describe('createFetch', () => {
   })
 
   it('returns a callable function', async () => {
-    const { createFetch } = await import('./create')
+    const { createFetch } = await import('./create.js')
 
     const apiFetch = createFetch()
 
@@ -25,7 +25,7 @@ describe('createFetch', () => {
   })
 
   it('delegates each call to performRequest with the instance config and refresh queue', async () => {
-    const { createFetch } = await import('./create')
+    const { createFetch } = await import('./create.js')
 
     const queue = { run: vi.fn() }
     createRefreshQueue.mockReturnValue(queue)
@@ -40,7 +40,7 @@ describe('createFetch', () => {
   })
 
   it('defaults init to an empty object when omitted', async () => {
-    const { createFetch } = await import('./create')
+    const { createFetch } = await import('./create.js')
 
     const apiFetch = createFetch({})
 
@@ -50,7 +50,7 @@ describe('createFetch', () => {
   })
 
   it('uses an empty config when not provided', async () => {
-    const { createFetch } = await import('./create')
+    const { createFetch } = await import('./create.js')
 
     const apiFetch = createFetch()
 
@@ -60,7 +60,7 @@ describe('createFetch', () => {
   })
 
   it('gives each instance its own refresh queue (per-instance isolation)', async () => {
-    const { createFetch } = await import('./create')
+    const { createFetch } = await import('./create.js')
 
     const queueA = { run: vi.fn() }
     const queueB = { run: vi.fn() }

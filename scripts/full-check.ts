@@ -15,6 +15,7 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Typecheck', args: ['run', 'typecheck'] },
   { name: 'Test (coverage)', args: ['run', 'test:coverage'] },
   { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },
+  { name: 'Node Module Resolution', args: ['run', 'validate:node-resolution'] },
   { name: 'API Validation', args: ['run', 'validate:api'] },
   { name: 'Document Validation', args: ['run', 'validate:docs'] },
   { name: 'Verify Packages', args: ['run', 'verify:packages'] },

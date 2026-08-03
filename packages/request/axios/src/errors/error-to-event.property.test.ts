@@ -2,7 +2,7 @@ import { AxiosError, type AxiosResponse } from 'axios'
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { mapErrorToEvent } from './error-to-event'
+import { mapErrorToEvent } from './error-to-event.js'
 
 const KNOWN_STATUS_EVENTS = new Map([
   [400, 'bad_request'],

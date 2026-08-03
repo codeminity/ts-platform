@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { emitterCallback } from '@codeminity/request-core'
 
-import { mapErrorToEvent } from '../errors/error-to-event'
-import { handleRetry } from '../retry/retry'
+import { mapErrorToEvent } from '../errors/error-to-event.js'
+import { handleRetry } from '../retry/retry.js'
 
-import { handleResponseError } from './response-error'
+import { handleResponseError } from './response-error.js'
 
-import type { Config } from './config.interface'
-import type { InternalRequestConfig } from './request-config.interface'
+import type { Config } from './config.interface.js'
+import type { InternalRequestConfig } from './request-config.interface.js'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 
 vi.mock('@codeminity/request-core', () => ({

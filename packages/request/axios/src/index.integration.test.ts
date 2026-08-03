@@ -1,6 +1,6 @@
 import { describe, expect, it, type Mock, vi } from 'vitest'
 
-import { create, default as codeminityAxios } from './index'
+import { create, default as codeminityAxios } from './index.js'
 
 import type { AxiosAdapter, AxiosError } from 'axios'
 

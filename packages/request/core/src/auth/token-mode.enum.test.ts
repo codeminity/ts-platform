@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { TokenModeEnum } from './token-mode.enum'
+import { TokenModeEnum } from './token-mode.enum.js'
 
 describe('TokenModeEnum', () => {
   it('exposes the expected token modes', () => {

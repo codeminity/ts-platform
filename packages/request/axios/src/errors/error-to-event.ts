@@ -1,4 +1,4 @@
-import type { ErrorEvent } from './error-event.type'
+import type { ErrorEvent } from './error-event.type.js'
 import type { AxiosError } from 'axios'
 
 export function mapErrorToEvent(error: AxiosError): ErrorEvent {

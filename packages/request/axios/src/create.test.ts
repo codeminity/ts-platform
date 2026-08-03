@@ -29,7 +29,7 @@ describe('create', () => {
   })
 
   it('creates an axios instance with the provided axios config', async () => {
-    const { create } = await import('./create')
+    const { create } = await import('./create.js')
 
     const config = {
       baseURL: 'https://api.example.com',
@@ -50,7 +50,7 @@ describe('create', () => {
   })
 
   it('attaches both interceptors', async () => {
-    const { create } = await import('./create')
+    const { create } = await import('./create.js')
 
     const codeminity = {
       getToken: vi.fn()
@@ -67,7 +67,7 @@ describe('create', () => {
   })
 
   it('uses an empty codeminity config when not provided', async () => {
-    const { create } = await import('./create')
+    const { create } = await import('./create.js')
 
     create()
 
@@ -77,7 +77,7 @@ describe('create', () => {
   })
 
   it('gives each axios instance its own refresh queue (per-instance isolation, ADR-004)', async () => {
-    const { create } = await import('./create')
+    const { create } = await import('./create.js')
 
     create({ codeminity: { getToken: vi.fn() } })
     create({ codeminity: { getToken: vi.fn() } })

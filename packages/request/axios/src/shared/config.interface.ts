@@ -1,7 +1,7 @@
 import type { AuthConfig } from '@codeminity/request-core'
 
-import type { CallbackConfig } from './callback-config.interface'
-import type { RetryConfig } from '../retry/retry-config.interface'
+import type { CallbackConfig } from './callback-config.interface.js'
+import type { RetryConfig } from '../retry/retry-config.interface.js'
 
 /**
  * Instance-level `codeminity` configuration: combines auth, lifecycle event

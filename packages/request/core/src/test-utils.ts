@@ -1,2 +1,2 @@
-export { createAuthConfig } from './auth/mocks/create-auth-config'
-export { createRefreshQueue } from './auth/mocks/create-refresh-queue'
+export { createAuthConfig } from './auth/mocks/create-auth-config.js'
+export { createRefreshQueue } from './auth/mocks/create-refresh-queue.js'

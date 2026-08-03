@@ -79,6 +79,9 @@ jobs:
       - name: Dependency Architecture Validation
         run: pnpm run validate:deps
 
+      - name: Node Module Resolution Validation
+        run: pnpm run validate:node-resolution
+
       - name: API Validation
         run: pnpm run validate:api
 

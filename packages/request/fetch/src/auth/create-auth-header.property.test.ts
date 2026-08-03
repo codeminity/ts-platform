@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { createAuthorizationHeader } from './create-auth-header'
+import { createAuthorizationHeader } from './create-auth-header.js'
 
 const headerName = fc.constantFrom(
   'Accept',

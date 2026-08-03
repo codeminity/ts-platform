@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 
-import { getAxiosInstance } from './get-axios-instance'
+import { getAxiosInstance } from './get-axios-instance.js'
 
 vi.mock('axios', () => ({
   default: vi.fn()

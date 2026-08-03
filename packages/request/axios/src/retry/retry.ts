@@ -1,8 +1,8 @@
 import { delay } from '@codeminity/request-core'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
-import type { RetryConfig } from './retry-config.interface'
+import type { RetryConfig } from './retry-config.interface.js'
 import type { AxiosError } from 'axios'
 
 export async function handleRetry(

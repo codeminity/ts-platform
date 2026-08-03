@@ -6,11 +6,11 @@ import {
   createRefreshQueue as createRefreshQueueMock
 } from '@codeminity/request-core/test-utils'
 
-import { createRequestInit } from '../mocks/create-request-init'
+import { createRequestInit } from '../mocks/create-request-init.js'
 
-import { handleAuthRequest } from './handle-auth-request'
+import { handleAuthRequest } from './handle-auth-request.js'
 
-import type { Config } from '../shared/config.interface'
+import type { Config } from '../shared/config.interface.js'
 
 const TEST_INPUT = '/test'
 

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
 
-import { classifyOutcome } from './outcome-to-event'
+import { classifyOutcome } from './outcome-to-event.js'
 
-import type { FetchOutcome } from './fetch-outcome.interface'
+import type { FetchOutcome } from './fetch-outcome.interface.js'
 
 function responseOutcome(status: number): FetchOutcome {
   return createFetchOutcome({ response: new Response(null, { status }) })

@@ -1,4 +1,4 @@
-import type { RefreshQueue } from './refresh-queue.interface'
+import type { RefreshQueue } from './refresh-queue.interface.js'
 
 /**
  * Creates a queue that coordinates concurrent refresh attempts so only one

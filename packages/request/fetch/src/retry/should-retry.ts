@@ -1,5 +1,5 @@
-import type { RetryConfig } from './retry-config.interface'
-import type { FetchOutcome } from '../errors/fetch-outcome.interface'
+import type { RetryConfig } from './retry-config.interface.js'
+import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
 export function shouldRetry(outcome: FetchOutcome, attempt: number, config: RetryConfig): boolean {
   const retries = config.retries ?? 0

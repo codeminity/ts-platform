@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createRefreshQueue } from '@codeminity/request-core/test-utils'
 
-import { performRequest } from './perform-request'
+import { performRequest } from './perform-request.js'
 
-import type { Config } from './config.interface'
-import type { FetchRequestInit } from './request-config.interface'
+import type { Config } from './config.interface.js'
+import type { FetchRequestInit } from './request-config.interface.js'
 
 describe('performRequest', () => {
   beforeEach(() => {

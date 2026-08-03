@@ -1,4 +1,4 @@
-import { handleRefreshToken } from './refresh-token'
+import { handleRefreshToken } from './refresh-token.js'
 
 /**
  * Re-exports {@link handleRefreshToken} through a mutable object so adapter

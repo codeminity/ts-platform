@@ -105,3 +105,16 @@ Stryker's `mutate` glob in [`stryker.config.ts`](./stryker.config.ts) mirrors `v
 
 - example-based tests prove specific cases work; property tests prove a _rule_ holds across a range no one would hand-write examples for
 - found real issues immediately: a `Response` status-range constraint the test didn't account for, and a native `Headers`/`AxiosHeaders` whitespace-trimming behavior — both caught by generated inputs no manually-written example happened to include
+
+---
+
+## Explicit `.js` Extensions for Relative Imports
+
+Every relative import/export in `packages/*/*/src` (e.g. `import { create } from './create.js'`) carries an explicit `.js` extension, checked by `pnpm run validate:node-resolution` (`tsc -p tsconfig.esm-strict.json --noEmit`, `moduleResolution: "NodeNext"`).
+
+### Reason:
+
+- `tsc --emitDeclarationOnly` (each package's `build:types` script) copies a relative specifier into the published `.d.ts` essentially verbatim — an extensionless source import ships as an extensionless `.d.ts` import
+- the monorepo's own dev-facing `tsconfig.base.json` uses `moduleResolution: "Bundler"`, which treats extensions as optional, so neither `pnpm run typecheck` nor `pnpm run build` can ever catch a missing one
+- a real consumer using `moduleResolution: "NodeNext"`/`"node16"` (the correct setting for an actual Node.js app) requires the extension to resolve a relative specifier at all — without it, resolution silently degrades to an unresolved type instead of a hard compiler error, so even the consumer's own `tsc --noEmit` stays silent; only type-aware ESLint (`@typescript-eslint/no-unsafe-*`) surfaces the fallout, as an unrelated symptom far from the real cause
+- `tsconfig.esm-strict.json` is a separate, dedicated tsconfig (not a change to `tsconfig.base.json` itself) scoped to `packages/*/*/src` only — flipping the whole monorepo's resolution mode would also demand fixing every relative import in `bench/`, `e2e/`, and `scripts/`, none of which ship in a published package or are affected by a downstream consumer's resolution mode

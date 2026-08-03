@@ -1,7 +1,7 @@
 import { AxiosError, type AxiosResponse } from 'axios'
 import { describe, expect, it } from 'vitest'
 
-import { mapErrorToEvent } from './error-to-event'
+import { mapErrorToEvent } from './error-to-event.js'
 
 function createError(code?: string, status?: number): AxiosError {
   const error = new AxiosError('error')

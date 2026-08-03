@@ -1,9 +1,9 @@
 import { createRefreshQueue } from '@codeminity/request-core'
 
-import { performRequest } from './shared/perform-request'
+import { performRequest } from './shared/perform-request.js'
 
-import type { Config } from './shared/config.interface'
-import type { FetchRequestInit } from './shared/request-config.interface'
+import type { Config } from './shared/config.interface.js'
+import type { FetchRequestInit } from './shared/request-config.interface.js'
 
 /**
  * Creates a `fetch`-compatible function wired with auth lifecycle, refresh

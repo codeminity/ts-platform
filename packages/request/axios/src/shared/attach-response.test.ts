@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createAxiosMock } from '../mocks/create-axios'
+import { createAxiosMock } from '../mocks/create-axios.js'
 
-import { attachResponseInterceptor } from './attach-response'
-import { handleResponseError } from './response-error'
+import { attachResponseInterceptor } from './attach-response.js'
+import { handleResponseError } from './response-error.js'
 
-import type { Config } from './config.interface'
+import type { Config } from './config.interface.js'
 import type { AxiosResponse } from 'axios'
 
 vi.mock('./response-error.ts', () => ({

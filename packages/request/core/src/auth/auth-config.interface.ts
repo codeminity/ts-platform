@@ -1,4 +1,4 @@
-import type { TokenMode } from './token-mode.type'
+import type { TokenMode } from './token-mode.type.js'
 
 /**
  * Configuration for the auth/token lifecycle: how tokens are read, checked for

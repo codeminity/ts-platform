@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { emitterCallback } from './emit-error-event'
+import { emitterCallback } from './emit-error-event.js'
 
-import type { EventCallbacks } from './emit-error-event'
+import type { EventCallbacks } from './emit-error-event.js'
 
 describe('emitterCallback', () => {
   it('calls onEvent and onError when both callbacks are provided', async () => {

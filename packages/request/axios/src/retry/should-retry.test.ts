@@ -1,9 +1,9 @@
 import { AxiosError, type AxiosResponse } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 
-import { shouldRetry } from './should-retry'
+import { shouldRetry } from './should-retry.js'
 
-import type { RetryConfig } from './retry-config.interface'
+import type { RetryConfig } from './retry-config.interface.js'
 
 function createError(options?: { code?: string; status?: number }): AxiosError {
   const error = new AxiosError('error')

@@ -1,9 +1,9 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
 
-import { classifyOutcome } from './outcome-to-event'
+import { classifyOutcome } from './outcome-to-event.js'
 
 const KNOWN_STATUS_EVENTS = new Map([
   [400, 'bad_request'],

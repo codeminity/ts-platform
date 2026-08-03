@@ -1,10 +1,10 @@
 import axios from 'axios'
 
-import { create } from './create'
-import { getAxiosInstance } from './shared/get-axios-instance'
+import { create } from './create.js'
+import { getAxiosInstance } from './shared/get-axios-instance.js'
 
-import type { Config } from './shared/config.interface'
-import type { RequestConfig } from './shared/request-config.interface'
+import type { Config } from './shared/config.interface.js'
+import type { RequestConfig } from './shared/request-config.interface.js'
 
 declare module 'axios' {
   interface CreateAxiosDefaults {
@@ -20,12 +20,12 @@ declare module 'axios' {
 export type { AuthConfig } from '@codeminity/request-core'
 export { TokenModeEnum } from '@codeminity/request-core'
 
-export type { CallbackConfig } from './shared/callback-config.interface'
-export type { Config } from './shared/config.interface'
-export type { ErrorEvent } from './errors/error-event.type'
-export { ErrorEventEnum } from './errors/error-event.enum'
-export type { RequestConfig } from './shared/request-config.interface'
-export type { RetryConfig } from './retry/retry-config.interface'
+export type { CallbackConfig } from './shared/callback-config.interface.js'
+export type { Config } from './shared/config.interface.js'
+export type { ErrorEvent } from './errors/error-event.type.js'
+export { ErrorEventEnum } from './errors/error-event.enum.js'
+export type { RequestConfig } from './shared/request-config.interface.js'
+export type { RetryConfig } from './retry/retry-config.interface.js'
 
 /**
  * The default export: a drop-in replacement for Axios's own default export,

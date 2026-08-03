@@ -1,4 +1,4 @@
-import type { ErrorEvent } from '../errors/error-event.type'
+import type { ErrorEvent } from '../errors/error-event.type.js'
 import type { AxiosError } from 'axios'
 
 /**
