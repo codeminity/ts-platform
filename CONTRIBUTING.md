@@ -18,6 +18,14 @@ pnpm test
 
 `pnpm install` also sets up the Husky git hooks (commit-msg, pre-commit) automatically — no separate setup step needed. The only prerequisites are Node.js `^22.13.0 || >=24.0.0` and pnpm, whose exact version is pinned via `packageManager` in `package.json` and installed automatically by Corepack.
 
+To reset back to a fresh-clone state:
+
+```bash
+pnpm run clean
+```
+
+Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/clean.ts`, not `git clean`, so it can never reach further than intended.
+
 ---
 
 ## Core Principles
@@ -181,10 +189,10 @@ Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package i
 
 ## Full Local Check
 
-`pnpm run check` runs every check CI runs — build, lint, typecheck, `test:coverage`, `validate:deps`, `validate:api`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job, plus mutation testing and browser e2e tests (both otherwise separate/manual):
+`pnpm run full-check` runs every check CI runs — build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job, plus mutation testing and browser e2e tests (both otherwise separate/manual):
 
 ```bash
-pnpm run check
+pnpm run full-check
 ```
 
 It does not stop at the first failure — every check runs regardless, and a summary at the end shows what passed and what didn't, so one run surfaces everything wrong instead of one problem at a time. This is slow (mutation testing and e2e are included); reach for the individual `pnpm run validate:*` / `pnpm test` scripts during normal development, and run the full thing before opening a PR.
@@ -195,7 +203,7 @@ It does not stop at the first failure — every check runs regardless, and a sum
 
 Before submitting:
 
-- `pnpm run check` passes (or at minimum: tests, lint, and build pass)
+- `pnpm run full-check` passes (or at minimum: tests, lint, and build pass)
 - scope is minimal
 - changes are well described
 
