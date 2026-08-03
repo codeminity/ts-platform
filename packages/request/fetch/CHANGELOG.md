@@ -1,5 +1,34 @@
 # @codeminity/fetch
 
+## 0.2.1
+
+### 🐛 Fixes
+
+- Fix relative imports in published type declarations missing explicit `.js` extensions, which silently broke type resolution for consumers using `moduleResolution: "NodeNext"`/`"node16"` (the correct setting for a real Node.js app). A new `pnpm run validate:node-resolution` check (CI-gated) prevents this from regressing.
+- Fix the automatic git-tag/GitHub-Release step after a publish incorrectly treating a tag as already existing (it checked a local-only ref instead of the remote), which silently skipped creating and pushing the real signed tag; added a manual `workflow_dispatch` recovery path as a stopgap.
+
+### 🛠 Improvements
+
+- Add `pnpm run full-check`, a single command that runs every CI check locally (build, lint, format, typecheck, test, dependency architecture, API/docs validation, package verification, bundle size, mutation testing, browser e2e) without stopping at the first failure.
+- Add `pnpm run clean`, an explicit allowlist-based reset to a fresh-clone state, and enforce Prettier formatting as a real CI gate.
+- Add a benchmark suite (Vitest's built-in `bench()`) covering every performance-sensitive hot path across all three packages.
+- Add bundle-size monitoring (`size-limit`) as a CI gate.
+- Bump `turbo` to v2.10.8 and `tsx` to v4.23.4.
+
+### 🔒 Security
+
+- Fix OpenSSF Scorecard `Token-Permissions` and `Dangerous-Workflow` alerts on `release.yml`.
+- Make the Socket.dev security scan retry on transient report-fetch failures instead of failing CI spuriously.
+
+### 📚 Documentation
+
+- Add a second maintainer for repository continuity.
+
+### Dependency Updates
+
+- Updated dependencies [39c39e6]
+  - @codeminity/request-core@0.8.1
+
 ## 0.2.0
 
 ### 🔒 Security
