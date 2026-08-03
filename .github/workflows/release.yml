@@ -177,11 +177,17 @@ jobs:
       # In workflow_dispatch recovery mode, the tag list comes directly
       # from the `tags` input instead of being parsed out of a publish run.
       #
-      # Tag existence is checked via `refs/tags/<tag>` specifically, not a
-      # bare `git rev-parse "<tag>"` — a tag name like "@scope/pkg@1.2.3"
-      # can otherwise be ambiguous against git's own revision syntax
-      # (a leading "@" is shorthand for HEAD), which previously caused a
-      # false "already exists" match that silently skipped real tags.
+      # Tag existence is checked against the REMOTE (`git ls-remote`), not
+      # local refs — `changeset publish` (the `pnpm release` step above)
+      # already creates a local, unsigned tag of the same name as a side
+      # effect of publishing (see @changesets/git's own `tag()` helper), so
+      # a local-only check like `git rev-parse --verify refs/tags/<tag>`
+      # always finds that tag and skips creating our signed one, silently
+      # dropping the push + GitHub Release. This is what caused automatic
+      # tagging to do nothing on 2026-08-02, requiring the workflow_dispatch
+      # recovery path to fix it by hand. The full `refs/tags/<tag>` form
+      # (not a bare tag name) makes the `ls-remote` pattern match only an
+      # exact tag ref, not any other ref that happens to share a suffix.
       - name: Tag & release published packages
         env:
           PUBLISH_OUTPUT: ${{ steps.release.outputs.publish_output }}
@@ -203,10 +209,14 @@ jobs:
           fi
 
           echo "$tags" | while IFS= read -r tag; do
-            if git rev-parse --verify --quiet "refs/tags/$tag" >/dev/null 2>&1; then
-              echo "Tag $tag already exists, skipping."
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+              echo "Tag $tag already exists on origin, skipping."
               continue
             fi
+
+            # Drop changesets' own unsigned local tag (if any) before
+            # creating ours — see the comment above this step.
+            git tag -d "$tag" >/dev/null 2>&1 || true
 
             git tag -s "$tag" -m "$tag"
             git push origin "$tag"
