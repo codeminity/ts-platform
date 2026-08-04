@@ -61,7 +61,7 @@ Each layer only talks to the layer directly below it. The application never reac
 
 - `@codeminity/axios` depends on `axios` and `@codeminity/request-core`.
 - `@codeminity/axios` **never** depends on application code, frameworks, or specific backend conventions.
-- `@codeminity/request-core` has **no dependency on Axios** — it's transport-agnostic by design, which is what makes it reusable across future adapters (`fetch`, `undici`, etc.).
+- `@codeminity/request-core` has **no dependency on Axios** — it's transport-agnostic by design, which is what makes it reusable across other adapters (see [`@codeminity/fetch`](../fetch)) and any future ones this ecosystem adds.
 - Applications should depend only on the public export (`import axios from '@codeminity/axios'`), never on internal modules.
 
 This one-directional dependency graph is what keeps the system testable in isolation: `request-core` can be fully unit-tested without ever creating an Axios instance, and `@codeminity/axios` can be tested against a mocked `request-core`.
@@ -122,15 +122,15 @@ If your application creates **multiple instances against the same backend** and 
 
 ## Extending to Other Transports
 
-Because `@codeminity/request-core` has no Axios dependency, the same lifecycle engine can back other transport adapters:
+Because `@codeminity/request-core` has no Axios dependency, the same lifecycle engine backs other transport adapters too — [`@codeminity/fetch`](../fetch) is a real, published example of this, not a hypothetical:
 
 ```text
-@codeminity/axios     ──┐
-@codeminity/fetch      ──┼──▶ @codeminity/request-core
-@codeminity/undici     ──┘
+@codeminity/axios      ──┐
+@codeminity/fetch       ──┼──▶ @codeminity/request-core
+(other adapters)        ──┘
 ```
 
-Each adapter would be responsible only for translating its transport's request/response shape into the primitives `request-core` understands — the auth, retry, and refresh logic would not need to be reimplemented.
+Each adapter is responsible only for translating its transport's request/response shape into the primitives `request-core` understands — the auth, retry, and refresh logic doesn't need to be reimplemented per adapter. See [`@codeminity/fetch`'s ARCHITECTURE.md](../fetch/ARCHITECTURE.md#relationship-to-codeminityaxios) for how its resolve/throw contract differs from this package's while sharing the same underlying engine.
 
 ## Non-Goals
 
