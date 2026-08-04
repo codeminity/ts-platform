@@ -10,6 +10,7 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 - [ADR-002: No custom `timeout` config — classify `AbortSignal.timeout()` instead](#adr-002-no-custom-timeout-config--classify-abortsignaltimeout-instead)
 - [ADR-003: No default export](#adr-003-no-default-export)
 - [ADR-004: Streaming request bodies + retries is a documented limitation, not solved](#adr-004-streaming-request-bodies--retries-is-a-documented-limitation-not-solved)
+- [ADR-005: A broken `shouldRetry`/`getRetryDelay` fails safe, not loud](#adr-005-a-broken-shouldretrygetretrydelay-fails-safe-not-loud)
 
 ---
 
@@ -50,6 +51,16 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 **Decision:** This package does not buffer or clone stream bodies to make them retry-safe. It's documented as a known limitation in the README: don't combine a `ReadableStream` request body with `retries > 0`.
 
 **Consequences:** Keeps the retry implementation simple and avoids silently buffering arbitrarily large streams into memory on every consumer's behalf. A caller who genuinely needs both (rare — most retryable requests have small, buffer-friendly bodies: JSON, form data) is responsible for constructing a fresh body per attempt themselves, e.g. via a custom `shouldRetry`/manual retry loop instead of this package's built-in one.
+
+---
+
+## ADR-005: A broken `shouldRetry`/`getRetryDelay` fails safe, not loud
+
+**Context:** `handleRetry` called the user-supplied `shouldRetry`/`getRetryDelay` with no try/catch. If either threw — a bug in the caller's own predicate — the exception replaced the original `FetchOutcome` all the way up the call stack, and `onEvent`/`onError` never fired for the real failure, since the code path that calls them sits after the now-aborted `handleRetry` call.
+
+**Decision:** `handleRetry` catches a throw from `shouldRetry` and treats it as "don't retry" (`false`), and catches a throw from `getRetryDelay` and falls back to `config.retryDelay ?? 0`, in both cases exactly as if the callback had returned normally with the safe default.
+
+**Consequences:** A bug in a caller's own retry callback no longer masks the real failure or silently drops its lifecycle event — the original outcome still reaches `onEvent`/`onError` unchanged. The tradeoff: the callback's own exception is swallowed with no signal of its own, matching how `emitterCallback` already swallows a failing `onEvent`/`onError` — consistent with this package's existing house style rather than introducing new logging infrastructure for one callback family.
 
 ---
 
