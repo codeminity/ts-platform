@@ -60,9 +60,9 @@ This document records significant design decisions for `@codeminity/request-core
 
 **Context:** Module-level mutable state is a common source of test pollution (one test's state leaking into another) and of surprising behavior when a package is used in more than one place in an application.
 
-**Decision:** All state this package manages (refresh-in-flight status, queued callers) is scoped to the `RefreshQueue` instance the caller creates and holds, never stored at module scope.
+**Decision:** All state this package manages (refresh-in-flight status, queued callers) is scoped to the `RefreshQueue` instance the caller creates and holds, never stored at module scope — with one narrow, documented exception: `warnIfInsecureUrl`'s per-origin dedup cache (`warnedOrigins` in `src/auth/warn-insecure-url.ts`) is process-wide by design. Its job is "warn about this insecure origin once," which is a property of the _origin_, not of any particular caller — deduping per `RefreshQueue`/adapter instance instead would mean the same misconfigured `baseURL` re-warns once per client instance, which defeats the point of deduping at all.
 
-**Consequences:** Multiple independent `RefreshQueue` instances never interfere with each other, and tests don't need to reset module state between runs. Adapters that want shared state across multiple client instances have to do so explicitly, by sharing one `RefreshQueue` — nothing here does it implicitly on their behalf.
+**Consequences:** Multiple independent `RefreshQueue` instances never interfere with each other, and tests don't need to reset module state between runs. Adapters that want shared state across multiple client instances have to do so explicitly, by sharing one `RefreshQueue` — nothing here does it implicitly on their behalf. The one exception above means two unrelated adapter instances hitting the same insecure origin only produce one console warning between them, not two — intentional, not a leak. Because the state is module-scoped, tests exercising it use distinct origins per test case (see `warn-insecure-url.test.ts`) rather than resetting shared state between runs.
 
 ## ADR-007: HTTP status classification stays adapter-local
 

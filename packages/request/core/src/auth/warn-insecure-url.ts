@@ -20,6 +20,12 @@ export function isInsecureUrl(url: string): boolean {
   }
 }
 
+// Deliberately process-wide, not scoped per adapter instance: the goal is
+// "warn about this origin once, period" — if five misconfigured instances
+// all pointed at the same insecure origin each logged their own warning,
+// that's spam, not five independent facts worth knowing. This is a narrow,
+// documented exception to the package's own no-global-state rule — see
+// DECISIONS.md#adr-006-no-global-state.
 const warnedOrigins = new Set<string>()
 
 /**

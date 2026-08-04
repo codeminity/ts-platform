@@ -114,7 +114,7 @@ Retry and refresh are both "response interceptor" concerns: they only activate o
 
 ## Instance Isolation
 
-Each Axios instance created via `axios.create()` gets its own `codeminity` configuration and its own lifecycle state (in-flight refresh tracking, retry counters). Two instances pointed at different `baseURL`s are fully independent of one another.
+Each Axios instance created via `axios.create()` gets its own `codeminity` configuration and its own lifecycle state (in-flight refresh tracking, retry counters). Two instances pointed at different `baseURL`s are fully independent of one another — with one narrow, shared exception inherited from `@codeminity/request-core`: the insecure-URL warning is deduped per origin process-wide, not per instance, so two instances hitting the same insecure origin only warn once between them, intentionally — see [request-core's DECISIONS.md](../core/DECISIONS.md#adr-006-no-global-state).
 
 **Exception — the default export.** `import axios from '@codeminity/axios'` (without calling `.create()`) returns an object built by copying Axios's own default singleton's properties onto it. This means `axios.defaults` and `axios.interceptors` on that default export are the **same object references** as plain Axios's own global singleton — mutating them affects the global Axios instance too, exactly as it would with plain `axios.defaults.baseURL = '...'`. This is intentional, for parity with how plain Axios's default export already behaves; it is **not** true of anything created via `.create()`, which is always fully isolated. If you need isolation, always use `axios.create(...)` rather than configuring the default export directly.
 
