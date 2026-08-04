@@ -3,7 +3,6 @@ name: ts-platform CodeQL config
 paths:
   - packages
   - scripts
-  - apps
 
 paths-ignore:
   - '**/dist'
