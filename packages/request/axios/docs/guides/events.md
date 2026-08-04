@@ -226,7 +226,7 @@ Keep this mapping in one place (e.g., a single `handleApiEvent` module) rather t
 
 - Unit test each handler function directly — they should be plain functions of `(event, error)` with no hidden dependency on the Axios instance.
 - For integration tests, use a mock server returning specific status codes and assert the corresponding event fires with the expected payload shape.
-- Test that `onError` is still called for errors that don't map to any classified `onEvent` case, if your version of the package makes that distinction — check the [API Reference](../../README.md#api-reference) for the exact contract.
+- Test that `onError` fires alongside `onEvent` for a classified HTTP failure, and that it still fires alone when `getToken`/`refreshToken` throws a non-Axios error (in which case `onEvent` can't fire — there's no `AxiosError` to classify).
 
 ## Common Pitfalls
 
