@@ -60,7 +60,9 @@ describe('typecheckExtras', () => {
     )
     mockedRunCommand.mockResolvedValue(undefined)
 
-    await typecheckExtras()
+    const onProgress = vi.fn()
+
+    await typecheckExtras(onProgress)
 
     expect(mockedRunCommand).toHaveBeenCalledTimes(4)
     expect(mockedRunCommand).toHaveBeenCalledWith('pnpm', [
@@ -70,6 +72,15 @@ describe('typecheckExtras', () => {
       'packages/request/axios/e2e/tsconfig.json',
       '--noEmit'
     ])
+    expect(onProgress).toHaveBeenCalledTimes(4)
+    expect(onProgress).toHaveBeenCalledWith('packages/request/axios/e2e/tsconfig.json')
+  })
+
+  it('does not require an onProgress callback', async () => {
+    mockedGlobby.mockResolvedValue([])
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    await expect(typecheckExtras()).resolves.toBeUndefined()
   })
 
   it('propagates a tsc failure', async () => {
