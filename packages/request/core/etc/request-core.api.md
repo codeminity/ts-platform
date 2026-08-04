@@ -11,6 +11,7 @@ export interface AuthConfig {
     onRefreshFail?: (error: unknown) => void | Promise<void>;
     onRefreshStart?: () => void | Promise<void>;
     onRefreshSuccess?: () => void | Promise<void>;
+    refreshTimeout?: number;
     refreshToken?: () => void | Promise<void>;
     tokenMode?: TokenMode;
 }
