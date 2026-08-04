@@ -421,7 +421,7 @@ Returns `(input: RequestInfo | URL, init?: FetchRequestInit) => Promise<Response
 
 `Config` (passed to `createFetch`) combines:
 
-- `AuthConfig` (re-exported from `@codeminity/request-core`): `tokenMode`, `getToken`, `isTokenExpired`, `refreshToken`, `onRefreshStart`, `onRefreshSuccess`, `onRefreshFail`
+- `AuthConfig` (re-exported from `@codeminity/request-core`): `tokenMode`, `getToken`, `isTokenExpired`, `refreshToken`, `refreshTimeout`, `onRefreshStart`, `onRefreshSuccess`, `onRefreshFail`
 - `CallbackConfig`: `onEvent`, `onError`
 - `RetryConfig`: `retries`, `retryDelay`, `retryOnStatuses`, `shouldRetry`, `getRetryDelay`
 

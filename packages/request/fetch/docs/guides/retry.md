@@ -205,3 +205,4 @@ If you see these events spiking for a specific endpoint, that's usually a sign t
 - **Listing `401` in `retryOnStatuses`** without also making the retry decision flip `isTokenExpired`, instead of relying on the auth/refresh lifecycle to do the right thing on its own — it won't, see [Combining Retry with Auth](#combining-retry-with-auth).
 - **Assuming retries are on by default.** They're not.
 - **Trying to read the response body inside `shouldRetry`.** It's synchronous — see [Error Classification](#error-classification).
+- **Assuming a bug in `shouldRetry`/`getRetryDelay` surfaces as an error.** It doesn't — a throw is caught and treated as its safe default (`shouldRetry` → don't retry, `getRetryDelay` → fall back to `retryDelay`/`0`), so the _original_ request failure is what your `onEvent`/`onError` sees, not a bug in your own callback. See [DECISIONS.md](../../DECISIONS.md#adr-005-a-broken-shouldretrygetretrydelay-fails-safe-not-loud).

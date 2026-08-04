@@ -234,3 +234,4 @@ Keep this mapping in one place (e.g., a single `handleApiEvent` module) rather t
 - **Not sampling high-volume events**, flooding a monitoring pipeline during outages.
 - **Forgetting `auth_refresh_failed` needs explicit handling** — without it, a failed refresh can leave the app silently stuck making requests that will keep failing.
 - **Logging full error objects that may include the `Authorization` header** — scrub sensitive headers before sending errors to third-party logging services.
+- **Assuming `onError` only fires for errors `onEvent` didn't see.** It fires for every failed outcome, alongside `onEvent` — see [DECISIONS.md](../../DECISIONS.md#adr-008-onerror-always-fires-alongside-onevent). If you need to tell the two cases apart, check whether `onEvent` was also called (or its event name), not whether `onError` fired at all.
