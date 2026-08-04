@@ -5,10 +5,12 @@ export interface CheckStep {
   args: string[]
 }
 
-// Mirrors ci.yml's "Test / Build / Lint" job order exactly (build, then
-// lint, then typecheck, then test), plus the slow checks (mutation, e2e)
-// that only run manually / via separate jobs there.
+// Mirrors ci.yml's "Test / Build / Lint" job order exactly (install, then
+// audit, then build, then lint, then typecheck, then test), plus the slow
+// checks (mutation, e2e) that only run manually / via separate jobs there.
 export const CHECK_STEPS: CheckStep[] = [
+  { name: 'Install Dependencies', args: ['install', '--frozen-lockfile'] },
+  { name: 'Audit Dependencies', args: ['audit', '--audit-level=moderate'] },
   { name: 'Build', args: ['run', 'build'] },
   { name: 'Lint', args: ['run', 'lint'] },
   { name: 'Format Validation', args: ['run', 'validate:format'] },

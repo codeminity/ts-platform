@@ -15,9 +15,15 @@ beforeEach(() => {
 })
 
 describe('CHECK_STEPS', () => {
-  it('runs every step through pnpm', () => {
+  it('gives every step a name and a non-empty pnpm invocation', () => {
     expect(CHECK_STEPS.length).toBeGreaterThan(0)
-    expect(CHECK_STEPS.every((step) => step.args[0] === 'run')).toBe(true)
+    expect(CHECK_STEPS.every((step) => step.name.length > 0 && step.args.length > 0)).toBe(true)
+  })
+
+  it('installs and audits dependencies before any `pnpm run` script', () => {
+    expect(CHECK_STEPS[0]?.args).toEqual(['install', '--frozen-lockfile'])
+    expect(CHECK_STEPS[1]?.args).toEqual(['audit', '--audit-level=moderate'])
+    expect(CHECK_STEPS.slice(2).every((step) => step.args[0] === 'run')).toBe(true)
   })
 })
 
