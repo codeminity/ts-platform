@@ -23,6 +23,9 @@ export async function typecheckExtras(): Promise<void> {
   const tsconfigs = await findExtraTsconfigs()
 
   for (const tsconfig of tsconfigs) {
+    // `tsc --noEmit` prints nothing on success, so without this the whole
+    // loop looks hung until the very last one finishes.
+    console.log(`  checking ${tsconfig}...`)
     await runCommand('pnpm', ['exec', 'tsc', '-p', tsconfig, '--noEmit'])
   }
 }
