@@ -638,9 +638,11 @@ import axios from '@codeminity/axios'
 
 const api = axios.create({
   codeminity: {
+    // Log the message/status, never the whole error object — it carries
+    // the live Authorization header via `error.config.headers`.
     onEvent: async (event, error) => {
       console.log(event)
-      console.error(error)
+      console.error(error.message, error.response?.status)
     }
   }
 })
@@ -653,7 +655,7 @@ import axios from '@codeminity/axios'
 
 const api = axios.create({
   codeminity: {
-    onError: async (error) => console.error(error)
+    onError: async (error) => console.error(error instanceof Error ? error.message : error)
   }
 })
 ```
