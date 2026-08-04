@@ -10,13 +10,34 @@ export async function handleRetry(
   attempt: number,
   config: RetryConfig
 ): Promise<boolean> {
-  const canRetry = shouldRetry(outcome, attempt, config)
+  // A broken `shouldRetry` shouldn't replace the original failure or
+  // suppress its onEvent/onError telemetry — swallow it and let `canRetry`
+  // stay `false`, the same fail-safe outcome as if it had returned false
+  // normally; the caller still sees `outcome`, not this callback's own.
+  let canRetry = false
+
+  try {
+    canRetry = shouldRetry(outcome, attempt, config)
+  } catch {
+    /* empty */
+  }
 
   if (!canRetry) {
     return false
   }
 
-  const retryDelay = config.getRetryDelay?.(attempt, outcome) ?? config.retryDelay ?? 0
+  let retryDelay: number
+
+  try {
+    // Stryker disable next-line OptionalChaining: equivalent mutant —
+    // without `?.`, a missing `getRetryDelay` throws instead of returning
+    // `undefined`, which the catch below turns into the exact same
+    // `config.retryDelay ?? 0` fallback the `??` chain would have computed
+    // anyway.
+    retryDelay = config.getRetryDelay?.(attempt, outcome) ?? config.retryDelay ?? 0
+  } catch {
+    retryDelay = config.retryDelay ?? 0
+  }
 
   if (retryDelay > 0) {
     await delay(retryDelay)

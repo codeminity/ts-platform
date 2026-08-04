@@ -14,6 +14,7 @@ This document records significant design decisions for `@codeminity/axios`, usin
 - [ADR-006: Per-request retry config is merged with global config, not replaced](#adr-006-per-request-retry-config-is-merged-with-global-config-not-replaced)
 - [ADR-007: `skipAuth` takes precedence over `tokenMode: COOKIE`](#adr-007-skipauth-takes-precedence-over-tokenmode-cookie)
 - [ADR-008: `onError` always fires alongside `onEvent`](#adr-008-onerror-always-fires-alongside-onevent)
+- [ADR-009: A broken `shouldRetry`/`getRetryDelay` fails safe, not loud](#adr-009-a-broken-shouldretrygetretrydelay-fails-safe-not-loud)
 
 ---
 
@@ -96,6 +97,16 @@ This document records significant design decisions for `@codeminity/axios`, usin
 **Decision:** `onError` fires for every failed outcome, unconditionally, alongside `onEvent` whenever `onEvent` is also applicable. `onEvent` keeps its existing, narrower scope: it only fires when the failure is a real `AxiosError` (true for every HTTP-originated failure; not true for an arbitrary exception thrown by a user's own `getToken`/`refreshToken`, since there's no `AxiosError` to hand it).
 
 **Consequences:** Both callback paths (`handleAuthRequest`, `handleResponseError`) now agree, and the public contract matches `@codeminity/request-core`'s own canonical `EventCallbacks` doc ("`onError`: called for every failed outcome, alongside `onEvent`") and `@codeminity/fetch`'s identical wording. Anyone who relied on the old either/or behavior — using `onError` as a catch-all specifically for errors `onEvent` didn't see — will now also see `onError` fire for classified HTTP failures; `onEvent`'s event name (or its absence, for a non-Axios auth exception) is still the reliable signal for telling the two cases apart.
+
+---
+
+## ADR-009: A broken `shouldRetry`/`getRetryDelay` fails safe, not loud
+
+**Context:** `handleRetry` called the user-supplied `shouldRetry`/`getRetryDelay` with no try/catch. If either threw — a bug in the caller's own predicate — the exception replaced the original `AxiosError` all the way up the call stack, and `onEvent`/`onError` never fired for the real failure, since the code path that calls them (in `response-error.ts`) sits after the now-aborted `handleRetry` call.
+
+**Decision:** `handleRetry` catches a throw from `shouldRetry` and treats it as "don't retry" (`false`), and catches a throw from `getRetryDelay` and falls back to `config.retryDelay ?? 0`, in both cases exactly as if the callback had returned normally with the safe default.
+
+**Consequences:** A bug in a caller's own retry callback no longer masks the real failure or silently drops its lifecycle event — the original error still reaches `onEvent`/`onError` unchanged (see [ADR-008](#adr-008-onerror-always-fires-alongside-onevent)). The tradeoff: the callback's own exception is swallowed with no signal of its own, matching how `emitterCallback` already swallows a failing `onEvent`/`onError` — consistent with this package's existing house style rather than introducing new logging infrastructure for one callback family.
 
 ---
 
