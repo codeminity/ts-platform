@@ -82,7 +82,7 @@ The adapter is responsible for everything before and after this flow — sending
 - No framework dependency
 - No HTTP client dependency
 - No protocol-specific vocabulary — event/outcome classification (HTTP status codes, GraphQL error codes, WebSocket close codes, and similar) stays adapter-local; see [DECISIONS.md](./DECISIONS.md)
-- No global state
+- No global state, with one narrow exception (`warnIfInsecureUrl`'s per-origin dedup cache, intentionally process-wide) — see [DECISIONS.md](./DECISIONS.md#adr-006-no-global-state)
 - Fully deterministic async behavior
 
 ## Public API

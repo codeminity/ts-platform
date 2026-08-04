@@ -81,7 +81,7 @@ Deep imports are forbidden.
 
 ## State Rule
 
-- no global mutable state, with one documented exception: `@codeminity/axios`'s default export intentionally shares Axios's own global `.defaults`/`.interceptors` for parity with plain Axios — see [Instance Isolation](./packages/request/axios/ARCHITECTURE.md#instance-isolation). Anything created via `axios.create()` is fully isolated.
+- no global mutable state, with two documented exceptions: `@codeminity/axios`'s default export intentionally shares Axios's own global `.defaults`/`.interceptors` for parity with plain Axios — see [Instance Isolation](./packages/request/axios/ARCHITECTURE.md#instance-isolation); and `@codeminity/request-core`'s `warnIfInsecureUrl` keeps a process-wide per-origin dedup cache so a misconfigured `baseURL` warns once regardless of how many adapter instances hit it — see [request-core's DECISIONS.md](./packages/request/core/DECISIONS.md#adr-006-no-global-state). Anything created via `axios.create()`/`createFetch()` is otherwise fully isolated.
 - state must be explicit and scoped
 
 ---

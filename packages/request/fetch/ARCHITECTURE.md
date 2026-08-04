@@ -111,7 +111,7 @@ On the happy path (successful response, valid token), the only added cost over c
 
 ## Instance Isolation
 
-Each `createFetch(config)` call gets its own closure over `config` and its own refresh queue (via `createRefreshQueue()` from `@codeminity/request-core`) — two instances are fully independent, with no shared mutable state, module-level singletons, or cross-instance coordination of any kind. There is no equivalent to Axios's default-export singleton exception (see `@codeminity/axios`'s `ARCHITECTURE.md#instance-isolation`) — there's no natural "default instance" for `fetch` to mimic (see [DECISIONS.md](./DECISIONS.md)), so every `createFetch()` call is isolated, full stop.
+Each `createFetch(config)` call gets its own closure over `config` and its own refresh queue (via `createRefreshQueue()` from `@codeminity/request-core`) — two instances are fully independent. There is no equivalent to Axios's default-export singleton exception (see `@codeminity/axios`'s `ARCHITECTURE.md#instance-isolation`) — there's no natural "default instance" for `fetch` to mimic (see [DECISIONS.md](./DECISIONS.md)), so every `createFetch()` call is isolated on everything this package itself owns. One narrow exception is inherited from `@codeminity/request-core`, not introduced here: the insecure-URL warning is deduped per origin process-wide, so two instances hitting the same insecure origin only warn once between them, intentionally — see [request-core's DECISIONS.md](../core/DECISIONS.md#adr-006-no-global-state).
 
 ## Relationship to `@codeminity/axios`
 
