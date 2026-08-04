@@ -28,11 +28,11 @@ This document records significant design decisions for `@codeminity/axios`, usin
 
 ## ADR-002: Lifecycle logic lives in `@codeminity/request-core`, not in this package
 
-**Context:** Auth lifecycle, refresh coordination, and retry orchestration are transport-independent concerns. If they were implemented directly inside the Axios adapter, they couldn't be reused if the ecosystem later added a `fetch` or `undici` adapter.
+**Context:** Auth lifecycle, refresh coordination, and retry orchestration are transport-independent concerns. If they were implemented directly inside the Axios adapter, sharing them with any other transport adapter would have meant duplicating the logic rather than reusing it.
 
 **Decision:** All non-Axios-specific logic is implemented in `@codeminity/request-core`, which has no dependency on Axios. `@codeminity/axios` is limited to interceptor wiring and configuration forwarding.
 
-**Consequences:** Enables future adapters to share the same tested lifecycle engine. Adds one extra package boundary to reason about, and any change to lifecycle behavior requires touching two packages (or at minimum, understanding which one owns the change) — see [ARCHITECTURE.md](./ARCHITECTURE.md).
+**Consequences:** Other adapters can share the same tested lifecycle engine instead of reimplementing it — [`@codeminity/fetch`](../fetch) is the package that proved this out, and any adapter added later follows the same path. Adds one extra package boundary to reason about, and any change to lifecycle behavior requires touching two packages (or at minimum, understanding which one owns the change) — see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ---
 

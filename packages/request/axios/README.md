@@ -324,7 +324,7 @@ Application Response
 
 ### Why This Architecture?
 
-Keeping lifecycle logic outside the HTTP client gives you easier maintenance, reusable infrastructure, consistent behavior across adapters, less duplicated code, and clearer package boundaries. The same architecture can extend to other transports (`fetch`, `undici`, custom clients) while keeping `@codeminity/request-core` as the shared foundation.
+Keeping lifecycle logic outside the HTTP client gives you easier maintenance, reusable infrastructure, consistent behavior across adapters, less duplicated code, and clearer package boundaries. [`@codeminity/fetch`](https://www.npmjs.com/package/@codeminity/fetch) is built on the same `@codeminity/request-core` foundation, proving the architecture extends to other transports without reimplementing the lifecycle logic.
 
 ---
 

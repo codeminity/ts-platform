@@ -1,46 +1,17 @@
 # @codeminity/request-core
 
+> The framework-agnostic request lifecycle engine behind Codeminity's HTTP adapters — no HTTP client of its own.
+
 [![npm version](https://img.shields.io/npm/v/@codeminity/request-core.svg)](https://www.npmjs.com/package/@codeminity/request-core)
-[![license](https://img.shields.io/npm/l/%40codeminity%2Frequest-core.svg)](../../../LICENSE)
+[![license](https://img.shields.io/npm/l/%40codeminity%2Frequest-core.svg)](https://github.com/codeminity/ts-platform/blob/main/LICENSE)
 [![build](https://img.shields.io/github/actions/workflow/status/codeminity/ts-platform/ci.yml)](https://github.com/codeminity/ts-platform/actions)
 
-This package provides the foundational logic for managing request-related workflows such as authentication lifecycle, retry coordination, and safe concurrency control.
-
-It is intentionally framework-agnostic and does not implement any HTTP client itself. It is currently consumed by [`@codeminity/axios`](../axios).
-
----
-
-## Overview
-
-`@codeminity/request-core` is responsible for handling the internal mechanics of request orchestration, including:
-
-- Authentication state management
-- Token expiration handling
-- Refresh token coordination
-- Request retry strategies
-- Safe concurrency control for async operations
-
-It is designed to be consumed by higher-level adapters and should not be used directly as a request client.
-
----
-
-## Who Should Use This
-
-**Nobody, directly.** This package is the internal engine behind Codeminity's own transport adapters — [`@codeminity/axios`](../axios) today, with `fetch`/`undici`/`graphql-request` adapters planned. Application developers should install and use an adapter package instead; this one has no HTTP client of its own and isn't a useful dependency on its own.
-
-If you're building a **new adapter** inside this ecosystem, this is the package you depend on:
-
-```bash
-pnpm add @codeminity/request-core
-```
-
-## Example: how an adapter wires this in
+`@codeminity/request-core` implements the transport-independent parts of a request lifecycle — authentication state, refresh coordination under concurrency, retry decisions, and event classification — so that an HTTP adapter only has to translate its own transport's request/response shape into these primitives, instead of reimplementing the lifecycle itself.
 
 ```ts
 import { createRefreshQueue, handleRefreshToken, TokenModeEnum } from '@codeminity/request-core'
 
 declare function isExpired(token: string | null): boolean
-
 declare function refreshFromServer(): Promise<string>
 
 const refreshQueue = createRefreshQueue()
@@ -59,117 +30,54 @@ await handleRefreshToken(
 )
 ```
 
-This is the primitive that transport adapters (like `@codeminity/axios`) wire into their own request/response interceptors — see [its ARCHITECTURE.md](../axios/ARCHITECTURE.md) for how that wiring works in practice.
+This is the primitive that transport adapters wire into their own request/response interceptors — see [`@codeminity/axios`'s ARCHITECTURE.md](../axios/ARCHITECTURE.md#request-lifecycle) or [`@codeminity/fetch`'s ARCHITECTURE.md](../fetch/ARCHITECTURE.md#request-lifecycle) for how each one wires it in practice.
 
-## Example: emitting a failure event
+---
 
-`emitterCallback` is the shared piece of an adapter's own error-event pipeline — the adapter still owns classifying its own transport's error into an event name (e.g. mapping an HTTP status code, a GraphQL error code, or a WebSocket close code):
+## Table of Contents
 
-```ts
-import { emitterCallback, type EventCallbacks } from '@codeminity/request-core'
+- [Who Should Use This](#who-should-use-this)
+- [Installation](#installation)
+- [Core Concepts](#core-concepts)
+- [API Reference](#api-reference)
+- [Emitting Events](#emitting-events)
+- [Test Utilities](#test-utilities)
+- [Design Constraints](#design-constraints)
+- [Testing Strategy](#testing-strategy)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-interface MyOutcome {
-  status?: number
-  error?: unknown
-}
+---
 
-declare const callbacks: EventCallbacks<string, MyOutcome>
-declare const outcome: MyOutcome
-declare const event: string
+## Who Should Use This
 
-await emitterCallback(event, outcome, callbacks)
+**Not application code, directly.** This package is the internal engine behind Codeminity's HTTP adapters — [`@codeminity/axios`](../axios) and [`@codeminity/fetch`](../fetch) are both built on it today. Application developers should install and use one of those adapter packages instead; this package has no HTTP client of its own and isn't a useful dependency by itself.
+
+If you're building a **new adapter** for this ecosystem — for an HTTP client, a GraphQL client, or anything else with an authenticated-request lifecycle — this is the package you depend on.
+
+## Installation
+
+```bash
+pnpm add @codeminity/request-core
 ```
 
----
+## Core Concepts
 
-## Test Utilities
+**Token handling flow.** Every authenticated request follows the same shape regardless of transport: check whether a token exists, check whether it's expired, trigger a refresh if needed, and avoid triggering a second refresh while one is already in flight. `handleRefreshToken` implements this flow once so no adapter has to reimplement it.
 
-For adapter packages that need to test against this package's config shapes, factory-based mocks are published separately so `vitest` never ends up in the main production bundle:
+**Refresh queue.** `createRefreshQueue()` guarantees that only one refresh operation runs at a time. If five requests discover an expired token simultaneously, only one `refreshToken` call is made; the other four await the same in-flight refresh instead of triggering four redundant (and potentially conflicting) refresh calls. See [DECISIONS.md](./DECISIONS.md) for why this is a queue rather than a simpler in-flight boolean flag.
 
-```ts
-import { createAuthConfig, createRefreshQueue } from '@codeminity/request-core/test-utils'
-```
+**Event classification.** `emitterCallback` is the shared plumbing of an adapter's error-event pipeline. The adapter still owns classifying its own transport's failure into an event name — mapping an HTTP status code, a GraphQL error code, or a WebSocket close code is transport-specific and stays in the adapter, not here (see [Design Constraints](#design-constraints)).
 
----
-
-## Design Principles
-
-### Separation of concerns
-
-This package does not perform network requests.  
-It only defines the logic required to manage request flows.
-
-### Deterministic behavior
-
-All async flows are predictable and testable, with no hidden side effects.
-
-### Single responsibility
-
-Each utility solves one well-defined problem and remains composable.
-
-### No runtime assumptions
-
-No dependency on any HTTP library, framework, or execution environment.
-
----
-
-## Core Responsibilities
-
-### Authentication lifecycle
-
-Handles logic around:
-
-- token validation
-- expiration checks
-- refresh triggering
-
-### Refresh coordination
-
-Ensures that concurrent refresh operations are handled safely by queueing execution and preventing duplicate refresh calls.
-
-### Async control utilities
-
-Provides utilities for:
-
-- delaying execution
-- controlling async flow
-- ensuring predictable sequencing
-
----
-
-## Key Abstractions
-
-### Refresh Queue
-
-A mechanism that ensures only one refresh operation runs at a time.
-
-Subsequent requests are queued and resolved when the active operation completes.
-
-### Token Handling Flow
-
-Defines a structured flow:
-
-1. Check if token exists
-2. Check if token is expired
-3. Trigger refresh if needed
-4. Prevent duplicate refresh calls during concurrent execution
-
-### Safe Async Execution
-
-Utilities that ensure async tasks behave predictably under concurrency.
-
----
-
-## API Surface
-
-The package exposes a minimal and stable API:
+## API Reference
 
 **Functions**
 
-- `handleRefreshToken`
-- `createRefreshQueue`
-- `delay`
-- `emitterCallback`
+- `handleRefreshToken` — runs the token-check → refresh → continue flow described above
+- `createRefreshQueue` — creates a queue guaranteeing a single in-flight refresh
+- `delay` — a promise-based delay utility used by retry backoff
+- `emitterCallback` — shared error-event emission plumbing
 
 **Objects**
 
@@ -188,69 +96,38 @@ The package exposes a minimal and stable API:
 - `RetryConfig`
 - `EventCallbacks`
 
-**`@codeminity/request-core/test-utils`** (separate subpath, for adapter test suites only)
+## Emitting Events
 
-- `createAuthConfig`
-- `createRefreshQueue` (mock, distinct from the real one above)
+```ts
+import { emitterCallback, type EventCallbacks } from '@codeminity/request-core'
 
-These primitives are designed to be composed into higher-level request systems.
+interface MyOutcome {
+  status?: number
+  error?: unknown
+}
 
----
+declare const callbacks: EventCallbacks<string, MyOutcome>
+declare const outcome: MyOutcome
+declare const event: string
 
-## Mental Model
+await emitterCallback(event, outcome, callbacks)
+```
 
-Instead of thinking in terms of HTTP libraries, think in flows:
+## Test Utilities
 
-- Is the token still valid?
-- If not, should it be refreshed?
-- Is a refresh already running?
-- Should this request wait or continue?
+For adapter packages that need to test against this package's config shapes, factory-based mocks are published separately so `vitest` never ends up in the main production bundle:
 
-This package provides the primitives to express those rules clearly.
+```ts
+import { createAuthConfig, createRefreshQueue } from '@codeminity/request-core/test-utils'
+```
 
----
+## Design Constraints
+
+This package is deliberately narrow in scope: no HTTP client dependency, no framework dependency, no global state, no protocol-specific vocabulary (HTTP status codes, GraphQL error codes, and similar stay adapter-local), and fully deterministic async behavior. See [ARCHITECTURE.md](./ARCHITECTURE.md#design-constraints) for the full list and the reasoning behind each constraint.
 
 ## Testing Strategy
 
-This package is fully covered using **Vitest**.
-
-Testing principles:
-
-- Factory-based mocks (no auto-mocking)
-- Deterministic async behavior
-- Fake timers only when necessary
-- Strict TypeScript safety (no `any`)
-- Clear separation of unit concerns
-
----
-
-## Constraints
-
-This package explicitly avoids:
-
-- HTTP client implementation
-- Framework-specific integrations
-- Global state
-- Hidden async behavior
-- Opinionated request pipelines
-
----
-
-## Usage Scope
-
-This is a **low-level infrastructure package**.
-
-It is intended to be used by adapters such as:
-
-- HTTP clients
-- Fetch wrappers
-- Custom request engines
-
-It should not be used directly in application-level code.
-
----
-
----
+Covered with Vitest using factory-based mocks (no auto-mocking), deterministic async behavior, strict TypeScript (no `any`), and fake timers only where a test genuinely needs to control elapsed time.
 
 ## Documentation
 
@@ -261,8 +138,6 @@ It should not be used directly in application-level code.
 ## Contributing
 
 Contributions are welcome. Before opening a pull request, please read [CONTRIBUTING.md](./CONTRIBUTING.md).
-
----
 
 ## License
 

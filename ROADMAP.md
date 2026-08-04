@@ -17,10 +17,12 @@ stable.
   OpenSSF Scorecard, and SBOM generation (see
   [SECURITY.md](./SECURITY.md#continuous-scanning)) continue to run on every
   change; findings get triaged and fixed, not silenced.
-- **Grow governance as the contributor base grows.** The project is
-  currently single-maintainer (see [GOVERNANCE.md](./GOVERNANCE.md)); adding
-  trusted maintainers and formalizing a review process is a priority once
-  there's a sustained contributor base to draw from.
+- **Formalize maintainer growth as the contributor base grows.**
+  [GOVERNANCE.md](./GOVERNANCE.md) already covers project continuity; a
+  defined path to becoming an active-development maintainer and
+  multi-maintainer review requirements are the next step once there's a
+  sustained contributor base to draw from — see
+  [GOVERNANCE.md#becoming-a-maintainer](./GOVERNANCE.md#becoming-a-maintainer).
 - **Evaluate new adapters and packages** for the Codeminity ecosystem based
   on real, demonstrated need — not speculative scope.
 
