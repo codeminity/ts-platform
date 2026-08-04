@@ -190,4 +190,85 @@ describe('handleRefreshToken', () => {
 
     expect(queueA).not.toBe(queueB)
   })
+
+  it('times out and calls onRefreshFail when refreshToken never settles', async () => {
+    const refreshToken = vi.fn().mockReturnValue(
+      new Promise<void>(() => {
+        /* never settles */
+      })
+    )
+    const onFail = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      refreshTimeout: 20,
+      onRefreshFail: onFail
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).rejects.toThrow(
+      'refreshToken did not settle within 20ms'
+    )
+    expect(onFail).toHaveBeenCalledTimes(1)
+  })
+
+  it('succeeds when refreshToken resolves before the timeout, and clears the timer', async () => {
+    const onSuccess = vi.fn()
+    const onFail = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken: vi.fn().mockResolvedValue(undefined),
+      refreshTimeout: 20,
+      onRefreshSuccess: onSuccess,
+      onRefreshFail: onFail
+    })
+
+    const queue = createRefreshQueue()
+
+    await handleRefreshToken(config, queue)
+
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+
+    // If the timer weren't cleared, this would eventually fire onFail too.
+    await new Promise((resolve) => setTimeout(resolve, 40))
+
+    expect(onFail).not.toHaveBeenCalled()
+  })
+
+  it('clears the timeout timer once refreshToken settles', async () => {
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken: vi.fn().mockResolvedValue(undefined),
+      refreshTimeout: 20
+    })
+
+    const queue = createRefreshQueue()
+
+    await handleRefreshToken(config, queue)
+
+    expect(clearTimeoutSpy).toHaveBeenCalledTimes(1)
+
+    clearTimeoutSpy.mockRestore()
+  })
+
+  it('does not apply a timeout when refreshTimeout is not configured', async () => {
+    const onSuccess = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken: vi.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 10))),
+      onRefreshSuccess: onSuccess
+    })
+
+    const queue = createRefreshQueue()
+
+    await handleRefreshToken(config, queue)
+
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
 })

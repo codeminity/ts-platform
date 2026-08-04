@@ -13,6 +13,7 @@ This document records significant design decisions for `@codeminity/request-core
 - [ADR-005: No runtime or framework assumptions](#adr-005-no-runtime-or-framework-assumptions)
 - [ADR-006: No global state](#adr-006-no-global-state)
 - [ADR-007: HTTP status classification stays adapter-local](#adr-007-http-status-classification-stays-adapter-local)
+- [ADR-008: Optional `refreshTimeout`](#adr-008-optional-refreshtimeout)
 
 ---
 
@@ -71,3 +72,13 @@ This document records significant design decisions for `@codeminity/request-core
 **Decision:** The mapping stays in each adapter. `request-core` exposes only `emitterCallback` as generic event-emission plumbing — it never defines what an "event" means for a specific transport.
 
 **Consequences:** "HTTP status code" isn't a concept every consumer of this package shares — `request-core` backs any transport adapter, not just HTTP ones, and a `401` from a REST endpoint isn't the same shape of thing as an authorization failure surfaced through a GraphQL response body or a WebSocket close code. Forcing every consumer to see an HTTP-specific enum sitting next to `TokenModeEnum`, whether or not their transport even has status codes, would misrepresent this package as less protocol-agnostic than it actually is. If a second HTTP-based adapter ever needs the same status-to-event table `@codeminity/axios` and `@codeminity/fetch` already share, the right move is a small dedicated shared package that only HTTP-based adapters depend on (alongside `request-core`, not instead of it) — not folding HTTP-specific vocabulary into the one package every adapter, HTTP or not, has to depend on.
+
+---
+
+## ADR-008: Optional `refreshTimeout`
+
+**Context:** `handleRefreshToken` awaited `refreshToken()` with no time bound. A `refreshToken` that never settles (a hung network request, a dropped connection with no timeout of its own) left every request funneled through that `RefreshQueue` waiting forever, with no error, no event, and no way for the adapter's existing failure handling to ever run.
+
+**Decision:** `AuthConfig` gains an optional `refreshTimeout` (milliseconds). When set, `refreshToken()` races against a timer; if the timer wins, the refresh is treated as failed with a timeout error, which flows through the exact same failure path (`onRefreshFail`, then the adapter's own `onEvent`/`onError`) as any other `refreshToken` rejection. Unset by default — nothing times out unless explicitly configured, consistent with this package having no automatic behavior a caller didn't opt into.
+
+**Consequences:** A hung `refreshToken` now surfaces as a normal, catchable failure instead of an invisible, permanent hang — at the cost of one new public config field. This can't rescue a `refreshToken` that blocks the event loop synchronously (no timer fires until the event loop is free); it only helps when `refreshToken` returns a promise that simply never settles, which is the realistic failure mode for a network-backed refresh.

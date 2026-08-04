@@ -208,4 +208,5 @@ If you see retry-related events spiking for a specific endpoint, that's usually 
 - **Retrying non-idempotent mutations without an idempotency key.**
 - **Setting a high `retries` count with no backoff**, which can hammer a struggling service harder right when it needs load to drop.
 - **Listing `401` in `retryOnStatuses`** instead of relying on the auth/refresh lifecycle.
+- **Assuming a bug in `shouldRetry`/`getRetryDelay` surfaces as an error.** It doesn't — a throw is caught and treated as its safe default (`shouldRetry` → don't retry, `getRetryDelay` → fall back to `retryDelay`/`0`), so the _original_ request failure is what your `onEvent`/`onError` sees, not a bug in your own callback. See [DECISIONS.md](../../DECISIONS.md#adr-009-a-broken-shouldretrygetretrydelay-fails-safe-not-loud).
 - **Assuming retries are on by default.** They're not — see [ADR-003](../../DECISIONS.md#adr-003-retry-and-auth-are-opt-in-never-automatic).

@@ -852,18 +852,19 @@ interface CreateAxiosDefaults {
 
 ### Codeminity Configuration
 
-| Option            | Type                            | Description                         |
-| ----------------- | ------------------------------- | ----------------------------------- |
-| `getToken`        | `() => Promise<string \| null>` | Provides the current access token   |
-| `refreshToken`    | `() => Promise<void>`           | Handles the token refresh flow      |
-| `tokenMode`       | `TokenModeEnum`                 | Defines the authentication strategy |
-| `retries`         | `number`                        | Maximum retry attempts              |
-| `retryDelay`      | `number`                        | Delay between retries               |
-| `retryOnStatuses` | `number[]`                      | HTTP statuses eligible for retry    |
-| `shouldRetry`     | `(error, attempt) => boolean`   | Custom retry decision               |
-| `getRetryDelay`   | `(attempt) => number`           | Custom retry delay strategy         |
-| `onEvent`         | `(event, error) => void`        | Lifecycle event callback            |
-| `onError`         | `(error) => void`               | General error callback              |
+| Option            | Type                            | Description                                                                     |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------- |
+| `getToken`        | `() => Promise<string \| null>` | Provides the current access token                                               |
+| `refreshToken`    | `() => Promise<void>`           | Handles the token refresh flow                                                  |
+| `refreshTimeout`  | `number`                        | Fails the refresh if it doesn't settle within this many ms (unset = no timeout) |
+| `tokenMode`       | `TokenModeEnum`                 | Defines the authentication strategy                                             |
+| `retries`         | `number`                        | Maximum retry attempts                                                          |
+| `retryDelay`      | `number`                        | Delay between retries                                                           |
+| `retryOnStatuses` | `number[]`                      | HTTP statuses eligible for retry                                                |
+| `shouldRetry`     | `(error, attempt) => boolean`   | Custom retry decision                                                           |
+| `getRetryDelay`   | `(attempt) => number`           | Custom retry delay strategy                                                     |
+| `onEvent`         | `(event, error) => void`        | Lifecycle event callback                                                        |
+| `onError`         | `(error) => void`               | General error callback                                                          |
 
 ### Request Configuration Options
 
