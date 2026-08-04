@@ -97,8 +97,8 @@ importers:
         specifier: ^13.0.3
         version: 13.0.3
       socket:
-        specifier: ^1.1.151
-        version: 1.1.151
+        specifier: ^1.1.152
+        version: 1.1.152
       tsx:
         specifier: ^4.23.5
         version: 4.23.5
@@ -2936,8 +2936,8 @@ packages:
     resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
     engines: {node: '>=14.16'}
 
-  socket@1.1.151:
-    resolution: {integrity: sha512-RZCCott6BJgfOFbIaDJm2s4cffY7RKx5cM2aHrrkFq9fGDpWDBTB7fDwkmPWpykjI6FuUNi1xkPm0R5Eqhcl+Q==}
+  socket@1.1.152:
+    resolution: {integrity: sha512-qvrNJjhLdwM6jjFCFDPlMPuVOO/sQ1swvBxHjaOj+jn28ubxV2cSOKoVd/UDtRzaC5liaRv1Z28St4MSnjVX+A==}
     engines: {node: '>=18.20.8', pnpm: '>=10.33.0'}
     hasBin: true
 
@@ -6068,7 +6068,7 @@ snapshots:
 
   slash@5.1.0: {}
 
-  socket@1.1.151:
+  socket@1.1.152:
     dependencies:
       '@socketsecurity/socket-patch': 2.0.0
 
