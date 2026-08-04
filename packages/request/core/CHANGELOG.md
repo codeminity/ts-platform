@@ -1,5 +1,21 @@
 # @codeminity/request-core
 
+## 0.9.0
+
+### ✨ Features
+
+- Add an optional `refreshTimeout` (milliseconds) to `AuthConfig`. Without it, a `refreshToken` that never settles hangs every request waiting on that refresh forever, with no error and no event. When set, `refreshToken()` races against a timer and fails the refresh (routing through the normal `onRefreshFail`/`onEvent`/`onError` path) if it doesn't settle in time. Unset by default — nothing changes unless you opt in. Available through `@codeminity/axios`'s and `@codeminity/fetch`'s `codeminity.refreshTimeout` too, since both inherit `AuthConfig`.
+
+### 📚 Documentation
+
+- Document the insecure-URL warning's process-wide dedup cache as an intentional, narrow exception to the no-global-state rule.
+- Rewrite this package's README, ARCHITECTURE, CONTRIBUTING, and DECISIONS to match `@codeminity/axios`'s and `@codeminity/fetch`'s structure and depth, and fix several stale claims (a "planned" adapter that was already published, a broken relative license badge link).
+
+### 🛠 Improvements
+
+- `full-check` now installs and audits dependencies first, matching CI exactly; lower the audit severity gate from `high` to `moderate`.
+- Fix a progress-log leak into test output in the local typecheck tooling.
+
 ## 0.8.1
 
 ### 🐛 Fixes

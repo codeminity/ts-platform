@@ -1,5 +1,20 @@
 # @codeminity/fetch
 
+## 0.2.2
+
+### 🐛 Fixes
+
+- Fix `handleRetry` propagating an exception thrown by a caller's own `shouldRetry`/`getRetryDelay`, which replaced the original failure and skipped its `onEvent`/`onError` telemetry entirely. A broken `shouldRetry` now fails safe (treated as "don't retry"); a broken `getRetryDelay` now falls back to `retryDelay`/`0`, exactly as if either had returned its safe default.
+
+### 🛠 Improvements
+
+- `full-check` now installs and audits dependencies first, matching CI exactly; lower the audit severity gate from `high` to `moderate`.
+
+### Dependency Updates
+
+- Updated dependencies
+  - @codeminity/request-core@0.9.0
+
 ## 0.2.1
 
 ### 🐛 Fixes
