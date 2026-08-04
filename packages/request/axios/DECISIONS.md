@@ -13,6 +13,7 @@ This document records significant design decisions for `@codeminity/axios`, usin
 - [ADR-005: `shouldRetry` is a full override, not an additional filter](#adr-005-shouldretry-is-a-full-override-not-an-additional-filter)
 - [ADR-006: Per-request retry config is merged with global config, not replaced](#adr-006-per-request-retry-config-is-merged-with-global-config-not-replaced)
 - [ADR-007: `skipAuth` takes precedence over `tokenMode: COOKIE`](#adr-007-skipauth-takes-precedence-over-tokenmode-cookie)
+- [ADR-008: `onError` always fires alongside `onEvent`](#adr-008-onerror-always-fires-alongside-onevent)
 
 ---
 
@@ -85,6 +86,16 @@ This document records significant design decisions for `@codeminity/axios`, usin
 **Decision:** `skipAuth` is checked first, before any `tokenMode` branching. When `skipAuth: true` is set for a request, authentication handling is skipped entirely regardless of `tokenMode` — including cookie mode, so `withCredentials` is left untouched.
 
 **Consequences:** `skipAuth` now behaves consistently across every `tokenMode`, matching its documented contract. Anyone relying on the previous (undocumented) behavior — where cookie credentials were attached even to requests marked `skipAuth: true` — needs to remove that per-request override and instead configure `withCredentials` directly via Axios's own request config if cookies must still be sent on an unauthenticated request.
+
+---
+
+## ADR-008: `onError` always fires alongside `onEvent`
+
+**Context:** `handleResponseError` (via `request-core`'s shared `emitterCallback`) always called both `onEvent` and `onError` for a classified HTTP failure, but `handleAuthRequest`'s two catch blocks called them as an either/or (`onEvent` for an `AxiosError`, `onError` otherwise) — matching this file's own documented contract at the time, but contradicting the response path's actual behavior and `@codeminity/fetch`'s already-consistent "always both" contract. A consumer configuring both callbacks got double-fired on an ordinary HTTP error but single-fired on an auth failure, with no discoverable reason why.
+
+**Decision:** `onError` fires for every failed outcome, unconditionally, alongside `onEvent` whenever `onEvent` is also applicable. `onEvent` keeps its existing, narrower scope: it only fires when the failure is a real `AxiosError` (true for every HTTP-originated failure; not true for an arbitrary exception thrown by a user's own `getToken`/`refreshToken`, since there's no `AxiosError` to hand it).
+
+**Consequences:** Both callback paths (`handleAuthRequest`, `handleResponseError`) now agree, and the public contract matches `@codeminity/request-core`'s own canonical `EventCallbacks` doc ("`onError`: called for every failed outcome, alongside `onEvent`") and `@codeminity/fetch`'s identical wording. Anyone who relied on the old either/or behavior — using `onError` as a catch-all specifically for errors `onEvent` didn't see — will now also see `onError` fire for classified HTTP failures; `onEvent`'s event name (or its absence, for a non-Axios auth exception) is still the reliable signal for telling the two cases apart.
 
 ---
 

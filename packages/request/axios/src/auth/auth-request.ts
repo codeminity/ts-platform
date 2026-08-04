@@ -56,9 +56,8 @@ export async function handleAuthRequest(
   } catch (error) {
     if (isAxiosError(error)) {
       await config.onEvent?.(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
-    } else {
-      await config.onError?.(error)
     }
+    await config.onError?.(error)
   }
 
   try {
@@ -71,9 +70,8 @@ export async function handleAuthRequest(
   } catch (error) {
     if (isAxiosError(error)) {
       await config.onEvent?.(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
-    } else {
-      await config.onError?.(error)
     }
+    await config.onError?.(error)
   }
 
   return request
