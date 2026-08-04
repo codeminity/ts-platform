@@ -114,6 +114,7 @@ Packages may depend on other packages through their public APIs when composition
 
 - [Architecture](./ARCHITECTURE.md)
 - [Decisions](./DECISIONS.md)
+- [Compatibility](./COMPATIBILITY.md)
 - [Contributing](./CONTRIBUTING.md)
 - [Security](./SECURITY.md)
 - [Assurance Case](./ASSURANCE_CASE.md)
