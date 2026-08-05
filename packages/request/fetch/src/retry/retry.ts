@@ -8,7 +8,8 @@ import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 export async function handleRetry(
   outcome: FetchOutcome,
   attempt: number,
-  config: RetryConfig
+  config: RetryConfig,
+  signal?: AbortSignal | null
 ): Promise<boolean> {
   // A broken `shouldRetry` shouldn't replace the original failure or
   // suppress its onEvent/onError telemetry — swallow it and let `canRetry`
@@ -40,7 +41,7 @@ export async function handleRetry(
   }
 
   if (retryDelay > 0) {
-    await delay(retryDelay)
+    await delay(retryDelay, signal ?? undefined)
   }
 
   return true

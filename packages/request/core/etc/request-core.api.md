@@ -20,7 +20,11 @@ export interface AuthConfig {
 export function createRefreshQueue(): RefreshQueue;
 
 // @public
-export function delay(ms: number): Promise<void>;
+export function delay(ms: number, signal?: {
+    readonly aborted: boolean;
+    addEventListener?(type: 'abort', listener: () => void): void;
+    removeEventListener?(type: 'abort', listener: () => void): void;
+}): Promise<void>;
 
 // @public
 export const dependencies: {

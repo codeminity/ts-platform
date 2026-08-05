@@ -14,6 +14,7 @@ This document records significant design decisions for `@codeminity/request-core
 - [ADR-006: No global state](#adr-006-no-global-state)
 - [ADR-007: HTTP status classification stays adapter-local](#adr-007-http-status-classification-stays-adapter-local)
 - [ADR-008: Optional `refreshTimeout`](#adr-008-optional-refreshtimeout)
+- [ADR-009: `delay()`'s abort signal is an inline structural type](#adr-009-delays-abort-signal-is-an-inline-structural-type)
 
 ---
 
@@ -82,3 +83,11 @@ This document records significant design decisions for `@codeminity/request-core
 **Decision:** `AuthConfig` gains an optional `refreshTimeout` (milliseconds). When set, `refreshToken()` races against a timer; if the timer wins, the refresh is treated as failed with a timeout error, which flows through the exact same failure path (`onRefreshFail`, then the adapter's own `onEvent`/`onError`) as any other `refreshToken` rejection. Unset by default — nothing times out unless explicitly configured, consistent with this package having no automatic behavior a caller didn't opt into.
 
 **Consequences:** A hung `refreshToken` now surfaces as a normal, catchable failure instead of an invisible, permanent hang — at the cost of one new public config field. This can't rescue a `refreshToken` that blocks the event loop synchronously (no timer fires until the event loop is free); it only helps when `refreshToken` returns a promise that simply never settles, which is the realistic failure mode for a network-backed refresh.
+
+## ADR-009: `delay()`'s abort signal is an inline structural type
+
+**Context:** `delay()` (used for retry backoff) previously always waited out its full duration, so aborting a request mid-backoff wasn't observed until the delay finished. Fixing this means `delay()` needs to accept some form of abort signal — but the adapters carry it as different types with different strictness (a real DOM/Node `AbortSignal` on the fetch side, a looser shape with optional `addEventListener`/`removeEventListener` on the axios side), and no adapter or caller ever needs to name this type directly — each just passes its own already-typed signal value straight through.
+
+**Decision:** `delay()`'s second parameter is typed as an inline anonymous shape (`aborted`, plus optional `addEventListener`/`removeEventListener`) rather than a named, exported interface. This was checked, not assumed: giving it a real name in its own file and leaving it unexported from `index.ts` still fails `verify:packages` (API Extractor's `ae-forgotten-export`, configured as an error here, fires for any type a `@public` signature references that isn't reachable from the entry point — regardless of whether the type itself has an `export` keyword in its own module). Exporting it from `index.ts` was the only alternative, and nothing warranted that: every real caller already has its own concretely-typed signal and structurally satisfies this shape without ever importing or naming it, and IDE hover/go-to-definition work the same either way, inline or named — TypeScript resolves both by following the module graph, not by what's reachable from the package root.
+
+**Consequences:** `request-core` stays adapter-agnostic per [ADR-001](#adr-001-no-http-client-dependency) — it never imports a specific HTTP client's types or assumes DOM lib types are available, consistent with [ADR-005](#adr-005-no-runtime-or-framework-assumptions). Keeping the type inline also holds the line on [ADR-004](#adr-004-minimal-strict-public-api-surface)'s minimal-surface rule: nothing was added to the public API surface just to satisfy the type checker. Because `addEventListener`/`removeEventListener` are typed optional, `delay()` degrades gracefully (falls back to a plain timer) against any signal-like value that doesn't support them, rather than requiring every caller to prove it has a fully-featured `AbortSignal`.

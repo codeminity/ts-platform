@@ -52,7 +52,7 @@ describe('handleRetry', () => {
     const result = await handleRetry(outcome, 2, { retryDelay: 500 })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(500)
+    expect(delay).toHaveBeenCalledWith(500, undefined)
   })
 
   it('prefers getRetryDelay over retryDelay', async () => {
@@ -66,7 +66,7 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(getRetryDelay).toHaveBeenCalledWith(3, outcome)
-    expect(delay).toHaveBeenCalledWith(1000)
+    expect(delay).toHaveBeenCalledWith(1000, undefined)
   })
 
   it('uses retryDelay when getRetryDelay returns undefined', async () => {
@@ -80,7 +80,7 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(getRetryDelay).toHaveBeenCalledWith(2, outcome)
-    expect(delay).toHaveBeenCalledWith(300)
+    expect(delay).toHaveBeenCalledWith(300, undefined)
   })
 
   it('returns true without delay when no retry delay is configured', async () => {
@@ -115,7 +115,7 @@ describe('handleRetry', () => {
     const result = await handleRetry(outcome, 1, { retryDelay: 200, getRetryDelay })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(200)
+    expect(delay).toHaveBeenCalledWith(200, undefined)
   })
 
   it('returns false without delaying when shouldRetry throws', async () => {
@@ -143,7 +143,7 @@ describe('handleRetry', () => {
     const result = await handleRetry(outcome, 1, { retryDelay: 250, getRetryDelay })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(250)
+    expect(delay).toHaveBeenCalledWith(250, undefined)
   })
 
   it('falls back to no delay when getRetryDelay throws and retryDelay is not configured', async () => {
@@ -159,5 +159,29 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(delay).not.toHaveBeenCalled()
+  })
+
+  it('passes the abort signal through to delay so a mid-backoff abort is observed immediately', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('./retry.js')
+
+    const controller = new AbortController()
+
+    const result = await handleRetry(outcome, 1, { retryDelay: 500 }, controller.signal)
+
+    expect(result).toBe(true)
+    expect(delay).toHaveBeenCalledWith(500, controller.signal)
+  })
+
+  it('passes undefined to delay when no signal is provided', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('./retry.js')
+
+    const result = await handleRetry(outcome, 1, { retryDelay: 500 }, null)
+
+    expect(result).toBe(true)
+    expect(delay).toHaveBeenCalledWith(500, undefined)
   })
 })

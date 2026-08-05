@@ -38,7 +38,7 @@ async function attempt(
 
   const nextAttempt = attemptNumber + 1
   const retryConfig = { ...config, ...init.codeminity }
-  const canRetry = await handleRetry(outcome, nextAttempt, retryConfig)
+  const canRetry = await handleRetry(outcome, nextAttempt, retryConfig, init.signal)
 
   if (canRetry) {
     return attempt(input, init, config, refreshQueue, nextAttempt)

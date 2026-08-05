@@ -52,7 +52,7 @@ describe('handleRetry', () => {
     })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(500)
+    expect(delay).toHaveBeenCalledWith(500, undefined)
   })
 
   it('prefers getRetryDelay over retryDelay', async () => {
@@ -71,7 +71,7 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(getRetryDelay).toHaveBeenCalledWith(3, error)
-    expect(delay).toHaveBeenCalledWith(1000)
+    expect(delay).toHaveBeenCalledWith(1000, undefined)
   })
 
   it('uses retryDelay when getRetryDelay returns undefined', async () => {
@@ -88,7 +88,7 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(getRetryDelay).toHaveBeenCalledWith(2, expect.any(Object))
-    expect(delay).toHaveBeenCalledWith(300)
+    expect(delay).toHaveBeenCalledWith(300, undefined)
   })
 
   it('returns true without delay when no retry delay is configured', async () => {
@@ -128,7 +128,7 @@ describe('handleRetry', () => {
     })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(200)
+    expect(delay).toHaveBeenCalledWith(200, undefined)
   })
 
   it('returns false without delaying when shouldRetry throws', async () => {
@@ -159,7 +159,7 @@ describe('handleRetry', () => {
     })
 
     expect(result).toBe(true)
-    expect(delay).toHaveBeenCalledWith(250)
+    expect(delay).toHaveBeenCalledWith(250, undefined)
   })
 
   it('falls back to no delay when getRetryDelay throws and retryDelay is not configured', async () => {
@@ -175,5 +175,18 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(delay).not.toHaveBeenCalled()
+  })
+
+  it('passes the abort signal through to delay so a mid-backoff abort is observed immediately', async () => {
+    shouldRetry.mockReturnValue(true)
+
+    const { handleRetry } = await import('./retry.js')
+
+    const controller = new AbortController()
+
+    const result = await handleRetry({} as AxiosError, 1, { retryDelay: 500 }, controller.signal)
+
+    expect(result).toBe(true)
+    expect(delay).toHaveBeenCalledWith(500, controller.signal)
   })
 })
