@@ -68,9 +68,10 @@ The `core → adapter` direction and circular dependencies aren't just documente
 - no flaky or time-dependent tests
 - mocks must be explicit (no auto-mocking)
 - tests live next to packages
-- `stryker.config.ts`'s `mutate` glob mirrors `vitest.config.ts`'s coverage
-  `include`/`exclude` — any new production file is mutation-tested
-  automatically, no config edits needed
+- `stryker.config.ts`'s `mutate` glob covers every package's production code
+  (`packages/*/*/src`) — any new file added there is mutation-tested
+  automatically, no config edits needed. `scripts/` is deliberately excluded
+  — see [DECISIONS.md](./DECISIONS.md#adr-007-mutation-testing-scope)
 - run `pnpm run test:mutation` before relying on 100% coverage as proof a new
   test actually verifies behavior — coverage alone doesn't catch e.g. a
   missing `?.` or an off-by-one that no test's inputs happen to expose
