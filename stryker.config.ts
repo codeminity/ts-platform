@@ -1,8 +1,10 @@
 import type { PartialStrykerOptions } from '@stryker-mutator/api/core'
 
-// Mirrors vitest.config.ts's own coverage `include`/`exclude` shape, so any
-// production file that counts toward the 100% coverage requirement is also
-// mutation-tested — new packages/files need zero config changes here.
+// Deliberately narrower than vitest.config.ts's own coverage include/exclude:
+// this mutates every *published* package's production code — the code an
+// external consumer actually depends on — not scripts/ (this repo's own
+// build/release/validation tooling). See DECISIONS.md#adr-007-mutation-testing-scope
+// for why that line is intentional, not an oversight.
 export default {
   mutate: [
     'packages/*/*/src/**/*.ts',
@@ -10,12 +12,17 @@ export default {
     '!packages/*/*/src/**/index.ts',
     '!packages/*/*/src/**/*.interface.ts',
     '!packages/*/*/src/**/*.type.ts',
-    '!packages/*/*/src/**/mocks/**'
+    '!packages/*/*/src/**/mocks/**',
+    '!packages/*/*/src/**/test-utils.ts'
   ],
   testRunner: 'vitest',
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: {
-    configFile: 'vitest.config.ts',
+    // A dedicated config (not vitest.config.ts) scoped to packages/*/*/src
+    // tests only — see vitest.mutation.config.ts. Nothing under scripts/ is
+    // ever mutated, so there's no reason for its ~20 test files to rerun on
+    // every single generated mutant.
+    configFile: 'vitest.mutation.config.ts',
     // Vitest's related-file lookup can't resolve mutated files back to their
     // tests in this pnpm workspace (see Stryker's vitest-runner troubleshooting
     // guide) — disabling it just runs the full configured suite once for the
