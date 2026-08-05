@@ -186,4 +186,14 @@ describe('shouldRetry', () => {
       })
     ).toBe(false)
   })
+
+  it('treats a NaN retries value as zero instead of retrying forever', () => {
+    const error = createError({ code: 'ERR_NETWORK' })
+
+    expect(
+      shouldRetry(error, 1, {
+        retries: NaN
+      })
+    ).toBe(false)
+  })
 })
