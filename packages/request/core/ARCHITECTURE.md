@@ -95,6 +95,8 @@ Only this surface is stable:
 - `createRefreshQueue`
 - `delay`
 - `emitterCallback`
+- `isInsecureUrl`
+- `warnIfInsecureUrl`
 
 **Objects**
 
