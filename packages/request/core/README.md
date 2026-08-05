@@ -76,7 +76,7 @@ pnpm add @codeminity/request-core
 
 - `handleRefreshToken` — runs the token-check → refresh → continue flow described above
 - `createRefreshQueue` — creates a queue guaranteeing a single in-flight refresh
-- `delay` — a promise-based delay utility used by retry backoff
+- `delay` — a promise-based delay utility used by retry backoff, resolves early if passed an aborted/aborting signal
 - `emitterCallback` — shared error-event emission plumbing
 - `isInsecureUrl` — returns whether a URL would carry credentials over a non-HTTPS, non-loopback connection
 - `warnIfInsecureUrl` — logs a one-time-per-origin `console.warn` when `isInsecureUrl` is true
