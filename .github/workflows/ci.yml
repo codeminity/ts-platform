@@ -82,8 +82,8 @@ jobs:
       - name: Node Module Resolution Validation
         run: pnpm run validate:node-resolution
 
-      - name: API Validation
-        run: pnpm run validate:api
+      - name: API Exports Validation
+        run: pnpm run validate:api-exports
 
       - name: Document Validation
         run: pnpm run validate:docs

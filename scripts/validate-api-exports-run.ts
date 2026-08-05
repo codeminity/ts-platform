@@ -1,10 +1,10 @@
-import { validatePackages } from './validate-api'
+import { validatePackages } from './validate-api-exports'
 
 try {
   const packages = await validatePackages()
 
   for (const pkg of packages) {
-    console.log(`✅ API validated ${pkg}`)
+    console.log(`✅ API exports validated for ${pkg}`)
   }
 } catch (error) {
   console.error(error)

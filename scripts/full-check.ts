@@ -18,7 +18,7 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Test (coverage)', args: ['run', 'test:coverage'] },
   { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },
   { name: 'Node Module Resolution', args: ['run', 'validate:node-resolution'] },
-  { name: 'API Validation', args: ['run', 'validate:api'] },
+  { name: 'API Exports Validation', args: ['run', 'validate:api-exports'] },
   { name: 'Document Validation', args: ['run', 'validate:docs'] },
   { name: 'Verify Packages', args: ['run', 'verify:packages'] },
   { name: 'Bundle Size', args: ['run', 'validate:size'] },

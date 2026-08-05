@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
 import { loadRuntimeModule } from './lib/load-runtime-module'
-import { validatePackages } from './validate-api'
+import { validatePackages } from './validate-api-exports'
 
 vi.mock('globby', () => ({
   globby: vi.fn().mockResolvedValue(['packages/request/core/package.json'])
@@ -38,7 +38,7 @@ vi.mock('./lib/api-exports', () => ({
   hasTypeExport: vi.fn()
 }))
 
-describe('validate-api', () => {
+describe('validate-api-exports', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
