@@ -32,7 +32,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "validate:api": "tsx scripts/validate-api-run.ts",
+    "validate:api-exports": "tsx scripts/validate-api-exports-run.ts",
     "typecheck": "turbo run typecheck && tsx scripts/typecheck-extras-run.ts",
     "verify:package": "tsx scripts/verify-package-run.ts",
     "verify:packages": "tsx scripts/verify-packages-run.ts",

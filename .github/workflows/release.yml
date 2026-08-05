@@ -5,7 +5,7 @@ name: Release
 # firing independently in parallel would let a broken commit publish if CI
 # happened to still be running (or failing) when this workflow's own `push`
 # trigger fired. This also means every check below (build, lint, typecheck,
-# test, audit, validate:api/docs/deps, verify:packages) doesn't need to be
+# test, audit, validate:api-exports/docs/deps, verify:packages) doesn't need to be
 # repeated here: CI already ran all of it on this exact commit, and the `if`
 # condition below fails closed if that run didn't succeed.
 #

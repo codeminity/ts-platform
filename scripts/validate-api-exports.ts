@@ -6,6 +6,11 @@ import { globby } from 'globby'
 import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
 import { loadRuntimeModule } from './lib/load-runtime-module'
 
+// A cheap, textual sanity check — does every export named in src/ actually
+// show up in the built dist/index.js and dist/index.d.ts? It does NOT run
+// API Extractor (no TSDoc/release-tag enforcement, no etc/*.api.md diff
+// check) — that's verify-package.ts's job, via lib/run-api-extractor.ts,
+// wired into `pnpm run verify:packages`.
 export async function validatePackages() {
   const validatedPackages: string[] = []
 

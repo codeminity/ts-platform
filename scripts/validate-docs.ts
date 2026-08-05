@@ -11,7 +11,7 @@ const DOC_GLOBS = ['**/*.md']
 
 // API Extractor reports (etc/*.api.md, temp/*.api.md) are generated snapshots of the
 // public API surface, not hand-written doc examples — they aren't meant to be
-// validated here (validate:api already covers them).
+// validated here (validate:api-exports already covers them).
 const DOC_IGNORE = ['**/node_modules/**', '**/dist/**', '**/*.api.md', '**/CHANGELOG.md']
 
 interface ExportTarget {
