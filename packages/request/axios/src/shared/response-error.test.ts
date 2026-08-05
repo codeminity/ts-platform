@@ -76,7 +76,7 @@ describe('handleResponseError', () => {
 
     const result = await handleResponseError(instance, {}, error)
 
-    expect(handleRetry).toHaveBeenCalledWith(error, 1, requestConfig.codeminity)
+    expect(handleRetry).toHaveBeenCalledWith(error, 1, requestConfig.codeminity, undefined)
 
     expect(request).toHaveBeenCalledWith({
       ...requestConfig,
@@ -84,6 +84,27 @@ describe('handleResponseError', () => {
     })
 
     expect(result).toBe(response)
+  })
+
+  it('passes the request signal through to handleRetry', async () => {
+    const controller = new AbortController()
+
+    const requestConfig = {
+      url: '/users',
+      codeminity: {},
+      signal: controller.signal
+    } as unknown as InternalRequestConfig
+
+    const error = new AxiosError('boom')
+    error.config = requestConfig
+
+    vi.mocked(handleRetry).mockResolvedValue(true)
+
+    request.mockResolvedValue({ data: 'ok' })
+
+    await handleResponseError(instance, {}, error)
+
+    expect(handleRetry).toHaveBeenCalledWith(error, 1, requestConfig.codeminity, controller.signal)
   })
 
   it('emits event when retry is denied', async () => {
@@ -141,7 +162,7 @@ describe('handleResponseError', () => {
 
     await expect(handleResponseError(instance, globalConfig, error)).rejects.toBe(error)
 
-    expect(handleRetry).toHaveBeenCalledWith(error, 1, globalConfig)
+    expect(handleRetry).toHaveBeenCalledWith(error, 1, globalConfig, requestConfig.signal)
   })
 
   it('merges global retry config with per-request override', async () => {
@@ -176,11 +197,16 @@ describe('handleResponseError', () => {
       data: 'ok'
     })
 
-    expect(handleRetry).toHaveBeenCalledWith(error, 1, {
-      retries: 1,
-      retryDelay: 5,
-      retryOnStatuses: [502, 503, 504]
-    })
+    expect(handleRetry).toHaveBeenCalledWith(
+      error,
+      1,
+      {
+        retries: 1,
+        retryDelay: 5,
+        retryOnStatuses: [502, 503, 504]
+      },
+      requestConfig.signal
+    )
 
     expect(request).toHaveBeenCalledTimes(1)
   })

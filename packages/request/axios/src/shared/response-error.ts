@@ -33,7 +33,7 @@ export async function handleResponseError(
   }
 
   const retryConfig = { ...config, ...requestConfig.codeminity }
-  const canRetry = await handleRetry(error, attempt, retryConfig)
+  const canRetry = await handleRetry(error, attempt, retryConfig, requestConfig.signal)
 
   if (canRetry) {
     return instance.request(nextConfig)

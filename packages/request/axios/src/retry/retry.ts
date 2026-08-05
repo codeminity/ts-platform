@@ -3,12 +3,13 @@ import { delay } from '@codeminity/request-core'
 import { shouldRetry } from './should-retry.js'
 
 import type { RetryConfig } from './retry-config.interface.js'
-import type { AxiosError } from 'axios'
+import type { AxiosError, GenericAbortSignal } from 'axios'
 
 export async function handleRetry(
   error: AxiosError,
   attempt: number,
-  config: RetryConfig
+  config: RetryConfig,
+  signal?: GenericAbortSignal
 ): Promise<boolean> {
   // A broken `shouldRetry` shouldn't replace the original failure or
   // suppress its onEvent/onError telemetry — swallow it and let `canRetry`
@@ -40,7 +41,7 @@ export async function handleRetry(
   }
 
   if (retryDelay > 0) {
-    await delay(retryDelay)
+    await delay(retryDelay, signal)
   }
 
   return true
