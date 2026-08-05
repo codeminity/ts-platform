@@ -46,7 +46,7 @@
   ],
   "scripts": {
     "build:js": "tsup",
-    "build:types": "tsc -p tsconfig.json --emitDeclarationOnly",
+    "build:types": "tsc -p tsconfig.build-types.json --emitDeclarationOnly",
     "build": "pnpm build:js && pnpm build:types",
     "dev": "tsup --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit"

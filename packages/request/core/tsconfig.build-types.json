@@ -1,0 +1,9 @@
+{
+  // Used only by build:types. tsconfig.json's own "include": ["src"] covers
+  // test files too (typecheck needs that) — without this exclude, every
+  // *.test.ts/*.property.test.ts would get its own .d.ts shipped in the
+  // published tarball alongside the real ones.
+  "extends": "./tsconfig.json",
+
+  "exclude": ["src/**/*.test.ts"]
+}
