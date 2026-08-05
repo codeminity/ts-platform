@@ -11,6 +11,7 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 - [ADR-003: No default export](#adr-003-no-default-export)
 - [ADR-004: Streaming request bodies + retries is a documented limitation, not solved](#adr-004-streaming-request-bodies--retries-is-a-documented-limitation-not-solved)
 - [ADR-005: A broken `shouldRetry`/`getRetryDelay` fails safe, not loud](#adr-005-a-broken-shouldretrygetretrydelay-fails-safe-not-loud)
+- [ADR-006: A `NaN` `retries` value is treated as zero](#adr-006-a-nan-retries-value-is-treated-as-zero)
 
 ---
 
@@ -61,6 +62,16 @@ This document records significant design decisions for `@codeminity/fetch`, usin
 **Decision:** `handleRetry` catches a throw from `shouldRetry` and treats it as "don't retry" (`false`), and catches a throw from `getRetryDelay` and falls back to `config.retryDelay ?? 0`, in both cases exactly as if the callback had returned normally with the safe default.
 
 **Consequences:** A bug in a caller's own retry callback no longer masks the real failure or silently drops its lifecycle event — the original outcome still reaches `onEvent`/`onError` unchanged. The tradeoff: the callback's own exception is swallowed with no signal of its own, matching how `emitterCallback` already swallows a failing `onEvent`/`onError` — consistent with this package's existing house style rather than introducing new logging infrastructure for one callback family.
+
+---
+
+## ADR-006: A `NaN` `retries` value is treated as zero
+
+**Context:** `shouldRetry` computed `attempt > (config.retries ?? 0)` to decide whether the retry budget is exhausted. `attempt > NaN` is always `false` in JavaScript, so a `NaN` `retries` value silently defeated the retry cap entirely — retries would continue unbounded as long as `retryOnStatuses`/`shouldRetry` kept matching. Unlike a type-bypassed non-function callback, this is reachable with fully type-correct code: `retries` is typed as `number`, and `NaN` is a valid `number` — a caller computing it from something like `someValue / someOtherCount` gets `NaN` for free the moment the denominator is `0`, no `as` cast required.
+
+**Decision:** `shouldRetry` treats a `NaN` `retries` the same as an unconfigured one: zero, meaning "don't retry."
+
+**Consequences:** A `retries` value that resolves to `NaN` at runtime fails safe (no retries) instead of failing open (unbounded retries), consistent with [ADR-005](#adr-005-a-broken-shouldretrygetretrydelay-fails-safe-not-loud)'s reasoning. Deliberately narrower than "validate all config inputs" — a non-function `getToken`/`refreshToken` etc. is a different class of problem (only reachable via an explicit type-bypass) and is left alone; this fix is scoped to the one value that's reachable through ordinary, type-correct arithmetic.
 
 ---
 

@@ -99,4 +99,8 @@ describe('shouldRetry', () => {
   it('does not retry when attempt equals retries+1', () => {
     expect(shouldRetry(networkOutcome(), 3, { retries: 2 })).toBe(false)
   })
+
+  it('treats a NaN retries value as zero instead of retrying forever', () => {
+    expect(shouldRetry(networkOutcome(), 1, { retries: NaN })).toBe(false)
+  })
 })
