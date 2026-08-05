@@ -9,5 +9,10 @@
     "types": ["node"]
   },
 
-  "include": ["stryker.config.ts", "commitlint.config.ts", "lint-staged.config.ts"]
+  "include": [
+    "stryker.config.ts",
+    "vitest.mutation.config.ts",
+    "commitlint.config.ts",
+    "lint-staged.config.ts"
+  ]
 }
