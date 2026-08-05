@@ -14,6 +14,7 @@ describe('performRequest', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.useRealTimers()
   })
 
   it('returns the response on a successful (ok) call without retrying', async () => {
@@ -60,6 +61,29 @@ describe('performRequest', () => {
 
     expect(result.status).toBe(500)
     expect(fetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('resolves the backoff delay immediately once the request is aborted mid-retry', async () => {
+    vi.useFakeTimers()
+
+    const controller = new AbortController()
+
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(null, { status: 500 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+
+    const config: Config = { retries: 1, retryOnStatuses: [500], retryDelay: 5000 }
+    const init: FetchRequestInit = { signal: controller.signal }
+
+    const resultPromise = performRequest('/flaky', init, config, createRefreshQueue())
+
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+
+    const result = await resultPromise
+
+    expect(result.status).toBe(200)
+    expect(fetch).toHaveBeenCalledTimes(2)
   })
 
   it('retries a thrown network error until it succeeds', async () => {
