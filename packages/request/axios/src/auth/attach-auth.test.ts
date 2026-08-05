@@ -3,12 +3,12 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RefreshQueue } from '@codeminity/request-core'
 
 import { attachAuthInterceptor } from './attach-auth.js'
-import { handleAuthRequest } from './auth-request.js'
+import { handleAuthRequest } from './handle-auth-request.js'
 
 import type { Config } from '../shared/config.interface.js'
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
-vi.mock('./auth-request.ts', () => ({
+vi.mock('./handle-auth-request.ts', () => ({
   handleAuthRequest: vi.fn()
 }))
 

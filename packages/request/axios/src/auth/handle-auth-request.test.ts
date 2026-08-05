@@ -10,7 +10,7 @@ import {
 import { ErrorEventEnum } from '../errors/error-event.enum.js'
 import { createRequestConfig } from '../mocks/create-request-config.js'
 
-import { handleAuthRequest } from './auth-request.js'
+import { handleAuthRequest } from './handle-auth-request.js'
 
 import type { Config } from '../shared/config.interface.js'
 

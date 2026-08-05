@@ -2,7 +2,7 @@ import { type AxiosInstance } from 'axios'
 
 import type { RefreshQueue } from '@codeminity/request-core'
 
-import { handleAuthRequest } from './auth-request.js'
+import { handleAuthRequest } from './handle-auth-request.js'
 
 import type { Config } from '../shared/config.interface.js'
 
