@@ -12,5 +12,6 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 
-minimumReleaseAgeExclude:
-  - lint-staged@17.3.0
+# pnpm 11 already defaults to this exact value — stated explicitly so the
+# policy is visible here instead of relying on an undocumented tool default.
+minimumReleaseAge: 1440
