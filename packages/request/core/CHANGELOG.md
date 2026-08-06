@@ -1,5 +1,12 @@
 # @codeminity/request-core
 
+## 0.10.0
+
+### 🐛 Fixes
+
+- Cancel the retry backoff delay immediately when the request is aborted mid-wait, instead of waiting out the full delay before the abort is observed. `delay()` now accepts an optional abort signal for this.
+- Stop shipping test-file type declarations (`*.test.d.ts`) in the published npm tarball. `build:types` now uses a dedicated `tsconfig.build-types.json` that excludes `*.test.ts` — `typecheck` is unaffected and still checks test files as before. No runtime or type-surface change for consumers; the tarball is just smaller and no longer leaks the internal test-file layout.
+
 ## 0.9.0
 
 ### ✨ Features
