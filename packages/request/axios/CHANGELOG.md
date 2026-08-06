@@ -1,5 +1,19 @@
 # @codeminity/axios
 
+## 0.9.1
+
+### 🐛 Fixes
+
+- Cancel the retry backoff delay immediately when the request is aborted mid-wait, instead of waiting out the full delay before the abort is observed. `handleRetry` now forwards the request's own abort signal to `request-core`'s `delay()`.
+- Stop shipping test-file type declarations (`*.test.d.ts`) in the published npm tarball. No runtime or type-surface change for consumers; the tarball is just smaller and no longer leaks the internal test-file layout.
+- Fix `shouldRetry` silently disabling the retry cap forever when `retries` resolves to `NaN` (reachable through ordinary type-correct arithmetic, e.g. a division by zero — no type-bypass needed). `attempt > NaN` is always `false` in JavaScript, so the retry budget never appeared exhausted. A `NaN` `retries` is now treated the same as an unconfigured one: zero, meaning "don't retry."
+
+### Dependency Updates
+
+- Updated dependencies [c10cb59]
+- Updated dependencies [fe5fe3f]
+  - @codeminity/request-core@0.10.0
+
 ## 0.9.0
 
 ### 🐛 Fixes
