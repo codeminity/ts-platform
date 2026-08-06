@@ -86,6 +86,37 @@ describe('performRequest', () => {
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
+  it('does not spend a real refreshToken() call on the retry attempt once the signal is already aborted', async () => {
+    vi.useFakeTimers()
+
+    const controller = new AbortController()
+    const refreshToken = vi.fn().mockResolvedValue(undefined)
+
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(null, { status: 500 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+
+    const config: Config = {
+      retries: 1,
+      retryOnStatuses: [500],
+      retryDelay: 5000,
+      getToken: () => 'a-token',
+      isTokenExpired: () => true,
+      refreshToken
+    }
+    const init: FetchRequestInit = { signal: controller.signal }
+
+    const resultPromise = performRequest('/flaky', init, config, createRefreshQueue())
+
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+
+    await resultPromise
+
+    expect(fetch).toHaveBeenCalledTimes(2)
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
   it('retries a thrown network error until it succeeds', async () => {
     vi.mocked(fetch)
       .mockRejectedValueOnce(new TypeError('fetch failed'))
