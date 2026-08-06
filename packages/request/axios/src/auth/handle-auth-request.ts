@@ -36,6 +36,13 @@ export async function handleAuthRequest(
   config: Config,
   refreshQueue: RefreshQueue
 ): Promise<InternalAxiosRequestConfig> {
+  // Already aborted (e.g. cancelled during a retry's backoff wait) — skip
+  // straight past auth/refresh entirely. The dispatch layer rejects an
+  // aborted request on its own with the correct abort error; there's no
+  // point spending a real refreshToken() call on a request that's already
+  // doomed.
+  if (request.signal?.aborted) return request
+
   const requestConfig = request as InternalRequestConfig
   const codeminity = requestConfig.codeminity
 
