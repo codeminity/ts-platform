@@ -18,7 +18,7 @@ export interface AuthConfig {
   /**
    * Milliseconds to wait for `refreshToken` before treating it as failed.
    * Unset by default — a `refreshToken` that never settles never fails on
-   * its own unless this is set; see DECISIONS.md#adr-008-optional-refreshtoken-timeout.
+   * its own unless this is set; see DECISIONS.md#adr-008-optional-refreshtimeout.
    * Can't rescue a `refreshToken` that blocks the event loop synchronously —
    * only one that returns a promise that never settles.
    */

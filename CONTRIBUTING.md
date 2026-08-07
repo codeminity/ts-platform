@@ -57,7 +57,7 @@ The `core → adapter` direction and circular dependencies aren't just documente
 - strict mode enabled
 - no eslint-disable unless justified
 - prefer explicit return types for public APIs
-- relative imports/exports in `packages/*/*/src` must include an explicit `.js` extension (e.g. `from './create.js'`), even though the dev-facing `moduleResolution: "Bundler"` doesn't require it — `tsc --emitDeclarationOnly` copies the specifier into the published `.d.ts` essentially verbatim, and a real consumer using `moduleResolution: "NodeNext"`/`"node16"` needs that extension to resolve it. Checked by `pnpm run validate:node-resolution`; see [DECISIONS.md](./DECISIONS.md#explicit-js-extensions-for-relative-imports).
+- relative imports/exports in `packages/*/*/src` must include an explicit `.js` extension (e.g. `from './create.js'`), even though the dev-facing `moduleResolution: "Bundler"` doesn't require it — `tsc --emitDeclarationOnly` copies the specifier into the published `.d.ts` essentially verbatim, and a real consumer using `moduleResolution: "NodeNext"`/`"node16"` needs that extension to resolve it. Checked by `pnpm run validate:node-resolution`; see [DECISIONS.md](./DECISIONS.md#adr-009-explicit-js-extensions-for-relative-imports).
 
 ---
 
@@ -83,7 +83,7 @@ The `core → adapter` direction and circular dependencies aren't just documente
   conditions, classification tables, value-preserving transforms,
   concurrency coalescing) get a property-based test with `fast-check`
   alongside the regular one, named `<file>.property.test.ts` — see
-  [DECISIONS.md](./DECISIONS.md#property-based-testing-scope). This
+  [DECISIONS.md](./DECISIONS.md#adr-008-property-based-testing-scope). This
   doesn't conflict with "no flaky tests": a failing property means the
   _rule_ doesn't hold, not that the test infrastructure is unreliable —
   `fast-check` shrinks every failure to a minimal, reproducible
