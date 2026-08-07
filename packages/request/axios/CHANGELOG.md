@@ -1,5 +1,13 @@
 # @codeminity/axios
 
+## 0.9.3
+
+### Dependency Updates
+
+- Updated dependencies [30d49f5]
+- Updated dependencies [4ca1759]
+  - @codeminity/request-core@0.10.1
+
 ## 0.9.2
 
 ### 🐛 Fixes
