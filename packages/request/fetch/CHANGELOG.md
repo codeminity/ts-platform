@@ -1,5 +1,25 @@
 # @codeminity/fetch
 
+## 0.2.4
+
+### 🐛 Fixes
+
+- Fix the insecure-URL warning never firing for a relative URL/path — the most common usage pattern in a browser SPA (`document.baseURI` was previously never resolved against, so `new URL('/orders')` threw and the check silently no-opped). Relative URLs now resolve against `document.baseURI` (in a browser) before being checked, matching how the request is actually dispatched.
+- Skip auth/token-refresh entirely on a retry attempt whose signal is already aborted, instead of spending a real `refreshToken()` call on a request that's already cancelled. This closes the remaining gap in the retry-backoff abort-cancellation fix: aborting mid-backoff now also avoids the wasted refresh work on the retry attempt that follows.
+
+### 🔒 Security
+
+- Close a fork-PR `workflow_run` spoofing gap in the release workflow ("pwn request" pattern) — the job now also checks the triggering event was a real `push`, not just that the run succeeded.
+- Bump `js-yaml` to patched versions (CVE-2026-59870, a quadratic-CPU `!!omap` resolution) via `pnpm-workspace.yaml` overrides.
+
+### 📚 Documentation
+
+- Stop logging full outcome-error objects in event/authentication doc examples — normalized to log a message string instead, consistent with the guides' own stated logging pitfalls.
+
+### ⚙️ CI
+
+- Declare `tsconfig.base.json` as a Turborepo global dependency, so a shared-config change correctly invalidates every package's build cache instead of serving a stale one.
+
 ## 0.2.3
 
 ### 🐛 Fixes
