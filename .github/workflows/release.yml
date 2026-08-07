@@ -13,6 +13,11 @@ name: Release
 # workflows that need write-ish permissions (here: OIDC publish access) to
 # run in response to a PR: `workflow_run` always executes the workflow file
 # as committed on the base branch, never a PR's own (possibly modified) copy.
+# That alone isn't sufficient, though — ci.yml runs on `pull_request` too
+# (forks included), and a fork PR's own workflow_run completion event
+# reports the fork's own branch name, which the attacker chooses. The job
+# `if:` below additionally requires the CI run to have been triggered by
+# `push`, closing that off. See the job-level `if:` comment for detail.
 #
 # `workflow_dispatch` is a manual recovery path only: it never runs `pnpm
 # release` (no re-publish), it just (re)creates a signed tag + GitHub
@@ -47,7 +52,17 @@ jobs:
   release:
     name: Build & Publish
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    # `github.event.workflow_run.event == 'push'` matters as much as
+    # `conclusion == 'success'` does: without it, a CI run that was itself
+    # triggered by `pull_request` (ci.yml runs on both) also produces a
+    # `workflow_run` completion event, and for a *fork* PR that event's
+    # `head_branch` is the fork's own branch name — fully attacker-chosen,
+    # so an attacker can just name their fork branch `main` to match the
+    # `branches: [main]` filter above. Gating on the CI run's own trigger
+    # event closes that off: only a `push` to main (i.e. a real merge)
+    # can ever produce a workflow_run this condition accepts. This is
+    # GitHub's documented "pwn request" mitigation for `workflow_run`.
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
 
     # id-token: write lets this workflow request a short-lived OIDC token from
     # GitHub's Actions identity provider. npm's Trusted Publisher feature (configured
