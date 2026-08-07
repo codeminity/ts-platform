@@ -159,6 +159,30 @@ describe('handleAuthRequest', () => {
     expect(getToken).not.toHaveBeenCalled()
   })
 
+  it('skips auth entirely when the request signal is already aborted', async () => {
+    const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
+
+    const getToken = vi.fn().mockResolvedValue('token123')
+
+    const config = createAuthConfig({
+      tokenMode: TokenModeEnum.JWT,
+      getToken
+    })
+
+    const controller = new AbortController()
+
+    controller.abort()
+
+    const request = createRequestConfig({ signal: controller.signal })
+    const queue = createRefreshQueueMock()
+
+    const result = await handleAuthRequest(request, config, queue)
+
+    expect(result).toBe(request)
+    expect(refreshSpy).not.toHaveBeenCalled()
+    expect(getToken).not.toHaveBeenCalled()
+  })
+
   it('emits refresh failed event and continues request after refresh failure', async () => {
     const onEvent = vi.fn()
 

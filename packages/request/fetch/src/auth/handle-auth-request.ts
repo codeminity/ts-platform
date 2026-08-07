@@ -31,6 +31,13 @@ export async function handleAuthRequest(
   config: Config,
   refreshQueue: RefreshQueue
 ): Promise<RequestInit> {
+  // Already aborted (e.g. cancelled during a retry's backoff wait) — skip
+  // straight past auth/refresh entirely. The dispatch layer rejects an
+  // aborted request on its own with the correct abort error; there's no
+  // point spending a real refreshToken() call on a request that's already
+  // doomed.
+  if (init.signal?.aborted) return init
+
   const codeminity = init.codeminity
 
   if (codeminity?.skipAuth) return init
