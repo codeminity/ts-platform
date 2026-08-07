@@ -187,6 +187,10 @@ To cut a release: run `pnpm version-packages` on a branch named exactly `release
 
 Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package is configured on npmjs.com to trust this exact repo and workflow, so the workflow requests a short-lived token from GitHub's OIDC provider instead of using a stored `NPM_TOKEN` secret. There is no long-lived npm token anywhere in this repo, and none should be added; see [SECURITY.md](./SECURITY.md#release--supply-chain-security) for why. Every published package also carries npm provenance, attesting the tarball back to the exact commit and workflow run that built it.
 
+### Renovate is dashboard-only here
+
+[Renovate](https://docs.renovatebot.com/) is enabled and keeps its Dependency Dashboard issue current, but dependency bumps in this repo are done manually as part of the curated release process above, not by merging Renovate's own PRs. Treat its dashboard as an alert/visibility tool for what's outdated, not as automation — don't expect it to open or merge anything on its own schedule.
+
 ---
 
 ## Full Local Check
