@@ -245,6 +245,55 @@ describe('handleAuthRequest', () => {
     ).resolves.toBeDefined()
   })
 
+  it('still calls onError when onEvent throws', async () => {
+    const onEvent = vi.fn().mockImplementation(() => {
+      throw new Error('broken onEvent')
+    })
+    const onError = vi.fn()
+
+    const config: Config = {
+      getToken: vi.fn().mockResolvedValue('token'),
+      onEvent,
+      onError
+    }
+
+    const error = new Error('refresh failed') as AxiosError
+
+    error.isAxiosError = true
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
+
+    await expect(
+      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
+    ).resolves.toBeDefined()
+
+    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
+    expect(onError).toHaveBeenCalledWith(error)
+  })
+
+  it('does not throw when onError itself throws', async () => {
+    const onError = vi.fn().mockImplementation(() => {
+      throw new Error('broken onError')
+    })
+
+    const config: Config = {
+      getToken: vi.fn().mockResolvedValue('token'),
+      onError
+    }
+
+    const error = new Error('refresh failed') as AxiosError
+
+    error.isAxiosError = true
+
+    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
+
+    await expect(
+      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
+    ).resolves.toBeDefined()
+
+    expect(onError).toHaveBeenCalledWith(error)
+  })
+
   it('emits error callback but not onEvent when refresh fails with a non axios error', async () => {
     const onEvent = vi.fn()
     const onError = vi.fn()
