@@ -306,9 +306,11 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
-    await expect(
-      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-    ).resolves.toBeDefined()
+    const request = createRequestConfig()
+
+    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
+      request
+    )
   })
 
   it('still calls onError when onEvent throws', async () => {
@@ -329,9 +331,11 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
-    await expect(
-      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-    ).resolves.toBeDefined()
+    const request = createRequestConfig()
+
+    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
+      request
+    )
 
     expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
     expect(onError).toHaveBeenCalledWith(error)
@@ -353,9 +357,11 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
-    await expect(
-      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-    ).resolves.toBeDefined()
+    const request = createRequestConfig()
+
+    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
+      request
+    )
 
     expect(onError).toHaveBeenCalledWith(error)
   })
@@ -407,9 +413,11 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    await expect(
-      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-    ).resolves.toBeDefined()
+    const request = createRequestConfig()
+
+    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
+      request
+    )
   })
 
   it('skips auth when getToken is not configured', async () => {
@@ -490,8 +498,10 @@ describe('handleAuthRequest', () => {
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    await expect(
-      handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-    ).resolves.toBeDefined()
+    const request = createRequestConfig()
+
+    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
+      request
+    )
   })
 })
