@@ -98,6 +98,73 @@ describe('handleAuthRequest', () => {
     warn.mockRestore()
   })
 
+  it('warns about a relative URL when the page itself is served insecurely (simulated browser)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'http://insecure-page.example.com/app' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('/orders', init, config, queue)
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-page.example.com')
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
+  it('does not warn about a relative URL when the page itself is served securely (simulated browser)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('/orders', init, config, queue)
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
+  it('does not warn about a relative URL outside a browser (no document to resolve against)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('/orders', init, config, queue)
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+  })
+
+  it('falls back to the raw (already-absolute) input when it cannot be resolved against an invalid document.baseURI', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'not-a-valid-base' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest('http://insecure-fallback.example.com/x', init, config, queue)
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-fallback.example.com')
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
   it('does not enable credentials: include in COOKIE mode when skipAuth is set for the request', async () => {
     const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
     const init = createRequestInit({ codeminity: { skipAuth: true } })
