@@ -1,5 +1,15 @@
 # @codeminity/request-core
 
+## 0.10.1
+
+### 🐛 Fixes
+
+- Fix `delay()` never removing its own `abort` listener when the signal actually aborts (only the normal timer-fires path cleaned up). A given `AbortSignal` only fires `abort` once, so this couldn't accumulate unbounded listeners in practice, but the cleanup is now symmetric on both paths.
+
+### 📚 Documentation
+
+- Fix `refreshTimeout`'s TSDoc pointing to a broken `DECISIONS.md` anchor (`#adr-008-optional-refreshtoken-timeout`, which doesn't exist) instead of the real one (`#adr-008-optional-refreshtimeout`). Shipped as-is in the published `.d.ts` since it was introduced; no behavior change.
+
 ## 0.10.0
 
 ### 🐛 Fixes
