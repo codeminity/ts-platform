@@ -99,4 +99,19 @@ describe('delay', () => {
 
     expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
   })
+
+  it('cleans up its own abort listener once the signal aborts', async () => {
+    vi.useFakeTimers()
+
+    const controller = new AbortController()
+    const removeEventListener = vi.spyOn(controller.signal, 'removeEventListener')
+
+    const promise = delay(1000, controller.signal)
+
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+    await promise
+
+    expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
+  })
 })

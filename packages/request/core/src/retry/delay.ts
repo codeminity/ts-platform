@@ -21,6 +21,7 @@ export function delay(
 
     const onAbort = (): void => {
       clearTimeout(timer)
+      signal?.removeEventListener?.('abort', onAbort)
       resolve()
     }
 
