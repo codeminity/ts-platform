@@ -21,6 +21,13 @@ export function delay(
 
     const onAbort = (): void => {
       clearTimeout(timer)
+      // Stryker disable next-line ConditionalExpression: equivalent mutant —
+      // onAbort only ever runs as the listener registered via
+      // `signal.addEventListener` below, so `signal` is provably defined here.
+      /* v8 ignore next */
+      if (signal) {
+        signal.removeEventListener?.('abort', onAbort)
+      }
       resolve()
     }
 
