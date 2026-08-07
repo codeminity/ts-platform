@@ -1223,7 +1223,7 @@ declare const logger: { error: (event: string, error: unknown) => void }
 
 const api = axios.create({
   codeminity: {
-    onEvent: async (event, error) => logger.error(event, error)
+    onEvent: async (event, error) => logger.error(event, error.message)
   }
 })
 ```

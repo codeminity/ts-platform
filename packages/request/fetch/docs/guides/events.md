@@ -25,7 +25,10 @@ import { createFetch } from '@codeminity/fetch'
 const apiFetch = createFetch({
   onEvent: async (event, outcome) => {
     console.log(event)
-    console.error(outcome.response?.status ?? outcome.error)
+    console.error(
+      outcome.response?.status ??
+        (outcome.error instanceof Error ? outcome.error.message : outcome.error)
+    )
   }
 })
 ```
@@ -56,7 +59,11 @@ const apiFetch = createFetch({
 
 function logToConsoleInDev(event: ErrorEvent, outcome: FetchOutcome) {
   if (process.env.NODE_ENV !== 'production') {
-    console.warn(`[api:${event}]`, outcome.response?.status ?? outcome.error)
+    console.warn(
+      `[api:${event}]`,
+      outcome.response?.status ??
+        (outcome.error instanceof Error ? outcome.error.message : outcome.error)
+    )
   }
 }
 
