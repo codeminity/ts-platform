@@ -167,7 +167,10 @@ function handleAuthEvent(event: ErrorEvent, outcome: FetchOutcome): void {
     redirectToLogin()
   }
   if (event === 'auth_token_failed') {
-    logger.warn('Token retrieval failed', outcome.error)
+    logger.warn(
+      'Token retrieval failed',
+      outcome.error instanceof Error ? outcome.error.message : outcome.error
+    )
   }
 }
 

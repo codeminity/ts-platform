@@ -172,7 +172,7 @@ const api = axios.create({
         redirectToLogin()
       }
       if (event === 'auth_token_failed') {
-        logger.warn('Token retrieval failed', error)
+        logger.warn('Token retrieval failed', error.message)
       }
     }
   }

@@ -334,7 +334,11 @@ const apiFetch = createFetch({
 import { createFetch, type ErrorEvent, type FetchOutcome } from '@codeminity/fetch'
 
 function handleEvent(event: ErrorEvent, outcome: FetchOutcome): void {
-  console.warn(event, outcome.response?.status ?? outcome.error)
+  console.warn(
+    event,
+    outcome.response?.status ??
+      (outcome.error instanceof Error ? outcome.error.message : outcome.error)
+  )
 }
 
 const apiFetch = createFetch({
