@@ -15,14 +15,25 @@ import type { FetchRequestInit } from '../shared/request-config.interface.js'
 
 function resolveInputUrl(input: RequestInfo | URL): string {
   // Stryker disable next-line ConditionalExpression: equivalent mutant —
-  // `new URL(...)` (this function's sole caller, via warnIfInsecureUrl)
-  // coerces a URL instance via its own `toString()`/`href`, so skipping
-  // this branch and falling through to `return input` produces the same
-  // resolved URL either way.
+  // `new URL(...)` below coerces a URL instance via its own `toString()`/
+  // `href` when this branch is skipped, producing the same resolved URL.
   if (input instanceof URL) return input.href
   if (input instanceof Request) return input.url
 
-  return input
+  // A relative `input` string is the common case in a browser SPA — the
+  // Fetch spec itself resolves it against the page's location, so check
+  // against that same origin instead of silently skipping the warning
+  // entirely (the actual bug this guards against: `new URL('/orders')`
+  // with no base throws, previously falling straight through to the raw,
+  // unresolved '/orders' string). `@codeminity/fetch` has no `baseURL`
+  // concept of its own to fall back to first, unlike axios's adapter.
+  const base = typeof document === 'undefined' ? undefined : document.baseURI
+
+  try {
+    return new URL(input, base).href
+  } catch {
+    return input
+  }
 }
 
 export async function handleAuthRequest(

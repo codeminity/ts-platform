@@ -52,8 +52,16 @@ function resolveRequestUrl(request: InternalAxiosRequestConfig): string {
   // never the path; no fallback string content can change that.
   const url = request.url ?? ''
 
+  // A relative `url` with no configured `baseURL` is the common case in a
+  // browser SPA — axios's own dispatch resolves it against the page's
+  // location either way, so check against that same origin instead of
+  // silently skipping the warning entirely (the actual bug this guards
+  // against: `new URL('/orders', undefined)` throws, previously falling
+  // straight through to the raw, unresolved '/orders' string).
+  const base = request.baseURL ?? (typeof document === 'undefined' ? undefined : document.baseURI)
+
   try {
-    return new URL(url, request.baseURL).toString()
+    return new URL(url, base).toString()
   } catch {
     return url
   }

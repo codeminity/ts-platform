@@ -107,6 +107,72 @@ describe('handleAuthRequest', () => {
     warn.mockRestore()
   })
 
+  it('warns about a relative url when the page itself is served insecurely (simulated browser)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'http://insecure-page.example.com/app' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ url: '/orders' })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-page.example.com')
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
+  it('does not warn about a relative url when the page itself is served securely (simulated browser)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ url: '/orders' })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
+  it('does not warn about a relative url outside a browser (no document to resolve against)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({ url: '/orders' })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).not.toHaveBeenCalled()
+
+    warn.mockRestore()
+  })
+
+  it('prefers a configured baseURL over document.baseURI (simulated browser)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
+
+    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
+    const request = createRequestConfig({
+      baseURL: 'http://insecure-base.example.com',
+      url: '/orders'
+    })
+
+    await handleAuthRequest(request, config, createRefreshQueueMock())
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-base.example.com')
+
+    warn.mockRestore()
+    vi.unstubAllGlobals()
+  })
+
   it('does not enable withCredentials in COOKIE mode when skipAuth is set for the request', async () => {
     const config = createAuthConfig({
       tokenMode: TokenModeEnum.COOKIE
