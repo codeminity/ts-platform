@@ -114,4 +114,24 @@ describe('delay', () => {
 
     expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
   })
+
+  it('does not throw aborting a signal that has addEventListener but no removeEventListener', async () => {
+    vi.useFakeTimers()
+
+    let onAbort: (() => void) | undefined
+
+    const signal = {
+      aborted: false,
+      addEventListener: (_type: 'abort', listener: () => void) => {
+        onAbort = listener
+      }
+    }
+
+    const promise = delay(1000, signal)
+
+    await vi.advanceTimersByTimeAsync(10)
+    onAbort?.()
+
+    await expect(promise).resolves.toBeUndefined()
+  })
 })
