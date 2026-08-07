@@ -21,7 +21,15 @@ jobs:
     # its actual contents here — it must be deleted right after merge and
     # never reused for anything else, or this exemption would silently
     # cover unrelated changes too.
-    if: github.head_ref != 'release/version-packages'
+    #
+    # The branch name alone is attacker-choosable (anyone opening a fork PR
+    # could name their branch exactly this to skip the check), so the
+    # exemption also requires the PR to come from a branch pushed directly
+    # to this repo, not a fork — only someone who already has write access
+    # here can do that.
+    if: >-
+      github.head_ref != 'release/version-packages' ||
+      github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
       - name: Checkout repository
