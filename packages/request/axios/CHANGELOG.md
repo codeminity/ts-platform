@@ -1,5 +1,30 @@
 # @codeminity/axios
 
+## 0.9.2
+
+### 🐛 Fixes
+
+- Fix a throwing `onEvent` callback suppressing `onError` (and vice versa) during an auth/token-refresh failure. Both callbacks now fail safe independently, matching how every other failure path in this package already behaves.
+- Fix the insecure-URL warning never firing for a relative URL/path — the most common usage pattern in a browser SPA (`baseURL`/`document.baseURI` was previously never resolved against, so `new URL('/orders')` threw and the check silently no-opped). Relative URLs now resolve against the configured `baseURL` before being checked, matching how the request is actually dispatched.
+- Skip auth/token-refresh entirely on a retry attempt whose signal is already aborted, instead of spending a real `refreshToken()` call on a request that's already cancelled. This closes the remaining gap in the retry-backoff abort-cancellation fix: aborting mid-backoff now also avoids the wasted refresh work on the retry attempt that follows.
+
+### 🔒 Security
+
+- Close a fork-PR `workflow_run` spoofing gap in the release workflow ("pwn request" pattern) — the job now also checks the triggering event was a real `push`, not just that the run succeeded.
+- Bump `js-yaml` to patched versions (CVE-2026-59870, a quadratic-CPU `!!omap` resolution) via `pnpm-workspace.yaml` overrides.
+
+### 📚 Documentation
+
+- Stop logging full `error`/auth-outcome objects in event/authentication doc examples — several examples logged the raw error, which can carry the live `Authorization` header; examples now log `error.message` (or the classified status) instead.
+
+### 🧪 Testing
+
+- Give `configuredAxios`'s `Object.assign` composition (previously untested glue code) real test coverage, proving `create` is wired correctly and the auth interceptor actually attaches.
+
+### ⚙️ CI
+
+- Declare `tsconfig.base.json` as a Turborepo global dependency, so a shared-config change correctly invalidates every package's build cache instead of serving a stale one.
+
 ## 0.9.1
 
 ### 🐛 Fixes
