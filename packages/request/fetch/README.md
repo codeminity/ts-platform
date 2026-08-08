@@ -445,7 +445,7 @@ Returns `(input: RequestInfo | URL, init?: FetchRequestInit) => Promise<Response
 
 - `AuthConfig` (re-exported from `@codeminity/request-core`): `tokenMode`, `getToken`, `isTokenExpired`, `refreshToken`, `refreshTimeout`, `onRefreshStart`, `onRefreshSuccess`, `onRefreshFail`
 - `CallbackConfig`: `onEvent`, `onError`
-- `RetryConfig`: `retries`, `retryDelay`, `retryOnStatuses`, `shouldRetry`, `getRetryDelay`
+- `RetryConfig`: `retries`, `retryDelay`, `retryJitter`, `retryOnStatuses`, `shouldRetry`, `getRetryDelay`
 
 ### Exports
 
