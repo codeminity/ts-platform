@@ -62,6 +62,9 @@ export interface RefreshQueue {
 }
 
 // @public
+export function resolveRetryDelay(configuredDelay: number, suggestedDelayMs?: number, maxDelayMs?: number): number;
+
+// @public
 export interface RetryConfig {
     retries?: number;
     retryDelay?: number;
