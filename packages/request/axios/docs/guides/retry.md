@@ -58,9 +58,23 @@ const config: RetryConfig = {
 }
 ```
 
-### Exponential Backoff With Jitter
+### Jitter
 
-Uncapped exponential backoff across many concurrent clients can cause a "thundering herd" retrying in lockstep. Adding jitter spreads retries out:
+A flat `retryDelay` across many concurrent clients can cause a "thundering herd" retrying in lockstep. `retryJitter` randomizes it, no custom function needed:
+
+```ts
+import axios from '@codeminity/axios'
+
+const api = axios.create({
+  codeminity: {
+    retries: 5,
+    retryDelay: 1000,
+    retryJitter: 'equal' // keeps at least half of retryDelay, randomizes the rest
+  }
+})
+```
+
+`'full'` randomizes anywhere from `0` up to `retryDelay`; `'equal'` (shown above) keeps at least half of it. Unset (`'none'`) by default. This only affects the _default_ delay computation — setting `getRetryDelay` is a full override, so exponential backoff needs its own jitter, same as before:
 
 ```ts
 import type { RetryConfig } from '@codeminity/axios'

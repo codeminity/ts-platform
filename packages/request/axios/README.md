@@ -587,6 +587,22 @@ const api = axios.create({
 
 Use this to implement linear backoff, exponential backoff, or any custom delay policy.
 
+### Jitter
+
+```ts
+import axios from '@codeminity/axios'
+
+const api = axios.create({
+  codeminity: {
+    retries: 5,
+    retryDelay: 1000,
+    retryJitter: 'equal' // or 'full' — randomizes retryDelay to avoid a thundering herd
+  }
+})
+```
+
+Only affects the default delay computation — `getRetryDelay` is a full override, so exponential backoff needs its own jitter (see [docs/guides/retry.md](./docs/guides/retry.md#jitter)).
+
 ### `Retry-After` Support
 
 A `Retry-After` response header is honored automatically, with no configuration needed — it boosts the delay whenever it asks for longer than `retryDelay` would otherwise wait, capped at 5 minutes. Setting `getRetryDelay` fully overrides this, same as any other backoff customization — see [docs/guides/retry.md](./docs/guides/retry.md#respecting-retry-after) for reading the header yourself in that case.
