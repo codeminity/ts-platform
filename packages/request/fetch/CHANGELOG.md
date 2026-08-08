@@ -1,5 +1,24 @@
 # @codeminity/fetch
 
+## 0.3.0
+
+### 🚀 Features
+
+- Automatically honor a `Retry-After` response header when retrying (supports both the numeric-seconds and HTTP-date forms), boosting the delay whenever it asks for longer than the configured `retryDelay` would otherwise wait, capped at 5 minutes. No configuration needed — a configured `getRetryDelay` still fully overrides this, same as any other backoff customization.
+
+### 🔒 Security
+
+- Bump `nanoid` to a patched version (CVE-2026-67213, custom generators looping indefinitely when size is zero) via a `pnpm-workspace.yaml` override.
+
+### ⚙️ CI
+
+- Pin `github/codeql-action` to its real commit SHA instead of the annotated tag object's SHA — still resolved correctly either way, but non-standard pinning.
+
+### Dependency Updates
+
+- Updated dependencies [5047387]
+  - @codeminity/request-core@0.11.0
+
 ## 0.2.5
 
 ### Dependency Updates
