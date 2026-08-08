@@ -8,10 +8,12 @@ const delay = vi.fn()
 const shouldRetry = vi.fn()
 const parseRetryAfter = vi.fn()
 const resolveRetryDelay = vi.fn()
+const applyRetryJitter = vi.fn()
 
 vi.mock('@codeminity/request-core', () => ({
   delay,
-  resolveRetryDelay
+  resolveRetryDelay,
+  applyRetryJitter
 }))
 
 vi.mock('./should-retry.ts', () => ({
@@ -28,6 +30,7 @@ describe('handleRetry', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     parseRetryAfter.mockReturnValue(undefined)
+    applyRetryJitter.mockImplementation((delayMs: number) => delayMs)
     resolveRetryDelay.mockImplementation((configuredDelay: number, suggestedDelayMs?: number) =>
       Math.max(configuredDelay, suggestedDelayMs ?? 0)
     )
@@ -273,5 +276,36 @@ describe('handleRetry', () => {
 
     expect(result).toBe(true)
     expect(delay).toHaveBeenCalledWith(900, undefined)
+  })
+
+  it('applies jitter to the configured retryDelay', async () => {
+    shouldRetry.mockReturnValue(true)
+    applyRetryJitter.mockReturnValue(250)
+
+    const { handleRetry } = await import('./retry.js')
+
+    const result = await handleRetry(outcome, 1, { retryDelay: 500, retryJitter: 'full' })
+
+    expect(result).toBe(true)
+    expect(applyRetryJitter).toHaveBeenCalledWith(500, 'full')
+    expect(delay).toHaveBeenCalledWith(250, undefined)
+  })
+
+  it('does not apply jitter to a getRetryDelay override', async () => {
+    shouldRetry.mockReturnValue(true)
+    applyRetryJitter.mockReturnValue(250)
+
+    const getRetryDelay = vi.fn().mockReturnValue(1000)
+
+    const { handleRetry } = await import('./retry.js')
+
+    const result = await handleRetry(outcome, 1, {
+      retryDelay: 500,
+      retryJitter: 'full',
+      getRetryDelay
+    })
+
+    expect(result).toBe(true)
+    expect(delay).toHaveBeenCalledWith(1000, undefined)
   })
 })

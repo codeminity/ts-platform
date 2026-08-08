@@ -5,6 +5,9 @@
 ```ts
 
 // @public
+export function applyRetryJitter(delayMs: number, jitter?: RetryConfig['retryJitter']): number;
+
+// @public
 export interface AuthConfig {
     getToken?: () => string | null | Promise<string | null>;
     isTokenExpired?: () => boolean | Promise<boolean>;
@@ -68,6 +71,7 @@ export function resolveRetryDelay(configuredDelay: number, suggestedDelayMs?: nu
 export interface RetryConfig {
     retries?: number;
     retryDelay?: number;
+    retryJitter?: 'none' | 'full' | 'equal';
 }
 
 // @public
