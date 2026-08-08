@@ -11,6 +11,7 @@ This guide covers authentication patterns beyond the basics shown in the [README
 - [Refresh Strategies](#refresh-strategies)
 - [Server-Side Authentication](#server-side-authentication)
 - [Authentication Events](#authentication-events)
+- [Retrying a Failed Refresh](#retrying-a-failed-refresh)
 - [Multi-Tenant / Multi-Account Auth](#multi-tenant--multi-account-auth)
 - [Testing Authenticated Clients](#testing-authenticated-clients)
 - [Common Pitfalls](#common-pitfalls)
@@ -179,7 +180,50 @@ const api = axios.create({
 })
 ```
 
-`auth_refresh_failed` is the signal to treat as "the session is over" — it fires when `refreshToken` itself throws or fails, meaning retrying further isn't going to help.
+`auth_refresh_failed` is the signal to treat as "the session is over" — it fires once `refreshToken` has failed for good (including after any retries from [Retrying a Failed Refresh](#retrying-a-failed-refresh) below have run out).
+
+## Retrying a Failed Refresh
+
+If `refreshToken` fails because of something transient — a network blip, not an actually-invalid refresh token — `onRefreshFail`'s second argument lets you retry it, no separate retry config needed:
+
+```ts
+import axios from '@codeminity/axios'
+
+declare const authStore: { refresh: () => Promise<void> }
+declare function isNetworkError(error: unknown): boolean
+
+const api = axios.create({
+  codeminity: {
+    refreshToken: () => authStore.refresh(),
+    onRefreshFail: async (error, retry) => {
+      if (isNetworkError(error)) {
+        await retry()
+      }
+      // Otherwise, don't retry — a genuinely invalid refresh token retrying
+      // wouldn't help, and `auth_refresh_failed` fires as the final signal.
+    }
+  }
+})
+```
+
+`retry()` re-runs `refreshToken()` (racing the same `refreshTimeout`, if configured) and only resolves once that attempt actually finishes — awaiting it reflects the real outcome, not just an intent to retry. `onRefreshFail` fires again if that attempt also fails, so you decide each time whether to keep going. There's no built-in limit, so track your own attempt count if you want a cap:
+
+```ts
+import axios from '@codeminity/axios'
+
+let attempts = 0
+
+const api = axios.create({
+  codeminity: {
+    onRefreshFail: async (error, retry) => {
+      attempts++
+      if (attempts < 3) await retry()
+    }
+  }
+})
+```
+
+> `retry()` must be `await`ed (or `return`ed) to behave correctly — calling it without awaiting resolves the refresh cycle immediately, without waiting for that attempt to actually finish.
 
 ## Multi-Tenant / Multi-Account Auth
 
@@ -218,3 +262,5 @@ This keeps refresh coordination and token state cleanly separated per tenant, ra
 - **Doing network calls inside `getToken` on every request.** Cache the token and only hit the network from `refreshToken`.
 - **Assuming refresh coordination is shared across every `axios.create()` instance in your app.** It's scoped per instance — see [ARCHITECTURE.md](../../ARCHITECTURE.md#instance-isolation) and [DECISIONS.md](../../DECISIONS.md#adr-004-refresh-coordination-scope--per-instance-vs-shared). If you need one shared refresh cycle, use one shared client instance rather than relying on cross-instance behavior.
 - **Not setting `refreshTimeout` on a `refreshToken` that calls a network endpoint.** Without it, a `refreshToken` that never settles (a hung request, a dropped connection) hangs every request waiting on that refresh forever, with no error and no event. `refreshTimeout` (in milliseconds) fails the refresh instead, which routes through the normal `auth_refresh_failed` event.
+- **Calling `onRefreshFail`'s `retry()` without `await`ing (or `return`ing) it.** See [Retrying a Failed Refresh](#retrying-a-failed-refresh) — an un-awaited `retry()` resolves the refresh cycle immediately, without waiting for that attempt to actually finish.
+- **Retrying a refresh failure that isn't actually transient.** Retrying a genuinely invalid/expired refresh token just wastes a network round-trip before failing anyway — check `error` inside `onRefreshFail` before calling `retry()`.

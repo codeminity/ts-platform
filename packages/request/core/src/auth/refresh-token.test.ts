@@ -4,6 +4,8 @@ import { createAuthConfig } from './mocks/create-auth-config.js'
 import { createRefreshQueue } from './mocks/create-refresh-queue.js'
 import { handleRefreshToken } from './refresh-token.js'
 
+import type { AuthConfig } from './auth-config.interface.js'
+
 describe('handleRefreshToken', () => {
   it('calls refreshToken when token is expired and triggers success flow', async () => {
     const isTokenExpired = vi.fn().mockResolvedValue(true)
@@ -270,5 +272,160 @@ describe('handleRefreshToken', () => {
     await handleRefreshToken(config, queue)
 
     expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries refreshToken when onRefreshFail awaits retry, and succeeds on the second attempt', async () => {
+    const refreshToken = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('transient'))
+      .mockResolvedValueOnce(undefined)
+    const onSuccess = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshSuccess: onSuccess,
+      onRefreshFail: async (_error, retry) => {
+        await retry()
+      }
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
+
+    expect(refreshToken).toHaveBeenCalledTimes(2)
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not retry when onRefreshFail never calls retry', async () => {
+    const refreshToken = vi.fn().mockRejectedValue(new Error('permanent'))
+    const onFail = vi.fn()
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshFail: onFail
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).rejects.toThrow('permanent')
+
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+    expect(onFail).toHaveBeenCalledTimes(1)
+  })
+
+  it('surfaces the final error when a retried attempt also fails and is not retried again', async () => {
+    const refreshToken = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('first failure'))
+      .mockRejectedValueOnce(new Error('second failure'))
+
+    const onFail = vi
+      .fn<NonNullable<AuthConfig['onRefreshFail']>>()
+      .mockImplementationOnce(async (_error, retry) => {
+        await retry()
+      })
+      .mockImplementationOnce(() => {
+        /* does not retry the second time */
+      })
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshFail: onFail
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).rejects.toThrow('second failure')
+
+    expect(refreshToken).toHaveBeenCalledTimes(2)
+    expect(onFail).toHaveBeenCalledTimes(2)
+  })
+
+  it('supports multiple chained retries until refreshToken finally succeeds', async () => {
+    const refreshToken = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('attempt 1'))
+      .mockRejectedValueOnce(new Error('attempt 2'))
+      .mockResolvedValueOnce(undefined)
+
+    let attempts = 0
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshFail: async (_error, retry) => {
+        attempts++
+        if (attempts < 3) {
+          await retry()
+        }
+      }
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
+
+    expect(refreshToken).toHaveBeenCalledTimes(3)
+  })
+
+  it('fails safe when onRefreshFail throws without ever calling retry', async () => {
+    const refreshToken = vi.fn().mockRejectedValue(new Error('original failure'))
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshFail: () => {
+        throw new Error('broken onRefreshFail')
+      }
+    })
+
+    const queue = createRefreshQueue()
+
+    await expect(handleRefreshToken(config, queue)).rejects.toThrow('original failure')
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves without waiting for an un-awaited retry, and still runs it in the background', async () => {
+    let resolveSecondAttempt!: () => void
+
+    const refreshToken = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('first failure'))
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSecondAttempt = resolve
+          })
+      )
+
+    const config = createAuthConfig({
+      isTokenExpired: vi.fn().mockResolvedValue(true),
+      refreshToken,
+      onRefreshFail: (_error, retry) => {
+        // Deliberate misuse: fire-and-forget, never awaited or returned —
+        // the internal safety-net `.catch()` (see refresh-token.ts) is what
+        // stops this from ever surfacing as an unhandled rejection if the
+        // background attempt later fails; that part is plain, well-understood
+        // promise semantics and isn't re-verified with its own test here.
+        void retry()
+      }
+    })
+
+    const queue = createRefreshQueue()
+
+    // Resolves once `onRefreshFail` returns — it never awaited `retry()`,
+    // so this doesn't wait for the second `refreshToken()` call to settle.
+    await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
+
+    expect(refreshToken).toHaveBeenCalledTimes(2)
+
+    // The background retry is still real, not abandoned — letting it
+    // resolve now doesn't throw or hang.
+    resolveSecondAttempt()
+    await Promise.resolve()
   })
 })

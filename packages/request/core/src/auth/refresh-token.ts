@@ -57,28 +57,73 @@ export async function handleRefreshToken(
 
     if (!expired) return
 
-    try {
-      await onRefreshStart?.()
+    await onRefreshStart?.()
 
-      if (refreshTimeout != null) {
-        await callWithTimeout(refreshToken, refreshTimeout)
-      } else {
-        await refreshToken()
-      }
-
-      await onRefreshSuccess?.()
-    } catch (error) {
+    const attempt = async (): Promise<void> => {
       try {
-        // Stryker disable next-line OptionalChaining: equivalent mutant — the
-        // surrounding catch already swallows a missing-callback TypeError
-        // identically to how it swallows any other callback failure, so no
-        // observable behavior can distinguish `?.()` from a bare call here.
-        await onRefreshFail?.(error)
-      } catch {
-        // ignore callback failure
-      }
+        if (refreshTimeout != null) {
+          await callWithTimeout(refreshToken, refreshTimeout)
+        } else {
+          await refreshToken()
+        }
 
-      throw error
+        await onRefreshSuccess?.()
+      } catch (error) {
+        // Tracks whether `onRefreshFail` actually called `retry`, since its
+        // own promise resolves either way (whether it retried or just
+        // logged and returned) — that's the only way to tell "the original
+        // failure still stands" apart from "a later attempt already handled
+        // this" once we're back out of the callback. Held on an object
+        // (not a bare `let`) so mutating it from inside the `retry` closure
+        // is visible here — a primitive binding gets narrowed to its
+        // initial literal value across the `await` below.
+        // Stryker disable next-line ObjectLiteral: equivalent mutant —
+        // `state.retried` is only ever read via plain truthy/falsy checks
+        // below, so starting as `undefined` (an empty object) behaves
+        // identically to starting as `false` until `retry` sets it `true`.
+        const state = { retried: false }
+
+        const retry = (): Promise<void> => {
+          state.retried = true
+
+          const nextAttempt = attempt()
+
+          // If the caller never awaits (or returns) this promise, a later
+          // rejection would otherwise surface as an unhandled rejection —
+          // they've already opted out of observing the real outcome by not
+          // awaiting it, but that misuse still shouldn't crash the process.
+          nextAttempt.catch(() => {
+            /* real rejection still propagates below to whoever does await it */
+          })
+
+          return nextAttempt
+        }
+
+        try {
+          // Stryker disable next-line OptionalChaining: equivalent mutant —
+          // without `?.`, a missing `onRefreshFail` throws a TypeError
+          // caught by this same block; `state.retried` is still `false`
+          // either way, so the `if (!state.retried) throw error` below
+          // throws the identical original error regardless.
+          await onRefreshFail?.(error, retry)
+        } catch (retryOrCallbackError) {
+          if (state.retried) {
+            // The retried attempt eventually failed for good (its own
+            // `attempt()` call ran out of retries) — that's the real,
+            // final error, not the one that triggered this retry.
+            throw retryOrCallbackError
+          }
+          // A throwing `onRefreshFail` that never called `retry` fails
+          // safe, same as every other callback in this codebase — swallow
+          // it and let the *original* `error` below surface instead.
+        }
+
+        if (!state.retried) {
+          throw error
+        }
+      }
     }
+
+    await attempt()
   })
 }

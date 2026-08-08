@@ -28,6 +28,15 @@ export interface AuthConfig {
   onRefreshStart?: () => void | Promise<void>
   /** Called after a refresh cycle completes successfully. */
   onRefreshSuccess?: () => void | Promise<void>
-  /** Called when a refresh cycle throws; receives the thrown error. */
-  onRefreshFail?: (error: unknown) => void | Promise<void>
+  /**
+   * Called when a refresh attempt throws; receives the thrown error and a
+   * `retry` function. Call and `await` (or `return`) `retry()` to attempt
+   * `refreshToken` again — it settles once that attempt actually finishes,
+   * so awaiting it reflects the real outcome, not just an intent to retry.
+   * Not calling `retry` (the default if this callback does nothing) fails
+   * the refresh immediately, exactly as if this parameter didn't exist —
+   * there's no limit on how many times `retry` can be called in a row
+   * except one your own callback enforces (e.g. by counting attempts).
+   */
+  onRefreshFail?: (error: unknown, retry: () => Promise<void>) => void | Promise<void>
 }
