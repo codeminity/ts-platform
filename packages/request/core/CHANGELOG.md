@@ -1,5 +1,19 @@
 # @codeminity/request-core
 
+## 0.11.0
+
+### 🚀 Features
+
+- Add `resolveRetryDelay`, a protocol-agnostic function that reconciles a configured retry delay with a server-suggested one (e.g. parsed from an HTTP `Retry-After` header by an adapter), taking whichever is larger and capping the result at 5 minutes. Used internally by `@codeminity/axios` and `@codeminity/fetch` to add automatic `Retry-After` support — see [ADR-010](./DECISIONS.md#adr-010-retry-after-reconciliation-is-generic-parsing-stays-adapter-local) for why the actual header parsing stays adapter-local instead of living here.
+
+### 🔒 Security
+
+- Bump `nanoid` to a patched version (CVE-2026-67213, custom generators looping indefinitely when size is zero) via a `pnpm-workspace.yaml` override.
+
+### ⚙️ CI
+
+- Pin `github/codeql-action` and `chainguard-dev/actions` to their real commit SHAs instead of the annotated tag object's SHA — still resolved correctly either way, but non-standard pinning.
+
 ## 0.10.1
 
 ### 🐛 Fixes
