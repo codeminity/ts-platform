@@ -1,9 +1,28 @@
-import { delay } from '@codeminity/request-core'
+import { delay, resolveRetryDelay } from '@codeminity/request-core'
 
+import { parseRetryAfter } from './parse-retry-after.js'
 import { shouldRetry } from './should-retry.js'
 
 import type { RetryConfig } from './retry-config.interface.js'
 import type { AxiosError, GenericAbortSignal } from 'axios'
+
+// Axios types `AxiosResponseHeaders` as an intersection with a raw
+// index-signature type, so TS sees `headers.get` as possibly a plain
+// `string` value rather than always a callable method — a real `AxiosError`
+// always carries an `AxiosHeaders` instance here, but a test double or a
+// non-Axios-shaped mock might not, so this stays a runtime check either way.
+function getRetryAfterHeader(error: AxiosError): string | undefined {
+  const headers: unknown = error.response?.headers
+  const get = (headers as { get?: unknown } | undefined)?.get
+
+  if (typeof get !== 'function') {
+    return undefined
+  }
+
+  const value: unknown = get.call(headers, 'retry-after')
+
+  return typeof value === 'string' ? value : undefined
+}
 
 export async function handleRetry(
   error: AxiosError,
@@ -27,17 +46,23 @@ export async function handleRetry(
     return false
   }
 
+  // A caller's own `getRetryDelay` is a full override of the default
+  // backoff (matching `shouldRetry`'s own full-override contract) — it
+  // always wins over `Retry-After`, which only ever boosts the *default*
+  // `retryDelay` fallback below.
+  const retryAfterMs = parseRetryAfter(getRetryAfterHeader(error))
+  const defaultDelay = resolveRetryDelay(config.retryDelay ?? 0, retryAfterMs)
+
   let retryDelay: number
 
   try {
     // Stryker disable next-line OptionalChaining: equivalent mutant —
     // without `?.`, a missing `getRetryDelay` throws instead of returning
     // `undefined`, which the catch below turns into the exact same
-    // `config.retryDelay ?? 0` fallback the `??` chain would have computed
-    // anyway.
-    retryDelay = config.getRetryDelay?.(attempt, error) ?? config.retryDelay ?? 0
+    // `defaultDelay` fallback the `??` chain would have computed anyway.
+    retryDelay = config.getRetryDelay?.(attempt, error) ?? defaultDelay
   } catch {
-    retryDelay = config.retryDelay ?? 0
+    retryDelay = defaultDelay
   }
 
   if (retryDelay > 0) {
