@@ -76,7 +76,21 @@ const config: RetryConfig = {
 
 ### Respecting `Retry-After`
 
-If the API returns a `Retry-After` header (common with `429`), prefer honoring it over a fixed backoff curve:
+A `Retry-After` response header (common with `429`) is honored automatically — no configuration needed. It's read from the failed response, supports both the numeric-seconds and HTTP-date header forms, and boosts the delay whenever it asks for longer than the configured `retryDelay` would otherwise wait:
+
+```ts
+import axios from '@codeminity/axios'
+
+const api = axios.create({
+  codeminity: {
+    retries: 5,
+    retryDelay: 1000, // used as-is when the server sends no Retry-After, or a shorter one
+    retryOnStatuses: [429]
+  }
+})
+```
+
+The honored value is capped at 5 minutes, so a misconfigured or malicious upstream can't stall a client indefinitely. A configured `getRetryDelay` is a full override of the default backoff — same as `shouldRetry` — so setting it opts out of the automatic `Retry-After` boost entirely; read the header yourself inside it if you need both:
 
 ```ts
 import type { RetryConfig } from '@codeminity/axios'
@@ -84,14 +98,12 @@ import type { RetryConfig } from '@codeminity/axios'
 const config: RetryConfig = {
   retries: 5,
   getRetryDelay: (attempt, error) => {
-    const retryAfter = error.response?.headers?.['retry-after']
+    const retryAfter = error.response?.headers['retry-after']
     if (retryAfter) return Number(retryAfter) * 1000
     return attempt * 1000
   }
 }
 ```
-
-> Check your installed version's type definitions for the exact `getRetryDelay` signature — some versions may only pass `attempt`, in which case reading `Retry-After` would need to happen inside a custom `shouldRetry`/`onEvent` combination instead.
 
 ## Error Classification
 

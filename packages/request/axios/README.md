@@ -587,6 +587,10 @@ const api = axios.create({
 
 Use this to implement linear backoff, exponential backoff, or any custom delay policy.
 
+### `Retry-After` Support
+
+A `Retry-After` response header is honored automatically, with no configuration needed — it boosts the delay whenever it asks for longer than `retryDelay` would otherwise wait, capped at 5 minutes. Setting `getRetryDelay` fully overrides this, same as any other backoff customization — see [docs/guides/retry.md](./docs/guides/retry.md#respecting-retry-after) for reading the header yourself in that case.
+
 ### Request-Level Retry Configuration
 
 ```ts
