@@ -1,5 +1,11 @@
 # @codeminity/request-core
 
+## 0.12.0
+
+### 🚀 Features
+
+- Add `applyRetryJitter`, a protocol-agnostic function that randomizes a delay per a `'none' | 'full' | 'equal'` strategy — used internally by `@codeminity/axios` and `@codeminity/fetch` to add opt-in thundering-herd protection to their default retry delay. See [ADR-011](./DECISIONS.md#adr-011-retry-delay-jitter-lives-in-request-core) for why jitter, unlike `Retry-After` parsing (ADR-010), belongs in core.
+
 ## 0.11.0
 
 ### 🚀 Features
