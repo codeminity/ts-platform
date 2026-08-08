@@ -74,7 +74,19 @@ const config: RetryConfig = {
 
 ### Respecting `Retry-After`
 
-If the API returns a `Retry-After` header (common with `429`), prefer honoring it over a fixed backoff curve:
+A `Retry-After` response header (common with `429`) is honored automatically — no configuration needed. It's read from the failed response, supports both the numeric-seconds and HTTP-date header forms, and boosts the delay whenever it asks for longer than the configured `retryDelay` would otherwise wait:
+
+```ts
+import { createFetch } from '@codeminity/fetch'
+
+const apiFetch = createFetch({
+  retries: 5,
+  retryDelay: 1000, // used as-is when the server sends no Retry-After, or a shorter one
+  retryOnStatuses: [429]
+})
+```
+
+The honored value is capped at 5 minutes, so a misconfigured or malicious upstream can't stall a client indefinitely. A configured `getRetryDelay` is a full override of the default backoff — same as `shouldRetry` — so setting it opts out of the automatic `Retry-After` boost entirely; read the header yourself inside it if you need both:
 
 ```ts
 import type { RetryConfig } from '@codeminity/fetch'
