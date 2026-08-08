@@ -11,7 +11,7 @@ export function applyRetryJitter(delayMs: number, jitter?: RetryConfig['retryJit
 export interface AuthConfig {
     getToken?: () => string | null | Promise<string | null>;
     isTokenExpired?: () => boolean | Promise<boolean>;
-    onRefreshFail?: (error: unknown) => void | Promise<void>;
+    onRefreshFail?: (error: unknown, retry: () => Promise<void>) => void | Promise<void>;
     onRefreshStart?: () => void | Promise<void>;
     onRefreshSuccess?: () => void | Promise<void>;
     refreshTimeout?: number;
