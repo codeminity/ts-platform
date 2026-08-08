@@ -872,19 +872,24 @@ interface CreateAxiosDefaults {
 
 ### Codeminity Configuration
 
-| Option            | Type                            | Description                                                                     |
-| ----------------- | ------------------------------- | ------------------------------------------------------------------------------- |
-| `getToken`        | `() => Promise<string \| null>` | Provides the current access token                                               |
-| `refreshToken`    | `() => Promise<void>`           | Handles the token refresh flow                                                  |
-| `refreshTimeout`  | `number`                        | Fails the refresh if it doesn't settle within this many ms (unset = no timeout) |
-| `tokenMode`       | `TokenModeEnum`                 | Defines the authentication strategy                                             |
-| `retries`         | `number`                        | Maximum retry attempts                                                          |
-| `retryDelay`      | `number`                        | Delay between retries                                                           |
-| `retryOnStatuses` | `number[]`                      | HTTP statuses eligible for retry                                                |
-| `shouldRetry`     | `(error, attempt) => boolean`   | Custom retry decision                                                           |
-| `getRetryDelay`   | `(attempt) => number`           | Custom retry delay strategy                                                     |
-| `onEvent`         | `(event, error) => void`        | Lifecycle event callback                                                        |
-| `onError`         | `(error) => void`               | General error callback                                                          |
+| Option             | Type                            | Description                                                                     |
+| ------------------ | ------------------------------- | ------------------------------------------------------------------------------- |
+| `getToken`         | `() => Promise<string \| null>` | Provides the current access token                                               |
+| `isTokenExpired`   | `() => Promise<boolean>`        | Reports whether the current token is expired and a refresh should run           |
+| `refreshToken`     | `() => Promise<void>`           | Handles the token refresh flow                                                  |
+| `refreshTimeout`   | `number`                        | Fails the refresh if it doesn't settle within this many ms (unset = no timeout) |
+| `tokenMode`        | `TokenModeEnum`                 | Defines the authentication strategy                                             |
+| `onRefreshStart`   | `() => void`                    | Called before a refresh cycle begins                                            |
+| `onRefreshSuccess` | `() => void`                    | Called after a refresh cycle completes successfully                             |
+| `onRefreshFail`    | `(error, retry) => void`        | Called when a refresh attempt throws; call `retry()` to try again               |
+| `retries`          | `number`                        | Maximum retry attempts                                                          |
+| `retryDelay`       | `number`                        | Delay between retries                                                           |
+| `retryJitter`      | `'none' \| 'full' \| 'equal'`   | Randomizes `retryDelay` to avoid a thundering herd                              |
+| `retryOnStatuses`  | `number[]`                      | HTTP statuses eligible for retry                                                |
+| `shouldRetry`      | `(error, attempt) => boolean`   | Custom retry decision                                                           |
+| `getRetryDelay`    | `(attempt) => number`           | Custom retry delay strategy                                                     |
+| `onEvent`          | `(event, error) => void`        | Lifecycle event callback                                                        |
+| `onError`          | `(error) => void`               | General error callback                                                          |
 
 ### Request Configuration Options
 
