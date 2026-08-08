@@ -1,4 +1,4 @@
-import { delay, resolveRetryDelay } from '@codeminity/request-core'
+import { applyRetryJitter, delay, resolveRetryDelay } from '@codeminity/request-core'
 
 import { parseRetryAfter } from './parse-retry-after.js'
 import { shouldRetry } from './should-retry.js'
@@ -32,8 +32,12 @@ export async function handleRetry(
   // backoff (matching `shouldRetry`'s own full-override contract) — it
   // always wins over `Retry-After`, which only ever boosts the *default*
   // `retryDelay` fallback below.
+  // Jitter only ever reduces (or leaves unchanged) the *configured* delay —
+  // it never makes the client wait less than a server-provided Retry-After,
+  // since that's combined in afterward via `resolveRetryDelay`'s max().
+  const jitteredRetryDelay = applyRetryJitter(config.retryDelay ?? 0, config.retryJitter)
   const retryAfterMs = parseRetryAfter(outcome.response?.headers.get('retry-after'))
-  const defaultDelay = resolveRetryDelay(config.retryDelay ?? 0, retryAfterMs)
+  const defaultDelay = resolveRetryDelay(jitteredRetryDelay, retryAfterMs)
 
   let retryDelay: number
 
