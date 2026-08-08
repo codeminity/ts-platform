@@ -1,5 +1,6 @@
-import { delay } from '@codeminity/request-core'
+import { delay, resolveRetryDelay } from '@codeminity/request-core'
 
+import { parseRetryAfter } from './parse-retry-after.js'
 import { shouldRetry } from './should-retry.js'
 
 import type { RetryConfig } from './retry-config.interface.js'
@@ -27,17 +28,23 @@ export async function handleRetry(
     return false
   }
 
+  // A caller's own `getRetryDelay` is a full override of the default
+  // backoff (matching `shouldRetry`'s own full-override contract) — it
+  // always wins over `Retry-After`, which only ever boosts the *default*
+  // `retryDelay` fallback below.
+  const retryAfterMs = parseRetryAfter(outcome.response?.headers.get('retry-after'))
+  const defaultDelay = resolveRetryDelay(config.retryDelay ?? 0, retryAfterMs)
+
   let retryDelay: number
 
   try {
     // Stryker disable next-line OptionalChaining: equivalent mutant —
     // without `?.`, a missing `getRetryDelay` throws instead of returning
     // `undefined`, which the catch below turns into the exact same
-    // `config.retryDelay ?? 0` fallback the `??` chain would have computed
-    // anyway.
-    retryDelay = config.getRetryDelay?.(attempt, outcome) ?? config.retryDelay ?? 0
+    // `defaultDelay` fallback the `??` chain would have computed anyway.
+    retryDelay = config.getRetryDelay?.(attempt, outcome) ?? defaultDelay
   } catch {
-    retryDelay = config.retryDelay ?? 0
+    retryDelay = defaultDelay
   }
 
   if (retryDelay > 0) {
