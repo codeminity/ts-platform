@@ -1,5 +1,16 @@
 # @codeminity/axios
 
+## 0.11.0
+
+### 🚀 Features
+
+- Add an opt-in `retryJitter` config (`'none'` | `'full'` | `'equal'`, default `'none'`) that randomizes the default retry delay to avoid many clients retrying in lockstep after the same failure ("thundering herd"). Only affects the default delay computation — a configured `getRetryDelay` remains a full override, unaffected by jitter.
+
+### Dependency Updates
+
+- Updated dependencies [83b6452]
+  - @codeminity/request-core@0.12.0
+
 ## 0.10.0
 
 ### 🚀 Features
