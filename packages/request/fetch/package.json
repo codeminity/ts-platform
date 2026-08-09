@@ -5,13 +5,23 @@
   "description": "A production-ready native Fetch adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
   "keywords": [
     "fetch",
+    "fetch-api",
+    "fetch-retry",
     "http",
+    "http-client",
     "request",
+    "rest-client",
+    "api-client",
     "typescript",
     "javascript",
     "adapter",
     "retry",
-    "authentication"
+    "retry-logic",
+    "jwt",
+    "authentication",
+    "token-refresh",
+    "refresh-token",
+    "rate-limit"
   ],
   "license": "MIT",
   "author": "Masoud Fooladi",
@@ -20,7 +30,7 @@
     "url": "git+https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/fetch"
   },
-  "homepage": "https://github.com/codeminity/ts-platform#readme",
+  "homepage": "https://github.com/codeminity/ts-platform/tree/main/packages/request/fetch#readme",
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },

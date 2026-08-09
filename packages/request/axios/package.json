@@ -5,14 +5,24 @@
   "description": "A production-ready Axios adapter with built-in infrastructure for retries, authentication, and advanced request handling.",
   "keywords": [
     "axios",
+    "axios-retry",
+    "axios-plugin",
     "http",
+    "http-client",
     "request",
+    "rest-client",
+    "api-client",
     "typescript",
     "javascript",
     "adapter",
     "retry",
+    "retry-logic",
+    "jwt",
     "authentication",
-    "interceptors"
+    "token-refresh",
+    "refresh-token",
+    "interceptors",
+    "rate-limit"
   ],
   "license": "MIT",
   "author": "Masoud Fooladi",
@@ -21,7 +31,7 @@
     "url": "git+https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/axios"
   },
-  "homepage": "https://github.com/codeminity/ts-platform#readme",
+  "homepage": "https://github.com/codeminity/ts-platform/tree/main/packages/request/axios#readme",
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },

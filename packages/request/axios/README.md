@@ -1,6 +1,6 @@
 # @codeminity/axios
 
-> A production-ready Axios adapter built on top of `@codeminity/request-core`.
+> A production-ready Axios adapter with automatic retry (backoff, jitter, `Retry-After`) and JWT token refresh, built on top of `@codeminity/request-core`.
 
 [![npm version](https://img.shields.io/npm/v/@codeminity/axios.svg)](https://www.npmjs.com/package/@codeminity/axios)
 [![license](https://img.shields.io/npm/l/%40codeminity%2Faxios.svg)](https://github.com/codeminity/ts-platform/blob/main/LICENSE)

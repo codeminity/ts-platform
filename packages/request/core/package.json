@@ -10,12 +10,21 @@
     "javascript",
     "infrastructure",
     "retry",
+    "retry-logic",
+    "exponential-backoff",
     "auth",
+    "authentication",
+    "jwt",
     "fetch",
+    "axios",
     "network",
     "token",
+    "token-refresh",
+    "refresh-token",
     "middleware",
-    "refresh-token"
+    "framework-agnostic",
+    "runtime-agnostic",
+    "api-client"
   ],
   "license": "MIT",
   "author": "Masoud Fooladi",
@@ -24,7 +33,7 @@
     "url": "git+https://github.com/codeminity/ts-platform.git",
     "directory": "packages/request/core"
   },
-  "homepage": "https://github.com/codeminity/ts-platform#readme",
+  "homepage": "https://github.com/codeminity/ts-platform/tree/main/packages/request/core#readme",
   "bugs": {
     "url": "https://github.com/codeminity/ts-platform/issues"
   },
