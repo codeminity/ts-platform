@@ -4,7 +4,9 @@
 [![license](https://img.shields.io/npm/l/%40codeminity%2Faxios.svg)](./LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13923/badge)](https://www.bestpractices.dev/projects/13923)
 
-ts-platform is a universal, modular monorepo platform within the Codeminity ecosystem.
+A collection of production-ready TypeScript packages for HTTP requests — [`@codeminity/axios`](./packages/request/axios) and [`@codeminity/fetch`](./packages/request/fetch), built on a shared, framework-agnostic core, [`@codeminity/request-core`](./packages/request/core) — with built-in retry logic (exponential backoff, jitter, `Retry-After` support), JWT authentication, and automatic token refresh.
+
+ts-platform is the universal, modular monorepo platform within the Codeminity ecosystem that hosts them.
 
 It provides a collection of independent, composable building blocks designed to simplify and standardize software development in a clean, predictable, and runtime-agnostic way.
 

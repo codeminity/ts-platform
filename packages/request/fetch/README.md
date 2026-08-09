@@ -1,6 +1,6 @@
 # @codeminity/fetch
 
-> A production-ready native Fetch adapter built on top of `@codeminity/request-core`.
+> A production-ready native Fetch adapter with automatic retry (backoff, jitter, `Retry-After`) and JWT token refresh, built on top of `@codeminity/request-core`.
 
 [![npm version](https://img.shields.io/npm/v/@codeminity/fetch.svg)](https://www.npmjs.com/package/@codeminity/fetch)
 [![license](https://img.shields.io/npm/l/%40codeminity%2Ffetch.svg)](https://github.com/codeminity/ts-platform/blob/main/LICENSE)
