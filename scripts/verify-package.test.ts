@@ -2,16 +2,32 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import * as esbuild from 'esbuild'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { runCommand } from './lib/run-command'
-import { readVersionFromPackageJson, verifyPackage } from './verify-package'
+import {
+  readVersionFromPackageJson,
+  verifyPackage,
+  verifyTreeShakenSideEffect
+} from './verify-package'
 
 vi.mock('./lib/run-command', () => ({
   runCommand: vi.fn()
 }))
 
+// Mocked here because `verifyPackage`'s own tests below mock `runCommand`
+// too — no real `pnpm add` ever runs, so there's nothing real for esbuild
+// to resolve. `verifyTreeShakenSideEffect`'s own tests further down
+// restore the real implementation (via `vi.importActual`) specifically
+// because a mocked bundler couldn't prove the real behavior this check
+// exists to verify.
+vi.mock('esbuild', () => ({
+  build: vi.fn()
+}))
+
 const mockedRunCommand = vi.mocked(runCommand)
+const mockedEsbuildBuild = vi.mocked(esbuild.build)
 
 function mockPackCommand() {
   mockedRunCommand.mockImplementation((command, args = []) => {
@@ -100,9 +116,73 @@ describe('readVersionFromPackageJson', () => {
   })
 })
 
+describe('verifyTreeShakenSideEffect', () => {
+  let tempDir: string | undefined
+
+  beforeEach(async () => {
+    // Restores the real esbuild for this block specifically — a mocked
+    // bundler can't prove real tree-shaking behavior, which is the entire
+    // point of these tests.
+    const actualEsbuild = await vi.importActual<typeof esbuild>('esbuild')
+
+    mockedEsbuildBuild.mockImplementation(actualEsbuild.build)
+  })
+
+  afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+      tempDir = undefined
+    }
+  })
+
+  // Real esbuild, real tree-shaking — a mocked bundler couldn't have caught
+  // the actual bug this check exists to catch a regression of (a bundler
+  // silently deleting a package's registration side effect based on a
+  // wrong "sideEffects" field).
+  function createFixturePackage(sideEffects: boolean): string {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tree-shake-test-'))
+
+    const packageDir = path.join(tempDir, 'node_modules', 'fixture-pkg')
+
+    fs.mkdirSync(packageDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(packageDir, 'package.json'),
+      JSON.stringify({ name: 'fixture-pkg', main: 'index.js', type: 'module', sideEffects })
+    )
+    fs.writeFileSync(
+      path.join(packageDir, 'index.js'),
+      "customElements.define('fixture-el', class extends HTMLElement {})\n"
+    )
+
+    return tempDir
+  }
+
+  it('passes when the side effect survives real bundling', async () => {
+    const dir = createFixturePackage(true)
+
+    await expect(verifyTreeShakenSideEffect(dir, 'fixture-pkg')).resolves.toBeUndefined()
+  })
+
+  it('throws when sideEffects: false lets a bundler tree-shake the side effect away', async () => {
+    const dir = createFixturePackage(false)
+
+    await expect(verifyTreeShakenSideEffect(dir, 'fixture-pkg')).rejects.toThrow(
+      "fixture-pkg: a production bundler tree-shook away this package's side effects"
+    )
+  })
+})
+
 describe('verifyPackage', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+
+    // Benign default so the ui-kit-category test below (which never
+    // actually installs anything real — runCommand is mocked) doesn't hit
+    // a real, doomed-to-fail esbuild resolution. Real tree-shaking
+    // behavior is covered by verifyTreeShakenSideEffect's own tests above.
+    mockedEsbuildBuild.mockResolvedValue({
+      outputFiles: [{ text: 'customElements.define(...)' }]
+    } as unknown as esbuild.BuildResult)
   })
 
   it('packs, installs and verifies package runtime import successfully', async () => {

@@ -9,6 +9,7 @@ This document records decisions specific to this package. Repo-wide decisions li
 - [ADR-001: Web Components (Lit), Not a Framework-Specific Library](#adr-001-web-components-lit-not-a-framework-specific-library)
 - [ADR-002: `static properties`, Not Decorators](#adr-002-static-properties-not-decorators)
 - [ADR-003: Design Tokens as CSS Custom Properties](#adr-003-design-tokens-as-css-custom-properties)
+- [ADR-004: `sideEffects: true`, Not `false`](#adr-004-sideeffects-true-not-false)
 
 ---
 
@@ -35,3 +36,11 @@ This document records decisions specific to this package. Repo-wide decisions li
 **Decision:** Shared theme values (color, font, radius, transition) live in [`src/theme/tokens.ts`](./src/theme/tokens.ts) as CSS custom properties applied to `:host`, and every component consumes them via `var(--cdmt-*)` instead of hardcoded values.
 
 **Consequences:** CSS custom properties cross shadow DOM boundaries by inheritance, so a host app can retheme every component from `:root` without any JS-level theming API. Keeps color/font/spacing decisions in one place instead of duplicated per component.
+
+## ADR-004: `sideEffects: true`, Not `false`
+
+**Context:** `package.json` originally shipped with `"sideEffects": false` (copied from `packages/request/*`'s own package.json shape, where it's correct — those packages export pure functions with no load-time behavior). Every component here registers itself via a bare `customElements.define('cdmt-<name>', ...)` call at module-load time — a real, load-time side effect, not something computed lazily. A consumer doing `import '@codeminity/ui-kit-core'` (the documented usage — no named import, since the whole point is the registration) triggers exactly this side effect and nothing else. `sideEffects: false` told bundlers the opposite was true: with it set, a production build (Vite/Rollup/Webpack, in an actual deployed app, not a dev server which doesn't tree-shake) correctly-per-that-metadata tree-shook the entire import away, since nothing consumed a named export from it — silently deleting the only thing that import was for. This wasn't caught until a real deployed build (not a dev server) was checked; `pnpm dev`/Vite's dev server never tree-shakes, so the bug was invisible until then.
+
+**Decision:** `sideEffects: true`, applying to the whole package, not a per-file array — every component here has this same "import for effect, not for a name" pattern, so there's no meaningful non-side-effecting export to preserve tree-shaking for.
+
+**Consequences:** Consumers get correctly-behaving production builds — the registration always survives tree-shaking. The tradeoff: this package's other exports (types, the `CdmtButton` class itself, if imported by name) also lose whatever marginal tree-shaking benefit `sideEffects: false` would have given them — an acceptable cost given every component's core purpose depends on the side effect surviving.
