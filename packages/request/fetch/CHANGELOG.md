@@ -1,5 +1,16 @@
 # @codeminity/fetch
 
+## 0.5.1
+
+### 📚 Documentation
+
+- Improve npm/SEO metadata: `homepage` now points to each package's own subfolder README instead of the generic monorepo root, and `keywords` now cover real feature-search terms (`jwt`, `token-refresh`, `retry-logic`, `rate-limit`, `api-client`, `http-client`) alongside the existing category terms. No code or behavior changes.
+
+### Dependency Updates
+
+- Updated dependencies
+  - @codeminity/request-core@0.13.1
+
 ## 0.5.0
 
 ### 🚀 Features
