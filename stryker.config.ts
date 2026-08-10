@@ -15,6 +15,10 @@ export default {
     '!packages/*/*/src/**/mocks/**',
     '!packages/*/*/src/**/test-utils.ts'
   ],
+  // See DECISIONS.md#adr-011-static-mutants-ignored-in-mutation-testing —
+  // also means a purely static file (e.g. theme/tokens.ts) will show 0
+  // total mutants in the report; that's expected, not a coverage gap.
+  ignoreStatic: true,
   testRunner: 'vitest',
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: {

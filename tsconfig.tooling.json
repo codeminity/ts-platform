@@ -12,6 +12,7 @@
   "include": [
     "stryker.config.ts",
     "vitest.mutation.config.ts",
+    "vitest.setup.ts",
     "commitlint.config.ts",
     "lint-staged.config.ts"
   ]
