@@ -46,7 +46,9 @@ Pure logic with no external integrations.
 
 - no framework dependency
 - no I/O concerns
-- no UI concerns
+- no UI-_framework_ concerns (no Vue/React/Angular component logic)
+
+The `ui-kit` category's `core` package is the deliberate exception this last rule is written for: its entire purpose is UI _primitives_ (Custom Elements built with Lit), not UI-framework integration — that's the adapter layer's job (`ui-kit/vue`, `ui-kit/react`, ...). Web Components aren't a UI-framework dependency, so this doesn't violate the rule's actual intent.
 
 ### Adapter Layer
 

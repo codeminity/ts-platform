@@ -15,6 +15,8 @@ This document records significant design decisions for the monorepo as a whole �
 - [ADR-007: Mutation testing scope](#adr-007-mutation-testing-scope)
 - [ADR-008: Property-based testing scope](#adr-008-property-based-testing-scope)
 - [ADR-009: Explicit `.js` extensions for relative imports](#adr-009-explicit-js-extensions-for-relative-imports)
+- [ADR-010: DOM globals scoped to the `ui-kit` category only](#adr-010-dom-globals-scoped-to-the-ui-kit-category-only)
+- [ADR-011: Static mutants ignored in mutation testing](#adr-011-static-mutants-ignored-in-mutation-testing)
 
 ---
 
@@ -89,3 +91,19 @@ This document records significant design decisions for the monorepo as a whole �
 **Decision:** Every relative import/export in `packages/*/*/src` (e.g. `import { create } from './create.js'`) carries an explicit `.js` extension, checked by `pnpm run validate:node-resolution` (`tsc -p tsconfig.esm-strict.json --noEmit`, `moduleResolution: "NodeNext"`).
 
 **Consequences:** Published `.d.ts` output resolves correctly for NodeNext consumers, and a regression is caught in CI before it ships rather than discovered downstream. `tsconfig.esm-strict.json` is a separate, dedicated tsconfig scoped to `packages/*/*/src` only, not a change to `tsconfig.base.json` itself — flipping the whole monorepo's resolution mode would also demand fixing every relative import in `bench/`, `e2e/`, and `scripts/`, none of which ship in a published package or are affected by a downstream consumer's resolution mode.
+
+## ADR-010: DOM globals scoped to the `ui-kit` category only
+
+**Context:** `ui-kit`'s packages are Web Components (Lit) — the first category whose production code needs a DOM at all. Every other package here is Node-oriented request/auth logic with no DOM dependency, and two existing mechanisms assumed that: `vitest.config.ts`'s single global `environment: 'node'`, and `scripts/verify-package.ts`'s runtime-import check, which spawns a bare `node index.mjs` to confirm a packed tarball actually imports cleanly — Lit's `LitElement` base class and `customElements.define()` reference `HTMLElement`/`customElements` at module-load time, which throws in plain Node with no DOM present.
+
+**Decision:** `vitest.config.ts` keeps its single `environment: 'node'` default, unchanged; a `ui-kit` test file opts into `happy-dom` per file via a `// @vitest-environment happy-dom` comment (Vitest 4 dropped `environmentMatchGlobs`, which would have scoped this by path in one place — this per-file comment is the mechanism Vitest 4 actually still supports). `verify-package.ts` detects a `ui-kit`-category package by path and, only for those, installs `@happy-dom/global-registrator` into the scratch consumer and prepends `import '@happy-dom/global-registrator/register.js'` to the generated `index.mjs` before importing the package under test.
+
+**Consequences:** `packages/request/**` keeps `node` and a plain-Node import check exactly as before — zero risk of regression there. `verify-package.ts`'s path-based scoping covers any future DOM-dependent category automatically; the Vitest side does not — each new `ui-kit` test file needs its own `// @vitest-environment happy-dom` comment, a real (small) cost accepted because Vitest 4 doesn't offer a path-based alternative anymore.
+
+## ADR-011: Static mutants ignored in mutation testing
+
+**Context:** Lit's `static properties`/`static styles` (see `ui-kit/core`'s own ADR-002) are this repo's first genuinely module-load-time static class fields — `request/*` never had this pattern. Stryker can't use its normal per-test incremental rerun for mutations to that kind of code, making them disproportionately slow: 15 static mutants (3% of the total mutant count) were observed consuming 45% of total mutation-testing run time.
+
+**Decision:** `stryker.config.ts` sets `ignoreStatic: true`, so Stryker no longer generates mutants for static/module-load-time code at all.
+
+**Consequences:** Mutation testing runtime dropped back to a normal range, same motivation as the existing `vitest.mutation.config.ts` split (ADR-007). The direct side effect: any file whose _entire_ content is static (a module-level `const` assignment or object literal with no conditionals, comparisons, or other mutable runtime logic — e.g. `ui-kit/core/src/theme/tokens.ts`, `request-core/src/auth/dependencies.ts`, `request/axios/src/create-configured-axios.ts`) now shows `0` total mutants (`n/a` score) in the mutation report, not because it's untested, but because there's nothing left for Stryker to mutate there at all. Ordinary Vitest coverage (100%, gated separately) is what verifies these files; a `n/a` row in the mutation report is expected for genuinely static files and isn't a coverage gap to chase.

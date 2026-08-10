@@ -19,5 +19,11 @@
     "name": "@codeminity/fetch",
     "path": "packages/request/fetch/dist/index.js",
     "limit": "2 kB"
+  },
+  {
+    "name": "@codeminity/ui-kit-core",
+    "path": "packages/ui-kit/core/dist/index.js",
+    "ignore": ["lit"],
+    "limit": "1.5 kB"
   }
 ]
