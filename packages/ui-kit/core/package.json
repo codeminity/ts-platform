@@ -23,7 +23,7 @@
     "url": "https://github.com/codeminity/ts-platform/issues"
   },
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": true,
   "engines": {
     "node": "^22.13.0 || >=24.0.0"
   },

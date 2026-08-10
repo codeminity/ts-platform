@@ -3,6 +3,8 @@ import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
 
+import * as esbuild from 'esbuild'
+
 import { buildLocalOverrides, toWorkspaceOverridesYaml } from './lib/local-overrides'
 import { packPackage } from './lib/pack-package'
 import { readPackageJson } from './lib/read-package-json'
@@ -32,7 +34,7 @@ function createTempDir(): string {
 // at module-load time, which throws in plain Node with no DOM. Every other
 // category's packages have no such requirement, so this is scoped to
 // `ui-kit` specifically rather than registering DOM globals unconditionally.
-function needsDomGlobals(packagePath: string): boolean {
+function isUiKitPackage(packagePath: string): boolean {
   return packagePath.split(path.sep).includes('ui-kit')
 }
 
@@ -79,6 +81,45 @@ async function verifyRuntimeImport(
   })
 }
 
+// `ui-kit` components register themselves via a load-time side effect
+// (customElements.define()) with no named export a consumer imports —
+// exactly the shape a bundler's tree-shaking (driven by package.json's
+// "sideEffects" field) can delete entirely if that field is wrong. A plain
+// Node import (verifyRuntimeImport, above) never tree-shakes, so it can't
+// catch this — only a real bundler run can. See ui-kit/core's own
+// DECISIONS.md#adr-004-sideeffects-true-not-false for the real bug this
+// exists to catch a regression of.
+export async function verifyTreeShakenSideEffect(
+  consumerPath: string,
+  packageName: string
+): Promise<void> {
+  const entryFile = path.join(consumerPath, 'tree-shake-entry.mjs')
+
+  fs.writeFileSync(entryFile, `import ${JSON.stringify(packageName)}\n`)
+
+  const result = await esbuild.build({
+    entryPoints: [entryFile],
+    bundle: true,
+    format: 'esm',
+    write: false,
+    absWorkingDir: consumerPath,
+    // esbuild's own "ignored-bare-import" warning fires for exactly the
+    // failure case this function exists to detect — that's this
+    // function's job to report (via the thrown Error below), not
+    // something worth also printing as raw bundler diagnostic noise.
+    logLevel: 'silent'
+  })
+
+  const output = result.outputFiles.map((file) => file.text).join('\n')
+
+  if (!output.includes('customElements.define')) {
+    throw new Error(
+      `${packageName}: a production bundler tree-shook away this package's side effects ` +
+        `(no customElements.define found in the bundled output) — check "sideEffects" in package.json`
+    )
+  }
+}
+
 export async function verifyPackage({
   packagePath,
   localPackages
@@ -120,9 +161,9 @@ export async function verifyPackage({
       )
     }
 
-    const domGlobals = needsDomGlobals(packagePath)
+    const isUiKit = isUiKitPackage(packagePath)
 
-    const addArgs = domGlobals
+    const addArgs = isUiKit
       ? [
           'add',
           tarball,
@@ -134,7 +175,12 @@ export async function verifyPackage({
       cwd: consumerDir
     })
 
-    await verifyRuntimeImport(consumerDir, packageJson.name, domGlobals)
+    await verifyRuntimeImport(consumerDir, packageJson.name, isUiKit)
+
+    if (isUiKit) {
+      await verifyTreeShakenSideEffect(consumerDir, packageJson.name)
+    }
+
     await runPublint(path.resolve(packagePath))
     await runApiExtractor(path.resolve(packagePath))
   } finally {
