@@ -1,1 +1,7 @@
-npx --no -- commitlint --edit "$1"
+npx --no -- commitlint --edit "$1" || exit 1
+
+if ! grep -qE "^Signed-off-by: .+ <.+>$" "$1"; then
+  echo ""
+  echo "Missing DCO sign-off. Commit with 'git commit -s' (see CONTRIBUTING.md)."
+  exit 1
+fi
