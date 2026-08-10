@@ -162,6 +162,9 @@ git commit -s -m "feat: add retry strategy"
 
 `-s` appends a `Signed-off-by: Your Name <your.email@example.com>` trailer
 using your configured git identity — no separate CLA or account needed.
+This is checked automatically by a `commit-msg` git hook (installed via
+`pnpm install`) — a rejected commit means the trailer is missing, not
+that the hook is wrong.
 
 ---
 
