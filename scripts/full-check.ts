@@ -8,9 +8,15 @@ export interface CheckStep {
 // Mirrors ci.yml's "Test / Build / Lint" job order exactly (install, then
 // audit, then build, then lint, then typecheck, then test), plus the slow
 // checks (mutation, e2e) that only run manually / via separate jobs there.
+// Changeset Required (changesets.yml) is folded in here too, right after
+// install, since it's cheap and exercises the changesets CLI's own
+// dependencies (e.g. js-yaml via read-yaml-file) - a path nothing else in
+// this list touches, and the reason a real override break once slipped
+// past a passing full-check.
 export const CHECK_STEPS: CheckStep[] = [
   { name: 'Install Dependencies', args: ['install', '--frozen-lockfile'] },
   { name: 'Audit Dependencies', args: ['audit', '--audit-level=moderate'] },
+  { name: 'Changeset Required', args: ['run', 'validate:changeset'] },
   { name: 'Build', args: ['run', 'build'] },
   { name: 'Lint', args: ['run', 'lint'] },
   { name: 'Format Validation', args: ['run', 'validate:format'] },
