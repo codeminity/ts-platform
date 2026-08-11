@@ -198,7 +198,7 @@ Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package i
 
 ## Full Local Check
 
-`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job, plus mutation testing and browser e2e tests (both otherwise separate/manual):
+`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus mutation testing and browser e2e tests (both otherwise separate/manual):
 
 ```bash
 pnpm run full-check
