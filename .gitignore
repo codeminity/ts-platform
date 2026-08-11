@@ -4,6 +4,9 @@ node_modules
 dist
 coverage
 .turbo
+.eslintcache
+.prettiercache
+*.tsbuildinfo
 localhost-key.pem
 localhost.pem
 

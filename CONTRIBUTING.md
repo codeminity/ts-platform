@@ -24,7 +24,7 @@ To reset back to a fresh-clone state:
 pnpm run clean
 ```
 
-Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/clean.ts`, not `git clean`, so it can never reach further than intended.
+Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.eslintcache`, `.prettiercache`, every `*.tsbuildinfo` file, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/clean.ts`, not `git clean`, so it can never reach further than intended.
 
 ---
 

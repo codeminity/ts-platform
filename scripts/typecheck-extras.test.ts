@@ -70,7 +70,10 @@ describe('typecheckExtras', () => {
       'tsc',
       '-p',
       'packages/request/axios/e2e/tsconfig.json',
-      '--noEmit'
+      '--noEmit',
+      '--incremental',
+      '--tsBuildInfoFile',
+      'packages/request/axios/e2e/tsconfig.json.tsbuildinfo'
     ])
     expect(onProgress).toHaveBeenCalledTimes(4)
     expect(onProgress).toHaveBeenCalledWith('packages/request/axios/e2e/tsconfig.json')

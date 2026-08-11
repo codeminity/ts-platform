@@ -24,6 +24,19 @@ export async function typecheckExtras(onProgress?: (tsconfig: string) => void): 
 
   for (const tsconfig of tsconfigs) {
     onProgress?.(tsconfig)
-    await runCommand('pnpm', ['exec', 'tsc', '-p', tsconfig, '--noEmit'])
+    // --incremental + an explicit build info file lets tsc skip re-checking
+    // files whose dependency graph hasn't changed since the last run - safe
+    // because tsc's own incremental correctness is what TS project
+    // references rely on everywhere, not a heuristic we're introducing.
+    await runCommand('pnpm', [
+      'exec',
+      'tsc',
+      '-p',
+      tsconfig,
+      '--noEmit',
+      '--incremental',
+      '--tsBuildInfoFile',
+      `${tsconfig}.tsbuildinfo`
+    ])
   }
 }
