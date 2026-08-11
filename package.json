@@ -29,6 +29,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "validate:format": "prettier --check .",
+    "outdated": "pnpm -r outdated --include-github-actions",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
