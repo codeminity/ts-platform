@@ -15,6 +15,19 @@ export const CLEAN_GLOBS = [
   'packages/*/*/dist',
   '.turbo',
   'packages/*/*/.turbo',
+  '.eslintcache',
+  '.prettiercache',
+  // Mirrors typecheck-extras.ts's own tsconfig discovery (its FIXED_TSCONFIGS
+  // plus per-package e2e/bench globs), each with its generated build info
+  // suffix - explicit paths, not a `**` glob, so there's no need for a
+  // node_modules exclusion that could (and once did) also swallow the
+  // `node_modules` cleanup entry above via fast-glob's negation semantics.
+  'tsconfig.tooling.json.tsbuildinfo',
+  'tsconfig.esm-strict.json.tsbuildinfo',
+  'scripts/tsconfig.json.tsbuildinfo',
+  'e2e/tsconfig.json.tsbuildinfo',
+  'packages/*/*/e2e/tsconfig.json.tsbuildinfo',
+  'packages/*/*/bench/tsconfig.json.tsbuildinfo',
   'packages/*/*/temp',
   'coverage',
   'reports',
