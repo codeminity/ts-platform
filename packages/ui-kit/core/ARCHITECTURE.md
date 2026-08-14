@@ -25,6 +25,7 @@ Only `src/index.ts`'s exports are public API. Everything else is an implementati
 - Reactive properties via Lit's `static properties`, not decorators — see [DECISIONS.md](./DECISIONS.md#adr-002-static-properties-not-decorators)
 - Shared theme values live in `theme/`, consumed via CSS custom properties — see [DECISIONS.md](./DECISIONS.md#adr-003-design-tokens-as-css-custom-properties)
 - Themes are applied via `applyTheme`/`mergeTheme`, never a hand-written CSS override block — see [DECISIONS.md](./DECISIONS.md#adr-005-multi-theme-presets-applied-via-a-config-engine-not-hand-written-css)
+- Every token reference is `themeVar(key)` at its own point of use (`var(--cdmt-*, default)`), never a blanket `:host { --cdmt-*: default; }` block, and a property must not both transition and derive its value from a token — see [DECISIONS.md](./DECISIONS.md#adr-006-per-use-site-var-fallbacks-not-a-blanket-host-token-block)
 
 ## Non-Goals
 
