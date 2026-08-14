@@ -17,6 +17,7 @@ const themeTokenKeys = [
   'colorSecondaryHover',
   'colorOnSecondary',
   'colorGhostHover',
+  'colorDanger',
   'fontFamily',
   'fontSize',
   'radiusMd',

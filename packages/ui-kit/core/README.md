@@ -17,13 +17,16 @@ import '@codeminity/ui-kit-core'
 ```html
 <cdmt-button variant="primary">Save</cdmt-button>
 <cdmt-button variant="ghost" disabled>Cancel</cdmt-button>
+
+<cdmt-input placeholder="Email" type="email"></cdmt-input>
 ```
 
 ## Components
 
-| Tag             | Description                                                                  |
-| --------------- | ---------------------------------------------------------------------------- |
-| `<cdmt-button>` | A button with `primary`/`secondary`/`ghost` variants and a `disabled` state. |
+| Tag             | Description                                                                                                                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `<cdmt-button>` | A button with `primary`/`secondary`/`ghost` variants and a `disabled` state.                                                                                                               |
+| `<cdmt-input>`  | A text input (`text`/`email`/`password`) with `disabled` and `invalid` states. `value` is a controlled property that stays in sync as the user types, listen for the native `input` event. |
 
 ## Theming
 

@@ -16,6 +16,7 @@ export const material: ThemePreset = {
     colorSecondaryHover: '#d1d5db',
     colorOnSecondary: '#111827',
     colorGhostHover: 'rgb(79 70 229 / 8%)',
+    colorDanger: '#dc2626',
     fontFamily: 'inherit',
     fontSize: 'inherit',
     radiusMd: '6px',

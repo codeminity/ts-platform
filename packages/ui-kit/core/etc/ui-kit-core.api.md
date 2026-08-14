@@ -39,6 +39,49 @@ export class CdmtButton extends LitElement {
 export type CdmtButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 // @public
+export class CdmtInput extends LitElement {
+    constructor();
+    // (undocumented)
+    disabled: boolean;
+    // (undocumented)
+    invalid: boolean;
+    // (undocumented)
+    placeholder: string;
+    // (undocumented)
+    static properties: {
+        value: {
+            type: StringConstructor;
+        };
+        type: {
+            type: StringConstructor;
+            reflect: boolean;
+        };
+        placeholder: {
+            type: StringConstructor;
+        };
+        disabled: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        invalid: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    type: CdmtInputType;
+    // (undocumented)
+    value: string;
+}
+
+// @public
+export type CdmtInputType = 'text' | 'email' | 'password';
+
+// @public
 export const material: ThemePreset;
 
 // @public
@@ -81,6 +124,8 @@ export interface ThemePresetOverrides {
 
 // @public
 export interface ThemeTokens {
+    // (undocumented)
+    colorDanger: string;
     // (undocumented)
     colorGhostHover: string;
     // (undocumented)
