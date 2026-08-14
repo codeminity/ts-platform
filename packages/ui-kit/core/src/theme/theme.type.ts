@@ -14,6 +14,7 @@ export interface ThemeTokens {
   colorSecondaryHover: string
   colorOnSecondary: string
   colorGhostHover: string
+  colorDanger: string
   fontFamily: string
   fontSize: string
   radiusMd: string

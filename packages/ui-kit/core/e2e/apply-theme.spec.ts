@@ -30,6 +30,7 @@ test.beforeAll(async () => {
 <html>
   <body>
     <cdmt-button id="btn" variant="primary">Click me</cdmt-button>
+    <cdmt-input id="inp" invalid></cdmt-input>
     <script type="module">
       import { applyTheme, mergeTheme, material } from '/bundle.js'
       window.__theme = { applyTheme, mergeTheme, material }
@@ -90,4 +91,29 @@ test('applyTheme re-applied with a merged override changes both color and radius
   })
 
   expect(result).toEqual({ backgroundColor: 'rgb(255, 0, 128)', borderRadius: '20px' })
+})
+
+test('applyTheme changes an invalid cdmt-input border color via colorDanger, live', async ({
+  page
+}) => {
+  await page.goto(pageServer.url, { waitUntil: 'networkidle' })
+
+  const before = await page.evaluate(() => {
+    const inner = document.getElementById('inp')?.shadowRoot?.querySelector('input')
+    return inner ? getComputedStyle(inner).borderColor : null
+  })
+
+  await page.evaluate(() => {
+    const { applyTheme, mergeTheme, material } = window.__theme
+    const custom = mergeTheme(material, { tokens: { colorDanger: 'rgb(255, 0, 255)' } })
+    applyTheme(document.documentElement, custom, 'light')
+  })
+
+  const after = await page.evaluate(() => {
+    const inner = document.getElementById('inp')?.shadowRoot?.querySelector('input')
+    return inner ? getComputedStyle(inner).borderColor : null
+  })
+
+  expect(after).toBe('rgb(255, 0, 255)')
+  expect(after).not.toBe(before)
 })
