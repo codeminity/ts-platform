@@ -178,29 +178,19 @@ jobs:
           path: sbom/
           retention-days: 90
 
-      # Normally no NPM_TOKEN / NODE_AUTH_TOKEN here: `changeset publish` shells
-      # out to `npm publish`, which authenticates via the OIDC token requested
-      # above (npm Trusted Publisher — configured on npmjs.com for each package
-      # to trust this workflow specifically). Requires npm >= 11.5.1, which Node
-      # 24 ships with; if this step starts failing with an auth error, check the
+      # No NPM_TOKEN / NODE_AUTH_TOKEN here: `changeset publish` shells out to
+      # `npm publish`, which authenticates via the OIDC token requested above
+      # (npm Trusted Publisher — configured on npmjs.com for each package to
+      # trust this workflow specifically). Requires npm >= 11.5.1, which Node 24
+      # ships with; if this step starts failing with an auth error, check the
       # bundled npm version before assuming the trusted publisher config broke.
       # NPM_CONFIG_PROVENANCE additionally attests the published tarball back to
       # this exact commit/workflow run (visible as the "Provenance" badge on npm).
-      #
-      # TEMPORARY EXCEPTION (see SECURITY.md#release--supply-chain-security):
-      # @codeminity/ui-kit-vue has never been published, so Trusted Publisher
-      # can't be configured for it yet (npm/cli#8544 — OIDC requires the
-      # package to already exist on npmjs.com). NODE_AUTH_TOKEN below, sourced
-      # from the short-lived NPM_TOKEN secret, is only for that one bootstrap
-      # publish. Remove this env entry and delete the NPM_TOKEN secret as soon
-      # as that publish succeeds and Trusted Publisher is configured for the
-      # now-existing package — do not leave this in place for future releases.
       - name: Release
         if: github.event_name == 'workflow_run'
         run: pnpm release
         env:
           NPM_CONFIG_PROVENANCE: true
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # `changeset publish`'s human-readable stdout summary is not a
           # reliable signal for which packages actually got tagged — see the
           # comment on the step below. CHANGESETS_OUTPUT (read by the CLI
