@@ -1,6 +1,6 @@
 {
   "name": "@codeminity/ui-kit-core",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "private": false,
   "description": "Framework-agnostic UI components (Web Components / Custom Elements) for the Codeminity ecosystem — no Vue, React, or Angular required.",
   "keywords": [
