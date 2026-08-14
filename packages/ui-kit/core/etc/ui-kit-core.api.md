@@ -9,6 +9,9 @@ import { LitElement } from 'lit';
 import { TemplateResult } from 'lit';
 
 // @public
+export function applyTheme(target: HTMLElement, preset: ThemePreset, mode?: ThemeMode): void;
+
+// @public
 export class CdmtButton extends LitElement {
     constructor();
     // (undocumented)
@@ -34,6 +37,75 @@ export class CdmtButton extends LitElement {
 
 // @public
 export type CdmtButtonVariant = 'primary' | 'secondary' | 'ghost';
+
+// @public
+export const material: ThemePreset;
+
+// @public
+export function mergeTheme(base: ThemePreset, overrides: ThemePresetOverrides): ThemePreset;
+
+// @public
+export type ThemeMode = 'light' | 'dark';
+
+// @public
+export interface ThemeModeTokens {
+    // (undocumented)
+    colorBg: string;
+    // (undocumented)
+    colorBorder: string;
+    // (undocumented)
+    colorSurface: string;
+    // (undocumented)
+    colorText: string;
+}
+
+// @public
+export interface ThemePreset {
+    // (undocumented)
+    dark: ThemeModeTokens;
+    // (undocumented)
+    light: ThemeModeTokens;
+    // (undocumented)
+    tokens: ThemeTokens;
+}
+
+// @public
+export interface ThemePresetOverrides {
+    // (undocumented)
+    dark?: Partial<ThemeModeTokens>;
+    // (undocumented)
+    light?: Partial<ThemeModeTokens>;
+    // (undocumented)
+    tokens?: Partial<ThemeTokens>;
+}
+
+// @public
+export interface ThemeTokens {
+    // (undocumented)
+    colorGhostHover: string;
+    // (undocumented)
+    colorOnPrimary: string;
+    // (undocumented)
+    colorOnSecondary: string;
+    // (undocumented)
+    colorPrimary: string;
+    // (undocumented)
+    colorPrimaryHover: string;
+    // (undocumented)
+    colorSecondary: string;
+    // (undocumented)
+    colorSecondaryHover: string;
+    // (undocumented)
+    fontFamily: string;
+    // (undocumented)
+    fontSize: string;
+    // (undocumented)
+    radiusMd: string;
+    // (undocumented)
+    transitionDuration: string;
+    // (undocumented)
+    transitionEasing: string;
+}
 
 // (No @packageDocumentation comment for this package)
 

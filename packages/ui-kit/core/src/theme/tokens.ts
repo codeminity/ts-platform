@@ -1,29 +1,27 @@
-import { css } from 'lit'
+import { css, unsafeCSS } from 'lit'
 
-// Design tokens as CSS custom properties, defined on `:host` so every
-// component gets these defaults even if the host app never sets a theme,
-// while still being overridable from outside without touching component
-// internals — per-instance (`cdmt-button { --cdmt-color-primary: ... }`)
-// or globally (`:root { --cdmt-color-primary: ...; }`, which every
-// shadow root inherits custom properties from).
+import { toCssCustomPropertyName } from './css-custom-property-name.js'
+import { material } from './presets/material.js'
+
+// The zero-JS fallback: every component gets these defaults even if the
+// host app never calls `applyTheme` (e.g. before hydration, or an app that
+// never bothers configuring a theme), while still being overridable from
+// outside without touching component internals — per-instance
+// (`cdmt-button { --cdmt-color-primary: ... }`) or globally
+// (`applyTheme(document.documentElement, ...)`, which every shadow root
+// inherits custom properties from).
+//
+// Generated from the `material` preset's light-mode values rather than
+// duplicated by hand, so the fallback can never drift from the preset it's
+// supposed to match.
+const defaultTokens: Record<string, string> = { ...material.tokens, ...material.light }
+
+const declarations = Object.entries(defaultTokens)
+  .map(([key, value]) => `${toCssCustomPropertyName(key)}: ${value};`)
+  .join('\n    ')
+
 export const tokens = css`
   :host {
-    --cdmt-color-primary: #4f46e5;
-    --cdmt-color-primary-hover: #4338ca;
-    --cdmt-color-on-primary: #ffffff;
-
-    --cdmt-color-secondary: #e5e7eb;
-    --cdmt-color-secondary-hover: #d1d5db;
-    --cdmt-color-on-secondary: #111827;
-
-    --cdmt-color-ghost-hover: rgb(79 70 229 / 8%);
-
-    --cdmt-font-family: inherit;
-    --cdmt-font-size: inherit;
-
-    --cdmt-radius-md: 6px;
-
-    --cdmt-transition-duration: 120ms;
-    --cdmt-transition-easing: ease;
+    ${unsafeCSS(declarations)}
   }
 `
