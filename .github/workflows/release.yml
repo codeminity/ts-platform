@@ -169,43 +169,56 @@ jobs:
       # NPM_CONFIG_PROVENANCE additionally attests the published tarball back to
       # this exact commit/workflow run (visible as the "Provenance" badge on npm).
       - name: Release
-        id: release
         if: github.event_name == 'workflow_run'
-        run: |
-          output=$(pnpm release)
-          echo "$output"
-          {
-            echo "publish_output<<PUBLISH_OUTPUT_EOF"
-            echo "$output"
-            echo "PUBLISH_OUTPUT_EOF"
-          } >> "$GITHUB_OUTPUT"
+        run: pnpm release
         env:
           NPM_CONFIG_PROVENANCE: true
+          # `changeset publish`'s human-readable stdout summary is not a
+          # reliable signal for which packages actually got tagged — see the
+          # comment on the step below. CHANGESETS_OUTPUT (read by the CLI
+          # itself, not a documented `publish` flag but real in the pinned
+          # version) makes it write one JSON-lines event per action instead,
+          # including a `{"type":"git-tag","tag":"<name>@<version>"}` entry
+          # for every tag it actually creates — parsed below via `jq`.
+          CHANGESETS_OUTPUT: ${{ runner.temp }}/changesets-report.ndjson
 
-      # `changeset publish` prints a "New tag: <name>@<version>" line per
-      # package it actually published (the same signal changesets/action
-      # itself parses to create GitHub releases). We can't use that action
-      # directly — it wants a long-lived NPM_TOKEN, which this repo
-      # deliberately doesn't have (OIDC Trusted Publisher instead, see
-      # SECURITY.md) — so replicate just the tagging + release step here.
+      # We can't use changesets/action to create the GitHub Release directly —
+      # it wants a long-lived NPM_TOKEN, which this repo deliberately doesn't
+      # have (OIDC Trusted Publisher instead, see SECURITY.md) — so replicate
+      # just the tagging + release step here.
+      #
+      # Do NOT determine which tags to create by grepping `changeset
+      # publish`'s stdout (e.g. a "New tag: <name>@<version>" line) — that
+      # was this step's original approach, and @changesets/cli@3.0.0 broke it
+      # silently: `publish.mjs`'s final summary message filters
+      # `results.tagged` through a `tagOnlyReleases` Set that only contains
+      # packages already marked tag-only in the release plan (root/private
+      # packages), never packages that were just npm-published — so for a
+      # normal publish the printed summary is just "Created git tags." with
+      # no package name at all, even though the tag was genuinely created.
+      # This went unnoticed from the v3 bump (#206) until the next real
+      # publish (#211), which published to npm but silently skipped
+      # tagging/releasing. Reading structured events from CHANGESETS_OUTPUT
+      # instead reads directly from where the tag is created (`git.tag()`),
+      # upstream of that broken summary formatting.
       #
       # In workflow_dispatch recovery mode, the tag list comes directly
-      # from the `tags` input instead of being parsed out of a publish run.
+      # from the `tags` input instead.
       #
-      # Tag existence is checked against the REMOTE (`git ls-remote`), not
-      # local refs — `changeset publish` (the `pnpm release` step above)
+      # Tag existence is still checked against the REMOTE (`git ls-remote`),
+      # not local refs — `changeset publish` (the `pnpm release` step above)
       # already creates a local, unsigned tag of the same name as a side
-      # effect of publishing (see @changesets/git's own `tag()` helper), so
-      # a local-only check like `git rev-parse --verify refs/tags/<tag>`
-      # always finds that tag and skips creating our signed one, silently
-      # dropping the push + GitHub Release. This is what caused automatic
-      # tagging to do nothing on 2026-08-02, requiring the workflow_dispatch
-      # recovery path to fix it by hand. The full `refs/tags/<tag>` form
-      # (not a bare tag name) makes the `ls-remote` pattern match only an
-      # exact tag ref, not any other ref that happens to share a suffix.
+      # effect of publishing, so a local-only check like `git rev-parse
+      # --verify refs/tags/<tag>` always finds that tag and skips creating
+      # our signed one, silently dropping the push + GitHub Release. This is
+      # what caused automatic tagging to do nothing on 2026-08-02, requiring
+      # the workflow_dispatch recovery path to fix it by hand. The full
+      # `refs/tags/<tag>` form (not a bare tag name) makes the `ls-remote`
+      # pattern match only an exact tag ref, not any other ref that happens
+      # to share a suffix.
       - name: Tag & release published packages
         env:
-          PUBLISH_OUTPUT: ${{ steps.release.outputs.publish_output }}
+          CHANGESETS_REPORT: ${{ runner.temp }}/changesets-report.ndjson
           DISPATCH_TAGS: ${{ inputs.tags }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -215,7 +228,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             tags=$(echo "$DISPATCH_TAGS" | tr ',' '\n' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
           else
-            tags=$(echo "$PUBLISH_OUTPUT" | grep 'New tag:' | sed -E 's/.*New tag:[[:space:]]*//' || true)
+            tags=$(jq -r 'select(.type == "git-tag") | .tag' "$CHANGESETS_REPORT" 2>/dev/null || true)
           fi
 
           if [ -z "$tags" ]; then
