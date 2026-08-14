@@ -25,5 +25,11 @@
     "path": "packages/ui-kit/core/dist/index.js",
     "ignore": ["lit"],
     "limit": "1.5 kB"
+  },
+  {
+    "name": "@codeminity/ui-kit-vue",
+    "path": "packages/ui-kit/vue/dist/index.js",
+    "ignore": ["vue", "@codeminity/ui-kit-core"],
+    "limit": "1 kB"
   }
 ]
