@@ -24,6 +24,24 @@ name: Release
 # Release for a package version that's already on npm — for when the
 # publish itself succeeded but tagging failed or was skipped for some
 # reason. See CONTRIBUTING.md#releasing-changesets.
+#
+# This recovery path only works if the commit being tagged is STILL the
+# default branch's current tip. GITHUB_TOKEN structurally cannot push a
+# tag pointing at an older commit whose `.github/workflows/*` content
+# differs from what's currently on the default branch — GitHub rejects it
+# with "refusing to allow a GitHub App to create or update workflow
+# ... without workflows permission", regardless of tag signing, clone
+# depth, or using the REST API instead of `git push` (all tested; no
+# `permissions:` grant fixes this — `workflows` isn't even a valid
+# GITHUB_TOKEN permission key). A human's own git push is exempt from this
+# restriction and always works. Confirmed 2026-08-14: this recovery path
+# failed for @codeminity/ui-kit-core@0.1.0 because a later PR (#212, a fix
+# to this very file) had already moved main's tip past the release commit
+# by the time recovery was attempted — recovered by pushing the tag
+# manually (unsigned, since gitsign's OIDC signing isn't available outside
+# Actions) instead. If this recovery path is needed again and the commit
+# is no longer the tip, expect the same failure and use the same manual
+# workaround — don't re-diagnose this from scratch.
 on:
   workflow_run:
     workflows:
