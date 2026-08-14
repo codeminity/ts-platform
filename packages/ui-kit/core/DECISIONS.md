@@ -10,6 +10,7 @@ This document records decisions specific to this package. Repo-wide decisions li
 - [ADR-002: `static properties`, Not Decorators](#adr-002-static-properties-not-decorators)
 - [ADR-003: Design Tokens as CSS Custom Properties](#adr-003-design-tokens-as-css-custom-properties)
 - [ADR-004: `sideEffects: true`, Not `false`](#adr-004-sideeffects-true-not-false)
+- [ADR-005: Multi-Theme Presets Applied via a Config Engine, Not Hand-Written CSS](#adr-005-multi-theme-presets-applied-via-a-config-engine-not-hand-written-css)
 
 ---
 
@@ -44,3 +45,20 @@ This document records decisions specific to this package. Repo-wide decisions li
 **Decision:** `sideEffects: true`, applying to the whole package, not a per-file array — every component here has this same "import for effect, not for a name" pattern, so there's no meaningful non-side-effecting export to preserve tree-shaking for.
 
 **Consequences:** Consumers get correctly-behaving production builds — the registration always survives tree-shaking. The tradeoff: this package's other exports (types, the `CdmtButton` class itself, if imported by name) also lose whatever marginal tree-shaking benefit `sideEffects: false` would have given them — an acceptable cost given every component's core purpose depends on the side effect surviving.
+
+## ADR-005: Multi-Theme Presets Applied via a Config Engine, Not Hand-Written CSS
+
+**Context:** ADR-003 established CSS custom properties as the token mechanism, but left a real consuming app with only one option: hand-write a `:root { --cdmt-*: ...; }` override block. That doesn't scale to this package's actual goal — multiple distinct, named theme presets (`material` today; `fancy`, `energetic`, ... later) that an end user can switch between at runtime inside a consuming app, with the consuming app still able to tweak a preset's individual values (down to `radiusMd`) without forking it.
+
+Consuming apps also need brand colors (`colorPrimary`, `colorSecondary`, ...) to stay fixed when the user flips between light and dark, while background/surface/border/text colors genuinely change — a hand-written CSS override block has no structure to express that split; it's just flat properties.
+
+**Decision:** A theme is a plain data object (`ThemePreset`: a `tokens` half fixed across color schemes, plus `light`/`dark` halves for what does change), not CSS. Two functions operate on it:
+
+- `applyTheme(target, preset, mode)` — resolves `{ ...preset.tokens, ...preset[mode] }` and imperatively sets each field as a `--cdmt-*` custom property via `target.style.setProperty(...)`. Calling it again (different preset, different mode, or both) re-themes everything already rendered — the runtime-switching case — because components only ever read `var(--cdmt-*)`; they have no idea when or why the value changed.
+- `mergeTheme(base, overrides)` — a field-by-field shallow merge across `tokens`/`light`/`dark`, returning a new `ThemePreset`. This is the supported way to customize a shipped preset; a consuming app never writes `--cdmt-*` CSS directly.
+
+`theme/tokens.ts` (the zero-JS `:host` fallback from ADR-003) is generated from `material`'s resolved light-mode values at module load, rather than duplicated by hand, so the static fallback can't drift from the preset it's supposed to match.
+
+**Consequences:** Adding a new preset (`fancy`, `energetic`, ...) is adding one more `ThemePreset` object under `theme/presets/`, not writing new CSS or touching `applyTheme`/`mergeTheme`. A consuming app's theme-switcher UI, and where the user's choice is persisted, stays entirely the consuming app's concern (unchanged from ADR-003's framing — see [ARCHITECTURE.md](./ARCHITECTURE.md)'s non-goals) — this package only ships the presets and the two functions that resolve them to custom properties. The tradeoff: `ThemeTokens`/`ThemeModeTokens` are a fixed, hand-maintained schema — a component that needs a token neither half currently has requires a schema change here first, not a local workaround in the component.
+
+Per-theme _behavioral_ differences (e.g. a real Material ripple) are explicitly out of scope for this decision — token-level theming (color/radius/shadow/transition) covers everything decided so far; conditional per-theme component logic is a separate, larger decision to make later if a preset's identity genuinely needs it.

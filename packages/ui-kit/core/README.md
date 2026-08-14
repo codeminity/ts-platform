@@ -25,6 +25,38 @@ import '@codeminity/ui-kit-core'
 | --------------- | ---------------------------------------------------------------------------- |
 | `<cdmt-button>` | A button with `primary`/`secondary`/`ghost` variants and a `disabled` state. |
 
+## Theming
+
+Every component reads its colors, radius, and transitions from `--cdmt-*` CSS custom properties, which inherit across shadow DOM boundaries. Apply a theme once, to the whole page:
+
+```ts
+import { applyTheme, material } from '@codeminity/ui-kit-core'
+
+applyTheme(document.documentElement, material, 'light')
+```
+
+Call `applyTheme` again — with a different preset, or a different `mode` (`'light'` | `'dark'`, defaults to `'light'`) — to re-theme every component on the page at runtime, e.g. for a user-facing theme switcher.
+
+A theme is split into two parts:
+
+- **`tokens`** — brand colors, font, radius, transitions. Fixed across light/dark; this is what makes your primary/secondary colors stay put when the user's color scheme changes.
+- **`light` / `dark`** — background, surface, border, and text colors. This is the part that actually changes between color schemes.
+
+To customize a shipped preset, layer overrides onto it with `mergeTheme` instead of writing CSS by hand:
+
+```ts
+import { applyTheme, material, mergeTheme } from '@codeminity/ui-kit-core'
+
+const myTheme = mergeTheme(material, {
+  tokens: { radiusMd: '2px' },
+  dark: { colorBg: '#0a0a0a' }
+})
+
+applyTheme(document.documentElement, myTheme, 'dark')
+```
+
+Only `material` ships today; more presets (a distinct "fancy", "energetic", ...) are added the same way, on demand.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for how to add a new component.

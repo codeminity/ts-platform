@@ -14,7 +14,7 @@ Every UI component here is a plain Custom Element (Web Components + [Lit](https:
 src/
 ├── index.ts             # public entry point
 ├── components/          # one folder per component, e.g. components/button/button.ts
-└── theme/                # shared design tokens (CSS custom properties), consumed by every component
+└── theme/                # design tokens, theme presets, and the apply/merge engine — consumed by every component
 ```
 
 Only `src/index.ts`'s exports are public API. Everything else is an implementation detail.
@@ -24,6 +24,7 @@ Only `src/index.ts`'s exports are public API. Everything else is an implementati
 - No Vue/React/Angular dependency, ever — see the root [ARCHITECTURE.md](../../../ARCHITECTURE.md#core-layer)'s carve-out for this category
 - Reactive properties via Lit's `static properties`, not decorators — see [DECISIONS.md](./DECISIONS.md#adr-002-static-properties-not-decorators)
 - Shared theme values live in `theme/`, consumed via CSS custom properties — see [DECISIONS.md](./DECISIONS.md#adr-003-design-tokens-as-css-custom-properties)
+- Themes are applied via `applyTheme`/`mergeTheme`, never a hand-written CSS override block — see [DECISIONS.md](./DECISIONS.md#adr-005-multi-theme-presets-applied-via-a-config-engine-not-hand-written-css)
 
 ## Non-Goals
 
