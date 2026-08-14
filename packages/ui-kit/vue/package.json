@@ -1,6 +1,6 @@
 {
   "name": "@codeminity/ui-kit-vue",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "description": "Vue bindings for @codeminity/ui-kit-core, with v-model support for form components.",
   "keywords": [
