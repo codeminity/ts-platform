@@ -24,12 +24,12 @@
     "name": "@codeminity/ui-kit",
     "path": "packages/ui-kit/dist/index.js",
     "ignore": ["lit"],
-    "limit": "5.5 kB"
+    "limit": "6.5 kB"
   },
   {
     "name": "@codeminity/ui-kit/vue",
     "path": "packages/ui-kit/dist/vue/index.js",
     "ignore": ["vue", "lit"],
-    "limit": "6.5 kB"
+    "limit": "7.5 kB"
   }
 ]

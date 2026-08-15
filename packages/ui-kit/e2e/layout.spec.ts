@@ -35,6 +35,11 @@ test.beforeAll(async () => {
       <cdmt-drawer id="docked-drawer" side="left" width="200">docked drawer</cdmt-drawer>
       <cdmt-page-container id="docked-page-container">docked page</cdmt-page-container>
     </cdmt-layout>
+    <cdmt-layout id="fixed-header-layout" view="Hhh lpr fff" style="height: 100vh">
+      <cdmt-header id="fixed-header" style="height: 64px">header</cdmt-header>
+      <cdmt-drawer id="fixed-header-drawer" side="left" width="200">drawer under a fixed header</cdmt-drawer>
+      <cdmt-page-container id="fixed-header-page-container">page</cdmt-page-container>
+    </cdmt-layout>
     <script type="module">
       window.__getDrawer = (id) => {
         const el = document.getElementById(id)
@@ -68,6 +73,19 @@ async function waitForTransformSettled(page: Page, elementId: string): Promise<v
     const el = document.getElementById(id)
     return el ? getComputedStyle(el).transform === 'none' : false
   }, elementId)
+}
+
+// Same reasoning as waitForTransformSettled above, but for a docked drawer's
+// width transition, which settles at the given target width rather than at
+// a fixed sentinel value like transform's 'none'.
+async function waitForWidthSettled(page: Page, elementId: string, targetPx: number): Promise<void> {
+  await page.waitForFunction(
+    ({ id, targetPx: target }) => {
+      const el = document.getElementById(id)
+      return el ? el.getBoundingClientRect().width === target : false
+    },
+    { id: elementId, targetPx }
+  )
 }
 
 test('a fixed header/footer/drawer offsets the page-container by their real measured size', async ({
@@ -131,10 +149,103 @@ test('a docked, non-fixed drawer sits beside the page via flexbox, with no extra
     ]
   })
 
-  expect(drawerPosition).toBe('static')
+  // 'relative', not 'static' — :host is always position:relative (a docked
+  // drawer just never gets the position:fixed override), so its own
+  // absolutely-positioned content wrappers have a real containing block.
+  expect(drawerPosition).toBe('relative')
   // flexbox alone placed the page-container right after the drawer's own width
   expect(pageContainerRect.left).toBeCloseTo(drawerRect.left + drawerRect.width, 0)
   expect(padding).toBe('0px')
+})
+
+test('a docked drawer starts below a fixed header, not underneath it', async ({ page }) => {
+  await page.goto(pageServer.url)
+
+  const [headerRect, drawerRect, drawerPosition] = await page.evaluate(() => {
+    const header = document.getElementById('fixed-header')
+    const drawer = document.getElementById('fixed-header-drawer')
+    if (!header || !drawer) throw new Error('missing element')
+
+    // This fixture isn't the first thing on the page, so it starts scrolled
+    // out of view — its own fixed header still renders pinned to the true
+    // viewport (fixed positioning ignores which <cdmt-layout> "owns" it),
+    // but a docked (non-fixed) drawer needs scrolling into view to compare
+    // sanely.
+    document.getElementById('fixed-header-layout')?.scrollIntoView()
+
+    return [
+      header.getBoundingClientRect(),
+      drawer.getBoundingClientRect(),
+      getComputedStyle(drawer).position
+    ]
+  })
+
+  // 'relative', not 'static' — see the other docked-drawer test above.
+  expect(drawerPosition).toBe('relative')
+  expect(drawerRect.top).toBeCloseTo(headerRect.bottom, 0)
+})
+
+test('an overlay drawer spans the full viewport height, ignoring a fixed header', async ({
+  page
+}) => {
+  await page.goto(pageServer.url)
+
+  const [drawerRect, viewportHeight] = await page.evaluate(async () => {
+    const drawer = window.__getDrawer('drawer')
+    drawer.overlay = true
+    drawer.show()
+    await drawer.updateComplete
+    return [drawer.getBoundingClientRect(), window.innerHeight]
+  })
+
+  // Unlike a docked drawer sitting beside a fixed header (which correctly
+  // offsets below it), an overlay drawer is a full-screen-style cover — it
+  // must span the whole viewport, not start below the header's 64px.
+  expect(drawerRect.top).toBe(0)
+  expect(drawerRect.height).toBeCloseTo(viewportHeight, 0)
+})
+
+test('a docked drawer collapses its width to 0 when hidden, and page-container reflows to reclaim the space', async ({
+  page
+}) => {
+  await page.goto(pageServer.url)
+
+  const collapsedRect = await page.evaluate(() => {
+    const drawer = document.getElementById('docked-drawer')
+    if (!drawer) throw new Error('missing element')
+    return drawer.getBoundingClientRect()
+  })
+  expect(collapsedRect.width).toBe(0)
+
+  await page.evaluate(async () => {
+    const drawer = window.__getDrawer('docked-drawer')
+    drawer.show()
+    await drawer.updateComplete
+  })
+  await waitForWidthSettled(page, 'docked-drawer', 200)
+
+  const [openRect, openPageContainerRect] = await page.evaluate(() => {
+    const drawer = document.getElementById('docked-drawer')
+    const container = document.getElementById('docked-page-container')
+    if (!drawer || !container) throw new Error('missing element')
+    return [drawer.getBoundingClientRect(), container.getBoundingClientRect()]
+  })
+  expect(openRect.width).toBe(200)
+  expect(openPageContainerRect.left).toBeCloseTo(openRect.left + openRect.width, 0)
+
+  await page.evaluate(async () => {
+    const drawer = window.__getDrawer('docked-drawer')
+    drawer.hide()
+    await drawer.updateComplete
+  })
+  await waitForWidthSettled(page, 'docked-drawer', 0)
+
+  const reCollapsedRect = await page.evaluate(() => {
+    const drawer = document.getElementById('docked-drawer')
+    if (!drawer) throw new Error('missing element')
+    return drawer.getBoundingClientRect()
+  })
+  expect(reCollapsedRect.width).toBe(0)
 })
 
 test('closes an overlay drawer by clicking its backdrop, in a real browser', async ({ page }) => {
@@ -155,6 +266,35 @@ test('closes an overlay drawer by clicking its backdrop, in a real browser', asy
 
   const isOpenAfter = await page.evaluate(() => window.__getDrawer('drawer').modelValue)
   expect(isOpenAfter).toBe(false)
+})
+
+test('slotted content inside an open overlay drawer stays clickable, not intercepted by its own backdrop', async ({
+  page
+}) => {
+  await page.goto(pageServer.url)
+
+  await page.evaluate(async () => {
+    const drawer = window.__getDrawer('drawer')
+    drawer.overlay = true
+    drawer.innerHTML = '<button id="drawer-btn">inside drawer</button>'
+    drawer.show()
+    await drawer.updateComplete
+  })
+  await waitForTransformSettled(page, 'drawer')
+
+  const buttonCenter = await page.evaluate(() => {
+    const rect = document.getElementById('drawer-btn')?.getBoundingClientRect()
+    if (!rect) throw new Error('expected #drawer-btn to exist')
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+  })
+  // A direct coordinate click (not page.click, which would hang retrying
+  // actionability checks) mirrors the backdrop-click test above — if the
+  // backdrop were still stacked above the drawer's own content, this would
+  // hit the backdrop instead and close the drawer.
+  await page.mouse.click(buttonCenter.x, buttonCenter.y)
+
+  const stillOpen = await page.evaluate(() => window.__getDrawer('drawer').modelValue)
+  expect(stillOpen).toBe(true)
 })
 
 test('a header in reveal mode hides on scroll-down and reappears on scroll-up, in a real browser', async ({

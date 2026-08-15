@@ -33,36 +33,26 @@ export const appStyles = `
     color: inherit;
   }
 
-  .app-layout {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .app-header {
+  .app-header__row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.75rem;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--cdmt-color-border);
   }
 
   .app-header__title {
     font-weight: var(--cdmt-font-weight-bold);
   }
 
-  .app-body {
+  .app-header__spacer {
     flex: 1;
-    display: flex;
   }
 
   .app-drawer {
-    flex: 0 0 200px;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     padding: 1.5rem 1rem;
-    border-right: 1px solid var(--cdmt-color-border);
   }
 
   .app-drawer a {
@@ -79,8 +69,6 @@ export const appStyles = `
   }
 
   .app-main {
-    flex: 1;
-    max-width: 800px;
     padding: 2rem;
   }
 
