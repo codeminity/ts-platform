@@ -7,6 +7,12 @@ import '../index.js'
 
 export { CdmtButton } from './components/button/CdmtButton.js'
 export { CdmtInput } from './components/input/CdmtInput.js'
+export { CdmtDrawer } from './components/drawer/CdmtDrawer.js'
+export { CdmtFooter } from './components/footer/CdmtFooter.js'
+export { CdmtHeader } from './components/header/CdmtHeader.js'
+export { CdmtLayout } from './components/layout/CdmtLayout.js'
+export { CdmtPage } from './components/page/CdmtPage.js'
+export { CdmtPageContainer } from './components/page-container/CdmtPageContainer.js'
 
 export { createUIKit } from './create-ui-kit.js'
 export type { UIKitConfig } from './create-ui-kit.js'

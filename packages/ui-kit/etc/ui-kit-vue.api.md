@@ -45,6 +45,265 @@ disabled: boolean;
 }, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
 // @public
+export const CdmtDrawer: DefineComponent<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+side: {
+type: PropType<CdmtDrawerSide>;
+default: string;
+};
+overlay: {
+type: BooleanConstructor;
+default: boolean;
+};
+width: {
+type: NumberConstructor;
+default: number;
+};
+mini: {
+type: BooleanConstructor;
+default: boolean;
+};
+miniWidth: {
+type: NumberConstructor;
+default: number;
+};
+miniToOverlay: {
+type: BooleanConstructor;
+default: boolean;
+};
+noMiniAnimation: {
+type: BooleanConstructor;
+default: boolean;
+};
+breakpoint: {
+type: NumberConstructor;
+default: number;
+};
+behavior: {
+type: PropType<CdmtDrawerBehavior>;
+default: string;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+persistent: {
+type: BooleanConstructor;
+default: boolean;
+};
+showIfAbove: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, ("update:modelValue" | "before-show" | "show" | "before-hide" | "hide")[], "update:modelValue" | "before-show" | "show" | "before-hide" | "hide", PublicProps, Readonly<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+side: {
+type: PropType<CdmtDrawerSide>;
+default: string;
+};
+overlay: {
+type: BooleanConstructor;
+default: boolean;
+};
+width: {
+type: NumberConstructor;
+default: number;
+};
+mini: {
+type: BooleanConstructor;
+default: boolean;
+};
+miniWidth: {
+type: NumberConstructor;
+default: number;
+};
+miniToOverlay: {
+type: BooleanConstructor;
+default: boolean;
+};
+noMiniAnimation: {
+type: BooleanConstructor;
+default: boolean;
+};
+breakpoint: {
+type: NumberConstructor;
+default: number;
+};
+behavior: {
+type: PropType<CdmtDrawerBehavior>;
+default: string;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+persistent: {
+type: BooleanConstructor;
+default: boolean;
+};
+showIfAbove: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>> & Readonly<{
+"onUpdate:modelValue"?: (...args: any[]) => any;
+"onBefore-show"?: (...args: any[]) => any;
+onShow?: (...args: any[]) => any;
+"onBefore-hide"?: (...args: any[]) => any;
+onHide?: (...args: any[]) => any;
+}>, {
+modelValue: boolean;
+side: CdmtDrawerSide;
+overlay: boolean;
+width: number;
+mini: boolean;
+miniWidth: number;
+miniToOverlay: boolean;
+noMiniAnimation: boolean;
+breakpoint: number;
+behavior: CdmtDrawerBehavior;
+bordered: boolean;
+elevated: boolean;
+persistent: boolean;
+showIfAbove: boolean;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtFooter: DefineComponent<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+reveal: {
+type: BooleanConstructor;
+default: boolean;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+heightHint: {
+type: NumberConstructor;
+default: number;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, "reveal"[], "reveal", PublicProps, Readonly<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+reveal: {
+type: BooleanConstructor;
+default: boolean;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+heightHint: {
+type: NumberConstructor;
+default: number;
+};
+}>> & Readonly<{
+onReveal?: (...args: any[]) => any;
+}>, {
+modelValue: boolean;
+bordered: boolean;
+elevated: boolean;
+reveal: boolean;
+heightHint: number;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtHeader: DefineComponent<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+reveal: {
+type: BooleanConstructor;
+default: boolean;
+};
+revealOffset: {
+type: NumberConstructor;
+default: number;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+heightHint: {
+type: NumberConstructor;
+default: number;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, "reveal"[], "reveal", PublicProps, Readonly<ExtractPropTypes<    {
+modelValue: {
+type: BooleanConstructor;
+default: boolean;
+};
+reveal: {
+type: BooleanConstructor;
+default: boolean;
+};
+revealOffset: {
+type: NumberConstructor;
+default: number;
+};
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+elevated: {
+type: BooleanConstructor;
+default: boolean;
+};
+heightHint: {
+type: NumberConstructor;
+default: number;
+};
+}>> & Readonly<{
+onReveal?: (...args: any[]) => any;
+}>, {
+modelValue: boolean;
+bordered: boolean;
+elevated: boolean;
+reveal: boolean;
+heightHint: number;
+revealOffset: number;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
 export const CdmtInput: DefineComponent<ExtractPropTypes<    {
 modelValue: {
 type: StringConstructor;
@@ -100,6 +359,63 @@ modelValue: string;
 }, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
 // @public
+export const CdmtLayout: DefineComponent<ExtractPropTypes<    {
+view: {
+type: StringConstructor;
+default: string;
+};
+container: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
+view: {
+type: StringConstructor;
+default: string;
+};
+container: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>> & Readonly<{}>, {
+view: string;
+container: boolean;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtPage: DefineComponent<ExtractPropTypes<    {
+padding: {
+type: BooleanConstructor;
+default: boolean;
+};
+styleFn: {
+type: PropType<CdmtPageStyleFn>;
+default: undefined;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
+padding: {
+type: BooleanConstructor;
+default: boolean;
+};
+styleFn: {
+type: PropType<CdmtPageStyleFn>;
+default: undefined;
+};
+}>> & Readonly<{}>, {
+padding: boolean;
+styleFn: CdmtPageStyleFn;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtPageContainer: DefineComponent<    {}, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
 export function createUIKit(config?: UIKitConfig): Plugin_2;
 
 // @public
@@ -140,7 +456,10 @@ export interface UseThemeResult {
 // Warnings were encountered during analysis:
 //
 // src/vue/components/button/CdmtButton.ts:14:1 - (ae-forgotten-export) The symbol "CdmtButtonVariant" needs to be exported by the entry point index.d.ts
+// src/vue/components/drawer/CdmtDrawer.ts:24:1 - (ae-forgotten-export) The symbol "CdmtDrawerSide" needs to be exported by the entry point index.d.ts
+// src/vue/components/drawer/CdmtDrawer.ts:54:23 - (ae-forgotten-export) The symbol "CdmtDrawerBehavior" needs to be exported by the entry point index.d.ts
 // src/vue/components/input/CdmtInput.ts:23:1 - (ae-forgotten-export) The symbol "CdmtInputType" needs to be exported by the entry point index.d.ts
+// src/vue/components/page/CdmtPage.ts:18:1 - (ae-forgotten-export) The symbol "CdmtPageStyleFn" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

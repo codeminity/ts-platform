@@ -37,9 +37,9 @@ Architecture Decision Records for `@codeminity/ui-kit`. Each entry: **Context** 
 
 **Context:** When building a component that a real consuming app needs (e.g. a form needing input/button), it's tempting to either build the full likely catalog upfront, or build directly in the consuming app and "extract" later. Both were rejected: (a) is speculative work with no real usage to validate the design; (b) doesn't actually work for Web Components — a plain framework component can't be mechanically converted into a shadow-DOM/Lit architecture, it needs a rewrite regardless of which direction it's built first.
 
-**Decision:** Build one real component at a time, only when a concrete consuming app's feature needs it. When building one, keep a `PARITY.md` checklist next to its source — listing implemented and known-missing props/events/slots as a plain checklist, with no external attribution — so the full shape of "what this component could eventually be" is visible without pre-implementing any of it.
+**Decision:** Build one real component at a time, only when a concrete consuming app's feature needs it. When building one, keep a `CHECKLIST.md` next to its source — listing implemented and known-missing props/events/slots as a plain checklist, with no external attribution — so the full shape of "what this component could eventually be" is visible without pre-implementing any of it.
 
-**Consequences:** No unused component code, no speculative API surface to maintain or get wrong before a real use case validates it. `PARITY.md` gives a clear, honest "here's what's next" list for whoever picks up that component again.
+**Consequences:** No unused component code, no speculative API surface to maintain or get wrong before a real use case validates it. `CHECKLIST.md` gives a clear, honest "here's what's next" list for whoever picks up that component again.
 
 ---
 
@@ -74,6 +74,8 @@ The `./src/*.ts` entries exist purely to silence `tsup`'s own build-time warning
 **Consequences:** `applyTheme()`/`getThemeController().setTheme()` genuinely re-theme every component on the page, including ones already rendered. Any theming-related change must be verified in a real browser (Playwright), never trusted from a `happy-dom` unit test alone — see this package's `e2e/` specs.
 
 Also established in this same pass: a CSS `transition` on a property that also derives its value from a `var()` token never re-samples that token in Chromium — components scope their `transition` to `opacity` only, never to a themed color/background property directly.
+
+**Reconfirmed on the layout components** (a real, reproducible browser bug, not a one-off): `<cdmt-page-container>`'s padding, derived from `<cdmt-layout>`'s `--cdmt-layout-*` offset custom properties, permanently froze at `0px` — the padding's own `transition: padding ...` declaration was the cause. Fixed by dropping that transition entirely (padding now snaps instantly, matching every other var()-derived property in this package). `<cdmt-drawer>`'s width had the identical bug (`width: var(--cdmt-drawer-width)` + `transition: width ...`) — fixed differently, since a smoothly-animating mini/full width toggle was an actual requirement here: `--cdmt-drawer-width` was dropped as a custom property entirely, and `#syncWidthVar()` now sets `this.style.width` directly. A _directly-set_ inline style transitions correctly in Chromium; only a `var()`-_derived_ value combined with a `transition` on that same property is broken. Both gaps were invisible to unit tests (`happy-dom` has no real layout/transition engine) and were only caught by the real-browser e2e specs — reinforcing the rule above.
 
 ---
 

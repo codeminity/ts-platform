@@ -39,6 +39,220 @@ export class CdmtButton extends LitElement {
 export type CdmtButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 // @public
+export class CdmtDrawer extends LitElement {
+    constructor();
+    // (undocumented)
+    behavior: CdmtDrawerBehavior;
+    // (undocumented)
+    bordered: boolean;
+    // (undocumented)
+    breakpoint: number;
+    // (undocumented)
+    connectedCallback(): void;
+    // (undocumented)
+    disconnectedCallback(): void;
+    // (undocumented)
+    elevated: boolean;
+    // (undocumented)
+    hide(): void;
+    get isDocked(): boolean;
+    // (undocumented)
+    mini: boolean;
+    // (undocumented)
+    miniToOverlay: boolean;
+    // (undocumented)
+    miniWidth: number;
+    // (undocumented)
+    modelValue: boolean;
+    // (undocumented)
+    noMiniAnimation: boolean;
+    // (undocumented)
+    overlay: boolean;
+    // (undocumented)
+    persistent: boolean;
+    // (undocumented)
+    static properties: {
+        modelValue: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        side: {
+            type: StringConstructor;
+            reflect: boolean;
+        };
+        overlay: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        width: {
+            type: NumberConstructor;
+        };
+        mini: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        miniWidth: {
+            type: NumberConstructor;
+            attribute: string;
+        };
+        miniToOverlay: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        noMiniAnimation: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        breakpoint: {
+            type: NumberConstructor;
+        };
+        behavior: {
+            type: StringConstructor;
+        };
+        bordered: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        elevated: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        persistent: {
+            type: BooleanConstructor;
+        };
+        showIfAbove: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        viewFixed: {
+            attribute: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    show(): void;
+    // (undocumented)
+    showIfAbove: boolean;
+    // (undocumented)
+    side: CdmtDrawerSide;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    toggle(): void;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+    // (undocumented)
+    viewFixed: boolean;
+    // (undocumented)
+    width: number;
+    // (undocumented)
+    willUpdate(): void;
+}
+
+// @public (undocumented)
+export type CdmtDrawerBehavior = 'default' | 'desktop' | 'mobile';
+
+// @public (undocumented)
+export type CdmtDrawerSide = 'left' | 'right';
+
+// @public
+export class CdmtFooter extends LitElement {
+    constructor();
+    // (undocumented)
+    bordered: boolean;
+    // (undocumented)
+    disconnectedCallback(): void;
+    // (undocumented)
+    elevated: boolean;
+    // (undocumented)
+    heightHint: number;
+    // (undocumented)
+    modelValue: boolean;
+    // (undocumented)
+    static properties: {
+        modelValue: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        reveal: {
+            type: BooleanConstructor;
+        };
+        bordered: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        elevated: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        heightHint: {
+            type: NumberConstructor;
+            attribute: string;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    reveal: boolean;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+}
+
+// @public
+export class CdmtHeader extends LitElement {
+    constructor();
+    // (undocumented)
+    bordered: boolean;
+    // (undocumented)
+    disconnectedCallback(): void;
+    // (undocumented)
+    elevated: boolean;
+    // (undocumented)
+    heightHint: number;
+    // (undocumented)
+    modelValue: boolean;
+    // (undocumented)
+    static properties: {
+        modelValue: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        reveal: {
+            type: BooleanConstructor;
+        };
+        revealOffset: {
+            type: NumberConstructor;
+            attribute: string;
+        };
+        bordered: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        elevated: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        heightHint: {
+            type: NumberConstructor;
+            attribute: string;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    reveal: boolean;
+    // (undocumented)
+    revealOffset: number;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+}
+
+// @public
 export class CdmtInput extends LitElement {
     constructor();
     // (undocumented)
@@ -80,6 +294,71 @@ export class CdmtInput extends LitElement {
 
 // @public
 export type CdmtInputType = 'text' | 'email' | 'password';
+
+// @public
+export class CdmtLayout extends LitElement {
+    constructor();
+    // (undocumented)
+    connectedCallback(): void;
+    // (undocumented)
+    container: boolean;
+    // (undocumented)
+    disconnectedCallback(): void;
+    // (undocumented)
+    static properties: {
+        view: {
+            type: StringConstructor;
+        };
+        container: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+    // (undocumented)
+    view: string;
+}
+
+// @public
+export class CdmtPage extends LitElement {
+    constructor();
+    // (undocumented)
+    padding: boolean;
+    // (undocumented)
+    static properties: {
+        padding: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        styleFn: {
+            attribute: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    styleFn: CdmtPageStyleFn | undefined;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+}
+
+// @public
+export class CdmtPageContainer extends LitElement {
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    static styles: CSSResult;
+}
+
+// @public
+export type CdmtPageStyleFn = (heightOffset: number) => Record<string, string>;
 
 // @public
 export interface ColorRole {

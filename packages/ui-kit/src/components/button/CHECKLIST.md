@@ -1,4 +1,4 @@
-# button — parity checklist
+# button — checklist
 
 ## Props
 

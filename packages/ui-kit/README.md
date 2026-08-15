@@ -53,7 +53,7 @@ app.use(createUIKit({ mode: 'auto' })) // 'light' | 'dark' | 'auto' — default:
 | `<cdmt-button>` | A button with `primary`/`secondary`/`ghost` variants and a `disabled` state.                                                                                                                |
 | `<cdmt-input>`  | A text input (`text`/`email`/`password`) with `disabled` and `invalid` states. `value` is a controlled property that stays in sync as the user types — listen for the native `input` event. |
 
-See each component's `PARITY.md` (next to its source) for what's implemented vs. still missing.
+See each component's `CHECKLIST.md` (next to its source) for what's implemented vs. still missing.
 
 ## Theming
 

@@ -11,7 +11,7 @@ Only when a real consuming app needs it — see [DECISIONS.md#adr-003](./DECISIO
    - If it holds a value (`value`, `checked`, ...), follow [DECISIONS.md#adr-007](./DECISIONS.md#adr-007-form-components-are-controlled-properties-synced-via-native-composed-events) — controlled property, synced via the native composed event, no custom event.
    - `customElements.define('cdmt-<name>', Cdmt<Name>)` at module scope, plus the `HTMLElementTagNameMap` augmentation.
 2. `src/components/<name>/<name>.test.ts` — unit tests (`happy-dom`). This repo enforces 100% mutation score (`npx stryker run stryker.config.ts --mutate "packages/ui-kit/src/components/<name>/*.ts,!packages/ui-kit/src/components/<name>/*.test.ts"`) — don't just cover lines, assert every default/branch precisely.
-3. `src/components/<name>/PARITY.md` — a plain checklist of implemented vs. known-missing props/events/slots, no external attribution (see ADR-003).
+3. `src/components/<name>/CHECKLIST.md` — a plain checklist of implemented vs. known-missing props/events/slots, no external attribution (see ADR-003).
 4. Export it from `src/index.ts`.
 5. Add real-browser coverage in `e2e/` if it has any themeable/interactive behavior worth verifying beyond what `happy-dom` can (see ADR-006 — `happy-dom` doesn't reliably resolve CSS custom-property inheritance).
 6. Add a Vue wrapper in `src/vue/components/<name>/Cdmt<Name>.ts` (see "Adding a framework wrapper" below) if the Vue binding needs it too.
