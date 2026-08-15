@@ -1,4 +1,4 @@
-# input — parity checklist
+# input — checklist
 
 ## Props
 

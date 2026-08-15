@@ -7,9 +7,9 @@ src/
   index.ts                — public API for the "." entry
   components/
     button/button.ts       — <cdmt-button>, plain Lit Custom Element
-    button/PARITY.md        — feature checklist, updated as the component grows
+    button/CHECKLIST.md     — feature checklist, updated as the component grows
     input/input.ts          — <cdmt-input>
-    input/PARITY.md
+    input/CHECKLIST.md
   theme/
     theme.type.ts           — ThemeTokens/ThemeColors/ColorRole/ThemePreset types
     presets/material.ts      — the material theme preset
