@@ -50,7 +50,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': resolve(__dirname, './packages')
+      '@': resolve(import.meta.dirname, './packages')
     }
   }
 })
