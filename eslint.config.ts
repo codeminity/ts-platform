@@ -153,7 +153,13 @@ export default defineConfig(
     rules: {
       'no-unused-vars': 'warn',
       'no-undef': 'off',
-      'import-x/no-internal-modules': 'off'
+      'import-x/no-internal-modules': 'off',
+      // `import-x/no-cycle`'s resolver crashes outright ("node with invalid
+      // interface loaded as resolver") walking apps/ui-kit-docs/vite.config.ts's
+      // `vite` import — the first Vite config in this repo, everywhere else
+      // uses tsup/tsc. Not a real violation to fix; config files are leaf
+      // files with no meaningful cycle risk to check anyway.
+      'import-x/no-cycle': 'off'
     }
   },
 

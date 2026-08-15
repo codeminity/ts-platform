@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ui-kit</title>
+    <script>
+      // Not a "setTheme delay" — ThemeController is fully synchronous, no
+      // async anywhere. Two real causes, both about running before main.ts
+      // (a deferred module, fetched/parsed after this script) gets a chance:
+      //
+      // 1. First paint happens before main.ts runs at all — this plain,
+      //    non-module script runs synchronously during HTML parsing instead,
+      //    so there's no unstyled frame to see. Mirrors material's dark
+      //    background/text (theme/presets/material.ts) — the real module
+      //    reapplies the same values moments later, a no-op once it runs.
+      // 2. Setting those two variables alone isn't enough: an unstyled page
+      //    also gets native `prefers-color-scheme`-based rendering from the
+      //    browser itself (independent of our CSS), which follows the OS/
+      //    browser preference, not this app's stored one — a mismatch flashes
+      //    the *other* native default first. `color-scheme` must be set
+      //    explicitly, in both branches, so the browser's own native paint
+      //    always agrees with the stored preference instead of guessing.
+      var isDark = localStorage.getItem('ui-kit-docs:theme-mode') === 'dark'
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
+      if (isDark) {
+        document.documentElement.style.setProperty('--cdmt-color-background', '#0a0a0a')
+        document.documentElement.style.setProperty('--cdmt-color-text', '#f9fafb')
+      }
+      // ThemeController's own boot sequence still repaints light-then-stored
+      // internally (see theme-controller.ts) — harmless on its own, but lets
+      // the CSS transition below ride along as a visible color-change flash.
+      // Suppressed here, removed by main.ts once the first frame settles.
+      document.documentElement.classList.add('no-transition')
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

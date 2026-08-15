@@ -19,3 +19,11 @@
 .editorconfig text eol=lf
 .gitignore text eol=lf
 .husky/* text eol=lf
+
+# apps/ui-kit-docs' one unavoidable HTML entry (Vite requires a physical
+# index.html) — real, hand-authored, and needed for build/dev to work.
+# `linguist-detectable=false` just keeps it out of GitHub's Languages stat
+# bar so the repo still reads 100% TypeScript; it is NOT generated or
+# vendored content, so `linguist-generated`/`linguist-vendored` would
+# misrepresent it.
+apps/ui-kit-docs/index.html text eol=lf linguist-detectable=false
