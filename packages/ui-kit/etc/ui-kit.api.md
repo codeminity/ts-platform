@@ -54,6 +54,8 @@ export class CdmtDrawer extends LitElement {
     // (undocumented)
     elevated: boolean;
     // (undocumented)
+    firstUpdated(): void;
+    // (undocumented)
     hide(): void;
     get isDocked(): boolean;
     // (undocumented)

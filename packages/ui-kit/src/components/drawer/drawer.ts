@@ -53,31 +53,47 @@ export class CdmtDrawer extends LitElement {
       display: block;
       box-sizing: border-box;
       overflow: hidden;
+      position: relative;
       background: ${themeVar('colorSurface')};
       /* Width is set directly (this.style.width, not a CSS custom property)
          specifically so it stays safely transitionable — see DECISIONS.md#adr-006:
          a transition on a property that also derives its value from a var()
          token never re-samples that token in Chromium, confirmed directly
          while building <cdmt-page-container>'s offset padding. */
+      /* No transition until data-cdmt-transitions-enabled — see that
+         attribute's own comment on #firstUpdated below for why. */
+      transition: none;
+    }
+
+    :host([data-cdmt-transitions-enabled]) {
       transition:
         transform ${themeVar('transitionDuration')} ${themeVar('transitionEasing')},
         width ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
     }
 
-    :host([data-cdmt-no-mini-animation]) {
+    :host([data-cdmt-transitions-enabled][data-cdmt-no-mini-animation]) {
       transition: transform ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
     }
 
+    /* No visibility toggle here on purpose — visibility is inherited, so a
+       parent-level visibility:hidden would also silently hide the backdrop
+       (a shadow sibling that otherwise controls its own show/hide purely via
+       opacity), and flipping an untransitioned inherited value instantly
+       masked whatever transition was supposed to play, on both this host and
+       the backdrop. A docked (non-fixed) drawer collapses via its own width
+       transitioning to 0 instead (see #syncWidthVar) — nothing further is
+       needed here. A fixed/overlay drawer slides fully off-screen below,
+       which alone is enough to make it visually and functionally gone. */
     :host([hidden]) {
       display: block;
-      visibility: hidden;
+      pointer-events: none;
     }
 
-    :host([side='left'][hidden]) {
+    :host([data-cdmt-fixed][side='left'][hidden]) {
       transform: translateX(-100%);
     }
 
-    :host([side='right'][hidden]) {
+    :host([data-cdmt-fixed][side='right'][hidden]) {
       transform: translateX(100%);
     }
 
@@ -87,6 +103,17 @@ export class CdmtDrawer extends LitElement {
       bottom: var(--cdmt-layout-footer-height, 0px);
       z-index: 2100;
       height: auto;
+    }
+
+    /* A docked-but-fixed drawer (a desktop sidebar sitting alongside a fixed
+       header/footer) correctly offsets by their height above, so it doesn't
+       overlap them. A mobile/overlay-mode drawer isn't docked at all — it's
+       a full-screen-style overlay covering everything, including visually
+       behind the header, so unlike the docked case it spans the full
+       viewport regardless of header/footer height. */
+    :host([data-cdmt-overlay-fixed]) {
+      top: 0;
+      bottom: 0;
     }
 
     :host([side='left']) {
@@ -125,12 +152,18 @@ export class CdmtDrawer extends LitElement {
     }
 
     /* Both slot wrappers paint above the backdrop (which also covers this
-       component's own bounding box, not just the rest of the page) —
-       without this, the drawer's own panel would be behind its backdrop. */
+       component's own bounding box, not just the rest of the page) — and
+       carry their own opaque background, sized to fully cover the host's own
+       box (position:absolute + inset:0, anchored by :host's own position).
+       Without the opaque background, the backdrop's dim tint would still
+       show through any part of the drawer's own panel that isn't itself
+       opaque (e.g. the gaps between nav links), even once painted above it. */
     .cdmt-drawer__default-slot,
     .cdmt-drawer__mini-slot {
-      position: relative;
-      z-index: 1;
+      position: absolute;
+      inset: 0;
+      z-index: 2051;
+      background: ${themeVar('colorSurface')};
     }
 
     .cdmt-drawer__mini-slot {
@@ -206,6 +239,24 @@ export class CdmtDrawer extends LitElement {
     document.removeEventListener('keydown', this.#handleKeydown)
   }
 
+  // Transitions start disabled (see the base :host rule above) and are only
+  // turned on after two nested rAFs — the first fires *before* the browser's
+  // next paint, so code in it still runs pre-paint; only the nested one is
+  // guaranteed to run after a real paint has happened (same double-rAF
+  // pattern ui-kit-docs's own main.ts already uses for an equivalent
+  // problem). Confirmed directly: calling show()/hide() within roughly the
+  // first two toggles after connecting — e.g. right after page load, before
+  // the browser had painted a real frame to transition *from* — made the
+  // transform jump straight to its end value instead of animating; with
+  // transitions gated behind an actual painted frame, every toggle animates.
+  override firstUpdated(): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.setAttribute('data-cdmt-transitions-enabled', '')
+      })
+    })
+  }
+
   override willUpdate(): void {
     // `showIfAbove` only forces initial visibility ("on initial render" per
     // Quasar's own docs) — deriving `modelValue` here, in `willUpdate`
@@ -242,15 +293,14 @@ export class CdmtDrawer extends LitElement {
     this.#hasCompletedFirstUpdate = true
 
     if (changed.has('modelValue')) this.#applyModelValue({ initial: isFirstUpdate })
-    if (changed.has('width') || changed.has('mini') || changed.has('miniWidth')) {
-      this.#syncWidthVar()
-    }
     if (changed.has('breakpoint') || changed.has('behavior')) {
       this.#setupBreakpointWatcher()
     }
     if (
-      changed.has('overlay') ||
+      changed.has('width') ||
       changed.has('mini') ||
+      changed.has('miniWidth') ||
+      changed.has('overlay') ||
       changed.has('miniToOverlay') ||
       changed.has('viewFixed')
     ) {
@@ -261,8 +311,15 @@ export class CdmtDrawer extends LitElement {
     }
   }
 
+  // A docked (non-fixed) drawer is still in normal flow, so unlike a fixed/
+  // overlay one (which only needs to visually slide away), it needs to
+  // actually collapse to 0 while hidden — otherwise it keeps reserving its
+  // full width in <cdmt-layout>'s flex row and adjacent page content never
+  // reflows into the freed space.
   #syncWidthVar(): void {
-    this.style.width = `${String(this.mini ? this.miniWidth : this.width)}px`
+    const openWidth = this.mini ? this.miniWidth : this.width
+    const collapsed = !this.#isFixed && !this.modelValue
+    this.style.width = `${String(collapsed ? 0 : openWidth)}px`
   }
 
   /**
@@ -278,7 +335,32 @@ export class CdmtDrawer extends LitElement {
   }
 
   #syncFixedAndNotifyLayout(): void {
+    // A docked<->fixed mode switch (e.g. resizing across the breakpoint)
+    // while already closed shouldn't visibly animate at all — both states
+    // are "invisible," just via a different mechanism (0 width vs. an
+    // off-screen transform), so transitioning between them flashes the
+    // drawer's own panel open-then-shut for no real reason. Suppressing the
+    // transition, forcing the change to commit via a synchronous layout
+    // read, then restoring it, makes this one switch instant without
+    // affecting any later, genuinely user-driven show/hide.
+    const modeSwitchWhileClosed =
+      this.hasAttribute('data-cdmt-fixed') !== this.#isFixed && !this.modelValue
+    if (modeSwitchWhileClosed) this.style.transition = 'none'
+
     this.toggleAttribute('data-cdmt-fixed', this.#isFixed)
+    this.toggleAttribute('data-cdmt-overlay-fixed', this.#isFixed && !this.isDocked)
+    // Folded in here rather than tracked separately — every call site below
+    // (mode/breakpoint changes, model-value changes via #applyModelValue)
+    // is exactly when the docked/fixed-vs-collapsed width might also need
+    // recomputing, so one shared trigger point avoids the two ever drifting
+    // out of sync with each other.
+    this.#syncWidthVar()
+
+    if (modeSwitchWhileClosed) {
+      void this.offsetWidth
+      this.style.transition = ''
+    }
+
     // Bubbles up to <cdmt-layout>, which can't otherwise know this
     // component's mode/visibility changed without its own size changing.
     this.dispatchEvent(new CustomEvent('cdmt-layout-child-change', { bubbles: true }))

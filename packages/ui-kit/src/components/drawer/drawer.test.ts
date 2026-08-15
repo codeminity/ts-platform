@@ -58,7 +58,9 @@ describe('CdmtDrawer', () => {
   })
 
   afterEach(() => {
+    el.remove()
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   it('defaults to hidden, side left, not overlay, width 300, not mini, miniWidth 57, breakpoint 1023, behavior default', () => {
@@ -164,17 +166,25 @@ describe('CdmtDrawer', () => {
     fresh.remove()
   })
 
-  it('sets inline width from the width prop, and from miniWidth when mini', async () => {
+  it('sets inline width from the width prop, changed in isolation while already shown', async () => {
+    el.show()
+    await el.updateComplete
+
     el.width = 320
     await el.updateComplete
-    expect(el.style.width).toBe('320px')
 
+    expect(el.style.width).toBe('320px')
+  })
+
+  it('sets inline width from miniWidth when mini, while shown', async () => {
+    el.show()
     el.mini = true
     await el.updateComplete
     expect(el.style.width).toBe('57px')
   })
 
-  it('recomputes width when only miniWidth changes, mini already true', async () => {
+  it('recomputes width when only miniWidth changes, mini already true, while shown', async () => {
+    el.show()
     el.mini = true
     await el.updateComplete
 
@@ -182,6 +192,41 @@ describe('CdmtDrawer', () => {
     await el.updateComplete
 
     expect(el.style.width).toBe('80px')
+  })
+
+  it('collapses width to 0 when docked (not fixed) and closed', () => {
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
+    expect(el.modelValue).toBe(false)
+    expect(el.style.width).toBe('0px')
+  })
+
+  it('restores the real width once shown, from a collapsed docked-closed state', async () => {
+    expect(el.style.width).toBe('0px')
+
+    el.show()
+    await el.updateComplete
+
+    expect(el.style.width).toBe('300px')
+  })
+
+  it('collapses back to 0 width when hidden again while docked', async () => {
+    el.show()
+    await el.updateComplete
+    expect(el.style.width).toBe('300px')
+
+    el.hide()
+    await el.updateComplete
+
+    expect(el.style.width).toBe('0px')
+  })
+
+  it('does not collapse width when fixed (overlay), even while closed', async () => {
+    el.overlay = true
+    await el.updateComplete
+
+    expect(el.modelValue).toBe(false)
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(el.style.width).toBe('300px')
   })
 
   it('is not fixed by default (docked, static)', () => {
@@ -357,6 +402,108 @@ describe('CdmtDrawer', () => {
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
   })
 
+  it('marks itself overlay-fixed when fixed via overlay (not docked)', async () => {
+    el.overlay = true
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(true)
+  })
+
+  it('marks itself overlay-fixed when fixed via mobile mode (not docked)', async () => {
+    el.behavior = 'mobile'
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(true)
+  })
+
+  it('does not mark itself overlay-fixed when fixed purely via viewFixed (docked, sits beside a fixed header/footer)', async () => {
+    el.viewFixed = true
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(el.isDocked).toBe(true)
+    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(false)
+  })
+
+  it('does not mark itself overlay-fixed while docked and not fixed at all', () => {
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
+    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(false)
+  })
+
+  it('enables transitions only after two animation frames past connect, not before', async () => {
+    const fresh = document.createElement('cdmt-drawer')
+    document.body.append(fresh)
+    await fresh.updateComplete
+
+    expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(false)
+
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(false)
+
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(true)
+    expect(fresh.getAttribute('data-cdmt-transitions-enabled')).toBe('')
+    fresh.remove()
+  })
+
+  it('suppresses and immediately restores the transition style for a mode switch while closed', async () => {
+    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+
+    el.overlay = true
+    await el.updateComplete
+
+    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toEqual(['none', ''])
+    expect(el.style.transition).toBe('')
+  })
+
+  it('does not touch the transition style for a genuine modelValue-driven show', async () => {
+    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+
+    el.show()
+    await el.updateComplete
+
+    expect(transitionSetterSpy).not.toHaveBeenCalled()
+  })
+
+  it('does not suppress the transition for a mode switch while already open', async () => {
+    el.show()
+    await el.updateComplete
+
+    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+    el.overlay = true
+    await el.updateComplete
+
+    expect(transitionSetterSpy).not.toHaveBeenCalled()
+  })
+
+  it('does not suppress the transition when a metrics-relevant prop changes but fixedness stays the same, while closed', async () => {
+    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+
+    // Still docked, still closed — data-cdmt-fixed never changes here, so
+    // this must NOT be treated as a mode switch even though the drawer is
+    // closed and #syncFixedAndNotifyLayout does run (for the width prop).
+    el.width = 250
+    await el.updateComplete
+
+    expect(transitionSetterSpy).not.toHaveBeenCalled()
+  })
+
+  it('detects the mode switch from the real data-cdmt-fixed attribute, not just from #isFixed alone', async () => {
+    el.overlay = true
+    await el.updateComplete
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(el.modelValue).toBe(false)
+
+    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+    // Switches back to docked (not fixed) while still closed — a real mode
+    // switch away from an attribute that was genuinely already present.
+    el.overlay = false
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
+    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toEqual(['none', ''])
+  })
+
   it('shows the backdrop only when open and in a fixed/overlay mode', async () => {
     el.overlay = true
     await el.updateComplete
@@ -440,6 +587,23 @@ describe('CdmtDrawer', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 
     expect(el.modelValue).toBe(true)
+  })
+
+  it('never applies visibility:hidden while hidden — a fixed/overlay drawer relies solely on transform to go off-screen', async () => {
+    el.overlay = true
+    await el.updateComplete
+    expect(el.hasAttribute('hidden')).toBe(true)
+
+    expect(getComputedStyle(el).visibility).not.toBe('hidden')
+  })
+
+  it('stacks its content wrappers above the backdrop, so slotted content stays clickable while the backdrop is visible', () => {
+    const backdropZIndex = Number(getComputedStyle(getBackdrop(el)).zIndex)
+    const defaultSlotWrapper = el.shadowRoot?.querySelector('.cdmt-drawer__default-slot')
+    if (!defaultSlotWrapper) throw new Error('expected a default-slot wrapper to exist')
+    const contentZIndex = Number(getComputedStyle(defaultSlotWrapper).zIndex)
+
+    expect(contentZIndex).toBeGreaterThan(backdropZIndex)
   })
 
   it('renders slotted default content, and mini-slot content only while mini', async () => {

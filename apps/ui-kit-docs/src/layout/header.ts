@@ -1,17 +1,30 @@
 import { getThemeController } from '@codeminity/ui-kit'
 
-export function renderHeader(): HTMLElement {
-  const header = document.createElement('header')
-  header.className = 'app-header'
+export function renderHeader(onToggleDrawer: () => void): HTMLElement {
+  const header = document.createElement('cdmt-header')
+  header.bordered = true
+
+  const row = document.createElement('div')
+  row.className = 'app-header__row'
+
+  const menuToggle = document.createElement('cdmt-button')
+  menuToggle.variant = 'ghost'
+  menuToggle.textContent = '☰'
+  menuToggle.setAttribute('aria-label', 'Toggle navigation')
+  menuToggle.addEventListener('click', onToggleDrawer)
 
   const title = document.createElement('span')
   title.className = 'app-header__title'
   title.textContent = '@codeminity/ui-kit'
-  header.append(title)
 
-  const toggle = document.createElement('cdmt-button')
-  toggle.variant = 'ghost'
-  header.append(toggle)
+  const spacer = document.createElement('span')
+  spacer.className = 'app-header__spacer'
+
+  const themeToggle = document.createElement('cdmt-button')
+  themeToggle.variant = 'ghost'
+
+  row.append(menuToggle, title, spacer, themeToggle)
+  header.append(row)
 
   const controller = getThemeController()
 
@@ -19,10 +32,10 @@ export function renderHeader(): HTMLElement {
   // page is light, the button reads "Dark" (the action), not "Light" (the
   // current state, which is already visually obvious from the page itself).
   function syncToggle(): void {
-    toggle.textContent = controller.isDark ? '☀️ Light' : '🌙 Dark'
+    themeToggle.textContent = controller.isDark ? '☀️ Light' : '🌙 Dark'
   }
 
-  toggle.addEventListener('click', () => {
+  themeToggle.addEventListener('click', () => {
     controller.toggleMode()
   })
 
