@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["ui-kit-docs", "ui-kit"]
+  "ignore": ["ui-kit-docs", "@codeminity/ui-kit"]
 }
