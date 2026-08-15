@@ -10,25 +10,30 @@ import { globby } from 'globby'
 // machine- or tool-specific folders this script has no business touching.
 export const CLEAN_GLOBS = [
   'node_modules',
-  'packages/*/*/node_modules',
+  'packages/**/node_modules',
   'dist',
-  'packages/*/*/dist',
+  'packages/**/dist',
   '.turbo',
-  'packages/*/*/.turbo',
+  'packages/**/.turbo',
   '.eslintcache',
   '.prettiercache',
   // Mirrors typecheck-extras.ts's own tsconfig discovery (its FIXED_TSCONFIGS
   // plus per-package e2e/bench globs), each with its generated build info
-  // suffix - explicit paths, not a `**` glob, so there's no need for a
-  // node_modules exclusion that could (and once did) also swallow the
-  // `node_modules` cleanup entry above via fast-glob's negation semantics.
+  // suffix. `packages/**/...` (not `packages/*/*/...`) because not every
+  // package is nested inside a category folder (e.g. `packages/ui-kit` is
+  // one level deep, `packages/request/axios` is two) — this can also match
+  // deep inside a package's own node_modules, but that's harmless redundancy,
+  // not a real risk: the `packages/**/node_modules` entry above already
+  // deletes that whole subtree regardless. Do NOT add a `!**/node_modules/**`
+  // exclusion to "fix" this — that previously also swallowed the bare
+  // `node_modules` cleanup entry itself via fast-glob's negation semantics.
   'tsconfig.tooling.json.tsbuildinfo',
   'tsconfig.esm-strict.json.tsbuildinfo',
   'scripts/tsconfig.json.tsbuildinfo',
   'e2e/tsconfig.json.tsbuildinfo',
-  'packages/*/*/e2e/tsconfig.json.tsbuildinfo',
-  'packages/*/*/bench/tsconfig.json.tsbuildinfo',
-  'packages/*/*/temp',
+  'packages/**/e2e/tsconfig.json.tsbuildinfo',
+  'packages/**/bench/tsconfig.json.tsbuildinfo',
+  'packages/**/temp',
   'coverage',
   'reports',
   'test-results',

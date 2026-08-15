@@ -21,15 +21,15 @@
     "limit": "2 kB"
   },
   {
-    "name": "@codeminity/ui-kit-core",
-    "path": "packages/ui-kit/core/dist/index.js",
+    "name": "@codeminity/ui-kit",
+    "path": "packages/ui-kit/dist/index.js",
     "ignore": ["lit"],
-    "limit": "1.5 kB"
+    "limit": "2.5 kB"
   },
   {
-    "name": "@codeminity/ui-kit-vue",
-    "path": "packages/ui-kit/vue/dist/index.js",
-    "ignore": ["vue", "@codeminity/ui-kit-core"],
-    "limit": "1 kB"
+    "name": "@codeminity/ui-kit/vue",
+    "path": "packages/ui-kit/dist/vue/index.js",
+    "ignore": ["vue", "lit"],
+    "limit": "3 kB"
   }
 ]

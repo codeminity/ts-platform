@@ -172,5 +172,28 @@ export default defineConfig(
     rules: {
       '@typescript-eslint/unbound-method': 'off'
     }
+  },
+
+  // e2e browser fixtures deliberately import a package's own built `dist/`
+  // output via a real relative import (not just a URL string passed to
+  // `bundlePackageForBrowser`, which is how every *.spec.ts file itself
+  // references dist/ without needing this exception at all) — that's the
+  // whole point of a fixture: bundling real code that imports from `dist/`
+  // mirrors what a real consumer's own bundler sees, which is exactly what
+  // an e2e test needs to prove.
+  //
+  // A self-referencing package import (`@codeminity/ui-kit/vue` via a
+  // `workspace:*` self-devDependency) was tried as a way to avoid this
+  // exception entirely, since it isn't a relative import at all — rejected:
+  // both rules below still fire on it anyway (their resolvers see through
+  // the self-reference symlink to the real, physically-parent filesystem
+  // path), so it added a whole extra moving part (the package depending on
+  // itself) without actually avoiding the need for this override.
+  {
+    files: ['packages/**/e2e/fixtures/**/*.ts'],
+    rules: {
+      'import-x/no-relative-parent-imports': 'off',
+      'import-x/no-internal-modules': 'off'
+    }
   }
 )
