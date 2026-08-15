@@ -1,0 +1,76 @@
+{
+  "name": "@codeminity/ui-kit",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Framework-agnostic UI components (Web Components / Custom Elements) for the Codeminity ecosystem, with a thin Vue binding — no Vue, React, or Angular required for the core.",
+  "keywords": [
+    "vue",
+    "web-components",
+    "custom-elements",
+    "lit",
+    "ui-library",
+    "design-system",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "Masoud Fooladi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeminity/ts-platform.git",
+    "directory": "packages/ui-kit"
+  },
+  "homepage": "https://github.com/codeminity/ts-platform/tree/main/packages/ui-kit#readme",
+  "bugs": {
+    "url": "https://github.com/codeminity/ts-platform/issues"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./dist/**",
+    "./src/index.ts",
+    "./src/vue/index.ts"
+  ],
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "tsc -p tsconfig.build-types.json --emitDeclarationOnly",
+    "dev": "tsup --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "lit": "^3.3.3"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.11",
+    "tsup": "^8.5.1",
+    "vue": "^3.5.41"
+  }
+}

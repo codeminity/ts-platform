@@ -90,8 +90,11 @@ export function extractExportsFromText(source: string, fileName = 'index.ts'): E
   }
 }
 
-export function extractExportsFromSource(pkgPath: string): ExpectedExports {
-  const entry = path.join(pkgPath, 'src/index.ts')
+export function extractExportsFromSource(
+  pkgPath: string,
+  entryRelativePath = 'src/index.ts'
+): ExpectedExports {
+  const entry = path.join(pkgPath, entryRelativePath)
 
   if (!fs.existsSync(entry)) {
     return {

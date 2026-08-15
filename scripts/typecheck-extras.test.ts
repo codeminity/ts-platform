@@ -20,7 +20,7 @@ describe('findExtraTsconfigs', () => {
   it('combines the fixed tsconfigs with discovered per-package e2e and bench tsconfigs', async () => {
     mockedGlobby.mockImplementation((pattern) =>
       Promise.resolve(
-        pattern === 'packages/*/*/e2e/tsconfig.json'
+        pattern === 'packages/**/e2e/tsconfig.json'
           ? ['packages/request/fetch/e2e/tsconfig.json', 'packages/request/axios/e2e/tsconfig.json']
           : ['packages/request/core/bench/tsconfig.json']
       )
@@ -28,8 +28,12 @@ describe('findExtraTsconfigs', () => {
 
     const result = await findExtraTsconfigs()
 
-    expect(mockedGlobby).toHaveBeenCalledWith('packages/*/*/e2e/tsconfig.json')
-    expect(mockedGlobby).toHaveBeenCalledWith('packages/*/*/bench/tsconfig.json')
+    expect(mockedGlobby).toHaveBeenCalledWith('packages/**/e2e/tsconfig.json', {
+      ignore: ['**/node_modules/**']
+    })
+    expect(mockedGlobby).toHaveBeenCalledWith('packages/**/bench/tsconfig.json', {
+      ignore: ['**/node_modules/**']
+    })
     expect(result).toEqual([
       'e2e/tsconfig.json',
       'packages/request/axios/e2e/tsconfig.json',
@@ -53,7 +57,7 @@ describe('typecheckExtras', () => {
   it('runs tsc for every discovered tsconfig', async () => {
     mockedGlobby.mockImplementation((pattern) =>
       Promise.resolve(
-        pattern === 'packages/*/*/e2e/tsconfig.json'
+        pattern === 'packages/**/e2e/tsconfig.json'
           ? ['packages/request/axios/e2e/tsconfig.json']
           : []
       )

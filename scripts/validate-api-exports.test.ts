@@ -152,4 +152,84 @@ describe('validate-api-exports', () => {
 
     await expect(validatePackages()).resolves.not.toThrow()
   })
+
+  it('validates every subpath in a multi-entry exports map, labeling each package/subpath', async () => {
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/ui-kit',
+          exports: {
+            '.': { types: './dist/index.d.ts', import: './dist/index.js' },
+            './vue': { types: './dist/vue/index.d.ts', import: './dist/vue/index.js' }
+          }
+        })
+      }
+
+      return `
+        export type { AuthConfig }
+      `
+    })
+
+    const result = await validatePackages()
+
+    expect(result).toEqual(['@codeminity/ui-kit', '@codeminity/ui-kit/vue'])
+    expect(extractExportsFromSource).toHaveBeenCalledWith(expect.any(String), 'src/index.ts')
+    expect(extractExportsFromSource).toHaveBeenCalledWith(expect.any(String), 'src/vue/index.ts')
+  })
+
+  it('reports the subpath in the error label when a subpath entry is missing its build output', async () => {
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/ui-kit',
+          exports: {
+            '.': { types: './dist/index.d.ts', import: './dist/index.js' },
+            './vue': { types: './dist/vue/index.d.ts', import: './dist/vue/index.js' }
+          }
+        })
+      }
+
+      return ''
+    })
+    vi.mocked(fs.existsSync).mockImplementation((file) => !String(file).includes('vue'))
+
+    await expect(validatePackages()).rejects.toThrow('Missing build output: @codeminity/ui-kit/vue')
+  })
+
+  it('skips an exports entry with no import target (types-only subpath)', async () => {
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/ui-kit',
+          exports: { './types-only': { types: './dist/types-only.d.ts' } }
+        })
+      }
+
+      return ''
+    })
+
+    const result = await validatePackages()
+
+    expect(result).toEqual([])
+    expect(loadRuntimeModule).not.toHaveBeenCalled()
+  })
+
+  it('accepts a bare string export target with no types entry', async () => {
+    vi.mocked(fs.readFileSync).mockImplementation((file) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({
+          name: '@codeminity/ui-kit',
+          exports: { '.': './dist/index.js' }
+        })
+      }
+
+      return ''
+    })
+    vi.mocked(extractExportsFromSource).mockReturnValue({ runtime: [], types: ['AuthConfig'] })
+
+    const result = await validatePackages()
+
+    expect(result).toEqual(['@codeminity/ui-kit'])
+    expect(hasTypeExport).not.toHaveBeenCalled()
+  })
 })

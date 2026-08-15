@@ -7,13 +7,21 @@ import type { PartialStrykerOptions } from '@stryker-mutator/api/core'
 // for why that line is intentional, not an oversight.
 export default {
   mutate: [
-    'packages/*/*/src/**/*.ts',
-    '!packages/*/*/src/**/*.test.ts',
-    '!packages/*/*/src/**/index.ts',
-    '!packages/*/*/src/**/*.interface.ts',
-    '!packages/*/*/src/**/*.type.ts',
-    '!packages/*/*/src/**/mocks/**',
-    '!packages/*/*/src/**/test-utils.ts'
+    // `**` (not `*/*`) so a one-level-deep package (e.g. `packages/ui-kit`)
+    // is found the same as a two-level one (`packages/request/axios`).
+    // Stryker's own file reader always ignores `node_modules` regardless of
+    // this config (see `ALWAYS_IGNORE` in `@stryker-mutator/core`'s
+    // `project-reader.ts`), so — unlike some of the other globs broadened
+    // for this same reason across the repo — no explicit exclusion is
+    // needed or wanted here (an explicit one that excludes nothing just
+    // produces its own "did not exclude any files" warning).
+    'packages/**/src/**/*.ts',
+    '!packages/**/src/**/*.test.ts',
+    '!packages/**/src/**/index.ts',
+    '!packages/**/src/**/*.interface.ts',
+    '!packages/**/src/**/*.type.ts',
+    '!packages/**/src/**/mocks/**',
+    '!packages/**/src/**/test-utils.ts'
   ],
   // See DECISIONS.md#adr-011-static-mutants-ignored-in-mutation-testing —
   // also means a purely static file (e.g. theme/tokens.ts) will show 0
@@ -22,7 +30,7 @@ export default {
   testRunner: 'vitest',
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: {
-    // A dedicated config (not vitest.config.ts) scoped to packages/*/*/src
+    // A dedicated config (not vitest.config.ts) scoped to packages/**/src
     // tests only — see vitest.mutation.config.ts. Nothing under scripts/ is
     // ever mutated, so there's no reason for its ~20 test files to rerun on
     // every single generated mutant.

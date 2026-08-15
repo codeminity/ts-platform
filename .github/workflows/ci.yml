@@ -63,7 +63,14 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: build-output
-          path: packages/*/*/dist
+          # `**` (not `*/*`) so a one-level-deep package (e.g. `packages/ui-kit`)
+          # is included the same as a two-level one — but pnpm symlinks a
+          # package's own workspace deps into its node_modules, so without
+          # excluding that, the same dist output gets matched a second time
+          # through the symlinked path too.
+          path: |
+            packages/**/dist
+            !packages/**/node_modules/**
           retention-days: 7
 
       - name: Lint

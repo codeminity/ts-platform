@@ -11,9 +11,16 @@ const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'tsconfig
  * automatically — nothing here needs updating when one is added.
  */
 export async function findExtraTsconfigs(): Promise<string[]> {
+  // `**` (not `*/*`) so a one-level-deep package (e.g. `packages/ui-kit`) is
+  // found the same as a two-level one (`packages/request/axios`) — but a
+  // pnpm workspace symlinks its own workspace deps into every consuming
+  // package's `node_modules` (e.g. `packages/request/axios/node_modules/
+  // @codeminity/request-core` really points back at `packages/request/core`
+  // itself), so without excluding `node_modules` this also matches the same
+  // real files a second time through the symlinked path.
   const [packageE2eTsconfigs, packageBenchTsconfigs] = await Promise.all([
-    globby('packages/*/*/e2e/tsconfig.json'),
-    globby('packages/*/*/bench/tsconfig.json')
+    globby('packages/**/e2e/tsconfig.json', { ignore: ['**/node_modules/**'] }),
+    globby('packages/**/bench/tsconfig.json', { ignore: ['**/node_modules/**'] })
   ])
 
   return [...FIXED_TSCONFIGS, ...packageE2eTsconfigs, ...packageBenchTsconfigs].sort()
