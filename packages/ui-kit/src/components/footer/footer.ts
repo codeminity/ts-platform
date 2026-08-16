@@ -25,7 +25,9 @@ export class CdmtFooter extends LitElement {
       display: block;
       box-sizing: border-box;
       background: ${themeVar('colorSurface')};
-      transition: transform ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+      transition-property: transform;
+      transition-duration: ${themeVar('transitionDuration')};
+      transition-timing-function: ${themeVar('transitionEasing')};
     }
 
     :host([data-cdmt-fixed]) {
@@ -37,7 +39,9 @@ export class CdmtFooter extends LitElement {
     }
 
     :host([bordered]) {
-      border-top: ${themeVar('borderWidth')} solid ${themeVar('colorBorder')};
+      border-top-width: ${themeVar('borderWidth')};
+      border-top-style: solid;
+      border-top-color: ${themeVar('colorBorder')};
     }
 
     :host([elevated]) {

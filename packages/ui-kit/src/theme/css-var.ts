@@ -68,6 +68,21 @@ export type ThemeVarKey =
 const defaultValues = flattenThemeTokens(material.tokens, 'light') as Record<ThemeVarKey, string>
 
 /**
+ * The plain `var(--cdmt-<key>, <material-light-default>)` text behind
+ * {@link themeVar} — exposed separately so multiple keys can be combined
+ * into a single interpolation for a CSS property whose value isn't a real
+ * shorthand for other properties (e.g. `box-shadow`'s offset/blur/spread/
+ * color list has no longhand split the way `padding`/`border`/`transition`
+ * do). Combine with `unsafeCSS` at the call site, e.g.
+ * `` unsafeCSS(`0 0 0 ${themeVarText('focusRingWidth')} ${themeVarText('focusRingColor')}`) ``.
+ *
+ * @public
+ */
+export function themeVarText(key: ThemeVarKey): string {
+  return `var(${toCssCustomPropertyName(key)}, ${defaultValues[key]})`
+}
+
+/**
  * Returns `var(--cdmt-<key>, <material-light-default>)` for use inside a
  * Lit component's `styles`. The fallback means every component renders
  * correctly out of the box even if `applyTheme()` is never called.
@@ -75,5 +90,5 @@ const defaultValues = flattenThemeTokens(material.tokens, 'light') as Record<The
  * @public
  */
 export function themeVar(key: ThemeVarKey): CSSResult {
-  return unsafeCSS(`var(${toCssCustomPropertyName(key)}, ${defaultValues[key]})`)
+  return unsafeCSS(themeVarText(key))
 }

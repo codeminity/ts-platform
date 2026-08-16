@@ -1,6 +1,6 @@
-import { LitElement, css, html } from 'lit'
+import { LitElement, css, html, unsafeCSS } from 'lit'
 
-import { themeVar } from '../../theme/css-var.js'
+import { themeVar, themeVarText } from '../../theme/css-var.js'
 
 /**
  * The visual style of a {@link CdmtButton}.
@@ -47,9 +47,16 @@ export class CdmtButton extends LitElement {
         font-weight: ${themeVar('fontWeightNormal')};
         cursor: pointer;
         border-radius: ${themeVar('radiusMd')};
-        padding: ${themeVar('spacingSm')} ${themeVar('spacingXl')};
-        border: ${themeVar('borderWidth')} solid transparent;
-        transition: opacity ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+        padding-top: ${themeVar('spacingSm')};
+        padding-bottom: ${themeVar('spacingSm')};
+        padding-left: ${themeVar('spacingXl')};
+        padding-right: ${themeVar('spacingXl')};
+        border-width: ${themeVar('borderWidth')};
+        border-style: solid;
+        border-color: transparent;
+        transition-property: opacity;
+        transition-duration: ${themeVar('transitionDuration')};
+        transition-timing-function: ${themeVar('transitionEasing')};
       }
 
       button:disabled {
@@ -59,7 +66,7 @@ export class CdmtButton extends LitElement {
 
       button:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 ${themeVar('focusRingWidth')} ${themeVar('focusRingColor')};
+        box-shadow: ${unsafeCSS(`0 0 0 ${themeVarText('focusRingWidth')} ${themeVarText('focusRingColor')}`)};
       }
 
       :host([variant='primary']) button {

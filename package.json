@@ -27,6 +27,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --cache --cache-location .eslintcache",
+    "validate:lit-css": "pnpm --filter @codeminity/ui-kit run validate:lit-css",
     "format": "prettier --write . --cache --cache-location .prettiercache --cache-strategy content",
     "validate:format": "prettier --check . --cache --cache-location .prettiercache --cache-strategy content",
     "outdated": "pnpm -r outdated --include-github-actions",

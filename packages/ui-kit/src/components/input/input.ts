@@ -1,6 +1,6 @@
-import { LitElement, css, html } from 'lit'
+import { LitElement, css, html, unsafeCSS } from 'lit'
 
-import { themeVar } from '../../theme/css-var.js'
+import { themeVar, themeVarText } from '../../theme/css-var.js'
 
 /**
  * The `type` attribute a {@link CdmtInput} passes through to its native
@@ -40,10 +40,17 @@ export class CdmtInput extends LitElement {
       font-size: ${themeVar('fontSize')};
       color: ${themeVar('colorText')};
       background: ${themeVar('colorSurface')};
-      padding: ${themeVar('spacingSm')} ${themeVar('spacingMd')};
+      padding-top: ${themeVar('spacingSm')};
+      padding-bottom: ${themeVar('spacingSm')};
+      padding-left: ${themeVar('spacingMd')};
+      padding-right: ${themeVar('spacingMd')};
       border-radius: ${themeVar('radiusMd')};
-      border: ${themeVar('borderWidth')} solid ${themeVar('colorBorder')};
-      transition: opacity ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+      border-width: ${themeVar('borderWidth')};
+      border-style: solid;
+      border-color: ${themeVar('colorBorder')};
+      transition-property: opacity;
+      transition-duration: ${themeVar('transitionDuration')};
+      transition-timing-function: ${themeVar('transitionEasing')};
     }
 
     input:disabled {
@@ -54,7 +61,7 @@ export class CdmtInput extends LitElement {
     input:focus {
       outline: none;
       border-color: ${themeVar('colorPrimary')};
-      box-shadow: 0 0 0 ${themeVar('focusRingWidth')} ${themeVar('focusRingColor')};
+      box-shadow: ${unsafeCSS(`0 0 0 ${themeVarText('focusRingWidth')} ${themeVarText('focusRingColor')}`)};
     }
 
     :host([invalid]) input {
