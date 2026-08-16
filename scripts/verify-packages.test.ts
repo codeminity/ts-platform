@@ -80,7 +80,7 @@ describe('verifyPackages', () => {
     })
   })
 
-  it('verifies packages sequentially', async () => {
+  it('starts verifying every discovered package without waiting for an earlier one to finish', async () => {
     mockedFindPackages.mockReturnValue(['packages/request/core', 'packages/request/axios'])
 
     mockPackageNames({
@@ -93,17 +93,67 @@ describe('verifyPackages', () => {
       'packages/request/axios': '/tmp/tarballs/axios.tgz'
     })
 
-    const calls: string[] = []
-
-    mockedVerifyPackage.mockImplementation(({ packagePath }) => {
-      calls.push(packagePath)
-
-      return Promise.resolve()
+    const started: string[] = []
+    let resolveCore: () => void = () => {
+      /* empty */
+    }
+    const coreGate = new Promise<void>((resolve) => {
+      resolveCore = resolve
     })
 
-    await verifyPackages()
+    mockedVerifyPackage.mockImplementation(({ packagePath }) => {
+      started.push(packagePath)
+      return packagePath === 'packages/request/core' ? coreGate : Promise.resolve()
+    })
 
-    expect(calls).toEqual(['packages/request/core', 'packages/request/axios'])
+    const resultPromise = verifyPackages()
+
+    // axios's verification should have started even though core's own
+    // verifyPackage call is still pending — proves these run concurrently,
+    // not one-after-another.
+    await vi.waitFor(() => {
+      expect(started).toContain('packages/request/axios')
+    })
+    expect(started).toContain('packages/request/core')
+
+    resolveCore()
+    await resultPromise
+  })
+
+  it('starts packing every discovered package without waiting for an earlier one to finish', async () => {
+    mockedFindPackages.mockReturnValue(['packages/request/core', 'packages/request/axios'])
+
+    mockPackageNames({
+      'packages/request/core': '@codeminity/request-core',
+      'packages/request/axios': '@codeminity/axios'
+    })
+
+    const started: string[] = []
+    let resolveCore: (() => void) | undefined
+    const coreGate = new Promise<string>((resolve) => {
+      resolveCore = () => {
+        resolve('/tmp/tarballs/request-core.tgz')
+      }
+    })
+
+    mockedPackPackage.mockImplementation((packagePath) => {
+      started.push(packagePath)
+      return packagePath === 'packages/request/core'
+        ? coreGate
+        : Promise.resolve('/tmp/tarballs/axios.tgz')
+    })
+
+    mockedVerifyPackage.mockResolvedValue(undefined)
+
+    const resultPromise = verifyPackages()
+
+    await vi.waitFor(() => {
+      expect(started).toContain('packages/request/axios')
+    })
+    expect(started).toContain('packages/request/core')
+
+    resolveCore?.()
+    await resultPromise
   })
 
   it('does nothing when no packages exist', async () => {
