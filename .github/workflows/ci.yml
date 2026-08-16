@@ -10,9 +10,146 @@ permissions:
   contents: read
 
 jobs:
+  # This repo is pure TS — build output, lint/typecheck results, and every
+  # other static-analysis check here are the same regardless of OS or Node
+  # version (only `pnpm test:coverage`, in the `test` job below, actually
+  # exercises Node's own runtime behavior). Building once here and sharing
+  # both the dist/ output and Turborepo's own local cache with the jobs
+  # below — instead of every one of the 6 `test` matrix legs redoing the
+  # same build and the same lint/typecheck/etc. from scratch — is what
+  # actually cuts CI wall-clock time; splitting `static-analysis` out on
+  # its own additionally means a docs-only or lint-only failure doesn't
+  # wait on 6 separate OS/Node test legs to report before you find out.
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        run: corepack install -g pnpm@11.21.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=moderate
+
+      - name: Build
+        run: pnpm build
+
+      # release.yml downloads this instead of rebuilding from source itself —
+      # keeps the actual build (arbitrary code from whatever's being released)
+      # out of the workflow that holds npm publish permissions.
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: build-output
+          # `**` (not `*/*`) so a one-level-deep package (e.g. `packages/ui-kit`)
+          # is included the same as a two-level one — but pnpm symlinks a
+          # package's own workspace deps into its node_modules, so without
+          # excluding that, the same dist output gets matched a second time
+          # through the symlinked path too.
+          path: |
+            packages/**/dist
+            !packages/**/node_modules/**
+          retention-days: 7
+
+      # A plain filesystem copy of Turborepo's own local cache — every
+      # `turbo run <task>` this build just did (build, and transitively
+      # anything typecheck/etc. already depend on via `^build`) becomes a
+      # cache *hit* in `static-analysis`/`test` below instead of redone
+      # work, purely by both jobs sharing the same content-hashed cache
+      # directory. Short retention: only ever needed within this one
+      # workflow run, never across runs.
+      - name: Upload Turborepo cache
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: turbo-cache
+          path: .turbo/cache
+          retention-days: 1
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        run: corepack install -g pnpm@11.21.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: build-output
+          path: packages
+
+      - name: Download Turborepo cache
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: turbo-cache
+          path: .turbo/cache
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Lit CSS Validation
+        run: pnpm run validate:lit-css
+
+      - name: Format Validation
+        run: pnpm run validate:format
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Dependency Architecture Validation
+        run: pnpm run validate:deps
+
+      - name: Node Module Resolution Validation
+        run: pnpm run validate:node-resolution
+
+      - name: API Exports Validation
+        run: pnpm run validate:api-exports
+
+      - name: Document Validation
+        run: pnpm run validate:docs
+
+      - name: Verify Packages
+        run: pnpm run verify:packages
+
+      - name: Bundle Size Validation
+        run: pnpm run validate:size
+
   test:
-    name: Test / Build / Lint
+    name: Test
     runs-on: ${{ matrix.os }}
+    needs: build
 
     defaults:
       run:
@@ -48,63 +185,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=moderate
-
-      - name: Build
-        run: pnpm build
-
-      # release.yml downloads this instead of rebuilding from source itself —
-      # keeps the actual build (arbitrary code from whatever's being released)
-      # out of the workflow that holds npm publish permissions. One matrix
-      # leg only: this repo is pure TS, build output doesn't vary by OS/Node.
-      - name: Upload build artifacts
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 24
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      # Some packages' own tests import another workspace package at
+      # runtime (e.g. @codeminity/axios's tests import
+      # @codeminity/request-core) — real ESM resolution through that
+      # package's package.json "exports", which points at dist/, not
+      # src/. Without this, every matrix leg would need its own full
+      # `pnpm build` (which is identical across all 6 — see the `build`
+      # job's own comment) just to make `test:coverage` resolve at all.
+      - name: Download build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: build-output
-          # `**` (not `*/*`) so a one-level-deep package (e.g. `packages/ui-kit`)
-          # is included the same as a two-level one — but pnpm symlinks a
-          # package's own workspace deps into its node_modules, so without
-          # excluding that, the same dist output gets matched a second time
-          # through the symlinked path too.
-          path: |
-            packages/**/dist
-            !packages/**/node_modules/**
-          retention-days: 7
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Lit CSS Validation
-        run: pnpm run validate:lit-css
-
-      - name: Format Validation
-        run: pnpm run validate:format
-
-      - name: Typecheck
-        run: pnpm typecheck
+          path: packages
 
       - name: Test
         run: pnpm test:coverage
-
-      - name: Dependency Architecture Validation
-        run: pnpm run validate:deps
-
-      - name: Node Module Resolution Validation
-        run: pnpm run validate:node-resolution
-
-      - name: API Exports Validation
-        run: pnpm run validate:api-exports
-
-      - name: Document Validation
-        run: pnpm run validate:docs
-
-      - name: Verify Packages
-        run: pnpm run verify:packages
-
-      - name: Bundle Size Validation
-        run: pnpm run validate:size
 
   security:
     name: Socket Security Scan
@@ -158,6 +253,7 @@ jobs:
   e2e:
     name: Browser E2E Tests
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Checkout repository
@@ -178,8 +274,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Download build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: build-output
+          path: packages
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
