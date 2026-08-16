@@ -1,4 +1,6 @@
-import { LitElement, css, html } from 'lit'
+import { LitElement, html } from 'lit'
+
+import { pageContainerStyles } from './page-container.styles'
 
 /**
  * `<cdmt-page-container>` — wraps a `<cdmt-page>` (directly, or through
@@ -18,15 +20,7 @@ import { LitElement, css, html } from 'lit'
  * @public
  */
 export class CdmtPageContainer extends LitElement {
-  static override styles = css`
-    :host {
-      display: block;
-      padding-top: var(--cdmt-layout-header-height, 0px);
-      padding-bottom: var(--cdmt-layout-footer-height, 0px);
-      padding-left: var(--cdmt-layout-drawer-left-width, 0px);
-      padding-right: var(--cdmt-layout-drawer-right-width, 0px);
-    }
-  `
+  static override styles = [pageContainerStyles]
 
   override render() {
     return html`<slot></slot>`
