@@ -16,21 +16,30 @@ vi.mock('./lib/run-command', async (importOriginal) => {
   }
 })
 
-// CHECK_STEPS' real Mutation Testing entry calls the real
-// runScopedMutationTesting — without this mock, exercising CHECK_STEPS
-// directly (e.g. "defaults to CHECK_STEPS") would spawn a real `turbo`
-// process as a side effect of running the unit test.
+// CHECK_STEPS' real Mutation Testing/Lint/Typecheck entries call the real
+// runScopedMutationTesting/runScopedLint/runScopedTypecheck — without these
+// mocks, exercising CHECK_STEPS directly (e.g. "defaults to CHECK_STEPS")
+// would run real getAffectedScope() git/turbo commands as a side effect of
+// running the unit test.
 vi.mock('./test-mutation', () => ({ runScopedMutationTesting: vi.fn() }))
+vi.mock('./lint', () => ({ runScopedLint: vi.fn() }))
+vi.mock('./typecheck', () => ({ runScopedTypecheck: vi.fn() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
 const { runScopedMutationTesting } = await import('./test-mutation')
+const { runScopedLint } = await import('./lint')
+const { runScopedTypecheck } = await import('./typecheck')
 
 const mockedRunCommand = vi.mocked(runCommand)
 const mockedRunScopedMutationTesting = vi.mocked(runScopedMutationTesting)
+const mockedRunScopedLint = vi.mocked(runScopedLint)
+const mockedRunScopedTypecheck = vi.mocked(runScopedTypecheck)
 
 beforeEach(() => {
   mockedRunCommand.mockClear()
   mockedRunScopedMutationTesting.mockClear()
+  mockedRunScopedLint.mockClear()
+  mockedRunScopedTypecheck.mockClear()
 })
 
 describe('CHECK_STEPS', () => {
@@ -86,25 +95,37 @@ describe('runFullCheck', () => {
   it('defaults to CHECK_STEPS when no steps are given', async () => {
     mockedRunCommand.mockResolvedValue(undefined)
     mockedRunScopedMutationTesting.mockResolvedValue(undefined)
+    mockedRunScopedLint.mockResolvedValue(undefined)
+    mockedRunScopedTypecheck.mockResolvedValue(undefined)
 
     const results = await runFullCheck()
 
-    // Every step except Mutation Testing (which uses its own in-process
-    // `run` instead of the generic `pnpm run <script>` path — see
-    // CHECK_STEPS) goes through runCommand directly.
-    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 1)
+    // Every step except Mutation Testing/Lint/Typecheck (which use their
+    // own in-process `run` instead of the generic `pnpm run <script>` path
+    // — see CHECK_STEPS) goes through runCommand directly.
+    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 3)
     expect(mockedRunScopedMutationTesting).toHaveBeenCalledTimes(1)
+    expect(mockedRunScopedLint).toHaveBeenCalledTimes(1)
+    expect(mockedRunScopedTypecheck).toHaveBeenCalledTimes(1)
     expect(results).toHaveLength(CHECK_STEPS.length)
   })
 
-  it("CHECK_STEPS' Mutation Testing entry forwards the scheduler's own signal to runScopedMutationTesting", async () => {
+  it("CHECK_STEPS' scoped entries forward the scheduler's own signal to their run() function", async () => {
     mockedRunCommand.mockResolvedValue(undefined)
     mockedRunScopedMutationTesting.mockResolvedValue(undefined)
+    mockedRunScopedLint.mockResolvedValue(undefined)
+    mockedRunScopedTypecheck.mockResolvedValue(undefined)
 
     await runFullCheck()
 
-    const [signal] = mockedRunScopedMutationTesting.mock.calls.at(0) ?? []
-    expect(signal).toBeInstanceOf(AbortSignal)
+    for (const mockedRun of [
+      mockedRunScopedMutationTesting,
+      mockedRunScopedLint,
+      mockedRunScopedTypecheck
+    ]) {
+      const [signal] = mockedRun.mock.calls.at(0) ?? []
+      expect(signal).toBeInstanceOf(AbortSignal)
+    }
   })
 
   it('waits for a dependsOn step to finish before starting a dependent one', async () => {

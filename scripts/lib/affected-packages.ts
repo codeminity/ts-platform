@@ -1,40 +1,27 @@
 import { exec as defaultExec } from 'node:child_process'
-import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { findWorkspacePackages } from '../package-discovery'
-
-import { readPackageJson } from './read-package-json'
+import { getAffectedScope, type ExecFn } from './affected-scope'
 
 const execAsync = promisify(defaultExec)
 
-export type ExecFn = (command: string) => Promise<{ stdout: string }>
+export type { ExecFn }
 
-interface TurboDryRun {
-  packages: string[]
-}
-
-// Turborepo's own dependency graph, not a raw `git diff` — a package whose
-// own source is untouched but that *depends on* something which changed is
-// still included (turbo's task-hash inputs are transitive), the same
-// correctness guarantee already relied on for `build`/`typecheck` caching.
-// This is deliberately not Stryker's own `--incremental` mode: that only
-// diffs the mutated file and its test file against a cached report, and by
-// its own docs will not detect a change in a *shared* file neither of those
-// happens to be — exactly the kind of stale-result risk that matters here.
+// Mutation testing is deliberately packages/-only (ADR-007 — apps/ is never
+// mutated), so this stays a thin wrapper around getAffectedScope rather
+// than exposing apps/ scoping too. `'full'` means a change landed
+// somewhere getAffectedScope can't attribute to any specific package (root
+// config, scripts/) — the safe response is to mutate everything, i.e. not
+// pass a STRYKER_MUTATE_DIRS override at all, not to scope to an empty (and
+// therefore skipped) set. See getAffectedScope's own comment for why this
+// matters more than it might look like it does.
 export async function getAffectedPackageDirs(
   baseRef = 'origin/main',
   packagesDir = 'packages',
   exec: ExecFn = execAsync
-): Promise<string[]> {
-  const { stdout } = await exec(`pnpm exec turbo run build --filter="...[${baseRef}]" --dry=json`)
+): Promise<string[] | 'full'> {
+  const scope = await getAffectedScope(baseRef, exec, packagesDir)
 
-  const dryRun = JSON.parse(stdout) as TurboDryRun
-
-  const affectedNames = new Set(dryRun.packages.filter((name) => name !== '//'))
-  if (affectedNames.size === 0) return []
-
-  return findWorkspacePackages(packagesDir)
-    .filter((packagePath) => affectedNames.has(readPackageJson(packagePath).name))
-    .map((packagePath) => packagePath.split(path.sep).join('/'))
+  if (scope.type === 'full') return 'full'
+  return scope.packageDirs
 }
