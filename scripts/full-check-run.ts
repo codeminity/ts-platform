@@ -8,14 +8,15 @@ async function main() {
       console.log(`\n▶ ${step.name}`)
     },
     onStepComplete: (result) => {
-      const icon = result.passed ? '✅' : '❌'
-      console.log(`${icon} ${result.name} (${(result.durationMs / 1000).toFixed(1)}s)`)
+      const icon = result.passed ? '✅' : result.cancelled ? '⏭' : '❌'
+      const suffix = result.cancelled ? ' (skipped — stopped after an earlier failure)' : ''
+      console.log(`${icon} ${result.name} (${(result.durationMs / 1000).toFixed(1)}s)${suffix}`)
     }
   })
 
   console.log('\n=== Full Check Summary ===')
   for (const result of results) {
-    const icon = result.passed ? '✅' : '❌'
+    const icon = result.passed ? '✅' : result.cancelled ? '⏭' : '❌'
     console.log(`${icon} ${result.name}`)
   }
 

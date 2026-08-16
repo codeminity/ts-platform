@@ -157,11 +157,17 @@ describe('verifyTreeShakenSideEffect', () => {
     return tempDir
   }
 
+  // Real esbuild I/O is inherently slower than the rest of this suite, and
+  // gets slower still under heavy concurrent load (e.g. full-check now
+  // runs everything else alongside this) — confirmed directly: the default
+  // 5000ms timeout flaked here under concurrent load even though nothing
+  // was actually broken. A generous fixed timeout, not a removed one — a
+  // real hang should still fail the test.
   it('passes when the side effect survives real bundling', async () => {
     const dir = createFixturePackage(true)
 
     await expect(verifyTreeShakenSideEffect(dir, 'fixture-pkg')).resolves.toBeUndefined()
-  })
+  }, 15000)
 
   it('throws when sideEffects: false lets a bundler tree-shake the side effect away', async () => {
     const dir = createFixturePackage(false)
@@ -169,7 +175,7 @@ describe('verifyTreeShakenSideEffect', () => {
     await expect(verifyTreeShakenSideEffect(dir, 'fixture-pkg')).rejects.toThrow(
       "fixture-pkg: a production bundler tree-shook away this package's side effects"
     )
-  })
+  }, 15000)
 })
 
 describe('verifyPackage', () => {

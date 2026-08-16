@@ -1,42 +1,120 @@
-import { runCommand } from './lib/run-command'
+import { CommandCancelledError, runCommand } from './lib/run-command'
+import { runScopedMutationTesting } from './test-mutation'
 
 export interface CheckStep {
   name: string
   args: string[]
+  // Names of other steps that must finish first. Only needed for the 3
+  // steps that actually consume dist/ output (Verify Packages, Bundle Size,
+  // Browser E2E) — everything else reads source directly and has no real
+  // ordering requirement beyond Install having finished. Steps with no
+  // dependsOn (other than Install itself) run concurrently.
+  dependsOn?: string[]
+  // When present, run in-process instead of `runCommand('pnpm', args,
+  // {signal})` — see the Mutation Testing step below for why this exists.
+  run?: (signal: AbortSignal) => Promise<void>
 }
 
-// Mirrors ci.yml's "Test / Build / Lint" job order exactly (install, then
-// audit, then build, then lint, then typecheck, then test), plus the slow
-// checks (mutation, e2e) that only run manually / via separate jobs there.
+// Mirrors ci.yml's "Test / Build / Lint" job checks, plus the slow checks
+// (mutation, e2e) that only run manually / via separate jobs there.
 // Changeset Required (changesets.yml) is folded in here too, right after
 // install, since it's cheap and exercises the changesets CLI's own
 // dependencies (e.g. js-yaml via read-yaml-file) - a path nothing else in
 // this list touches, and the reason a real override break once slipped
 // past a passing full-check.
+//
+// Execution order here is NOT the same as run order — see runFullCheck.
+// Install always runs alone, first. Everything else runs concurrently
+// except the 3 steps that need Build's dist/ output (declared via
+// dependsOn), which wait for it specifically — not for slower unrelated
+// siblings like Mutation Testing, which is by far the longest single step
+// and deliberately isn't a dependency of anything.
+// Steps below marked `dependsOn: ['Build']` all share the same real cause,
+// confirmed by directly emptying a package's dist/ and watching what each
+// command actually does (not inferred from reading the command's own code):
+// any package that depends on another workspace package (e.g.
+// @codeminity/axios -> @codeminity/request-core, ui-kit-docs ->
+// @codeminity/ui-kit) resolves that dependency's types *and* runtime code
+// through its package.json "exports" field, which points at dist/, not
+// src/ — there is no dev-time alias back to source anywhere in this repo.
+// Running one of these concurrently with Build risks two different failure
+// shapes depending on the command: a loud crash (Cannot find module) for
+// anything that does real ESM resolution (Test (coverage), API Exports
+// Validation, Mutation Testing), or a *silent wrong result* for anything
+// type-aware (Lint's type-checked ESLint rules, Typecheck, Node Module
+// Resolution) — confirmed directly: with @codeminity/request-core's dist/
+// removed, ESLint reported 9 fabricated "unsafe access on unresolvable
+// type" errors on ui-kit-docs source that has nothing wrong with it, and
+// `tsc -p tsconfig.esm-strict.json` cascaded into dozens of unrelated
+// errors across @codeminity/axios. A step with no cross-package workspace
+// dependency at all (Lit CSS Validation only scans @codeminity/ui-kit,
+// which has none) has no such exposure and is left concurrent.
 export const CHECK_STEPS: CheckStep[] = [
   { name: 'Install Dependencies', args: ['install', '--frozen-lockfile'] },
   { name: 'Audit Dependencies', args: ['audit', '--audit-level=moderate'] },
   { name: 'Changeset Required', args: ['run', 'validate:changeset'] },
   { name: 'Build', args: ['run', 'build'] },
-  { name: 'Lint', args: ['run', 'lint'] },
   { name: 'Lit CSS Validation', args: ['run', 'validate:lit-css'] },
   { name: 'Format Validation', args: ['run', 'validate:format'] },
-  { name: 'Typecheck', args: ['run', 'typecheck'] },
-  { name: 'Test (coverage)', args: ['run', 'test:coverage'] },
   { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },
-  { name: 'Node Module Resolution', args: ['run', 'validate:node-resolution'] },
-  { name: 'API Exports Validation', args: ['run', 'validate:api-exports'] },
-  { name: 'Document Validation', args: ['run', 'validate:docs'] },
-  { name: 'Verify Packages', args: ['run', 'verify:packages'] },
-  { name: 'Bundle Size', args: ['run', 'validate:size'] },
-  { name: 'Mutation Testing', args: ['run', 'test:mutation'] },
-  { name: 'Browser E2E', args: ['run', 'test:e2e'] }
+  { name: 'Lint', args: ['run', 'lint'], dependsOn: ['Build'] },
+  { name: 'Test (coverage)', args: ['run', 'test:coverage'], dependsOn: ['Build'] },
+  {
+    name: 'Node Module Resolution',
+    args: ['run', 'validate:node-resolution'],
+    dependsOn: ['Build']
+  },
+  { name: 'API Exports Validation', args: ['run', 'validate:api-exports'], dependsOn: ['Build'] },
+  // Also needs dist/ for its own reason, on top of the cross-package one
+  // above: it type-checks every TypeScript code block found in the docs
+  // against the package's real *published* types (dist/*.d.ts), not
+  // internal source — confirmed the hard way, running concurrently with
+  // Build produced "Missing build output" before this depended on it.
+  { name: 'Typecheck', args: ['run', 'typecheck'], dependsOn: ['Build'] },
+  { name: 'Document Validation', args: ['run', 'validate:docs'], dependsOn: ['Build'] },
+  { name: 'Verify Packages', args: ['run', 'verify:packages'], dependsOn: ['Build'] },
+  { name: 'Bundle Size', args: ['run', 'validate:size'], dependsOn: ['Build'] },
+  // Also used to need explicit protection from Build/Test (coverage)
+  // racing over dist/ and coverage/ mid-write via Stryker's sandbox
+  // blindly copying the whole project — fixed at the root via
+  // stryker.config.ts's ignorePatterns, so the only reason this still
+  // depends on Build is the same cross-package one as everything else here
+  // (a mutated package that imports another workspace package needs that
+  // package's real dist to run its own tests at all).
+  //
+  // Deliberately `run: runScopedMutationTesting` (in-process) instead of
+  // `args: ['run', 'test:mutation']` (a nested `pnpm run` spawned from
+  // *inside* an already-spawned child): a fail-fast kill only reaches
+  // whatever process tree the AbortSignal was actually attached to.
+  // Routing through a second, independently-spawned `pnpm run` process
+  // meant the real Stryker process — spawned by *that* child, with no
+  // signal of its own — could come into existence in the exact window
+  // between the outer kill firing and taskkill's tree snapshot, and survive
+  // as an orphan (confirmed directly: a real fail-fast run left 15 live
+  // Stryker worker processes running for minutes after `pnpm run
+  // full-check` itself had already reported the step as cancelled and
+  // exited). Calling runScopedMutationTesting(signal) here means the one
+  // process it does still need to spawn (Stryker itself) is governed by
+  // the *same* signal this step's own cancellation uses, with no
+  // unmonitored hop in between.
+  {
+    name: 'Mutation Testing',
+    args: ['run', 'test:mutation'],
+    dependsOn: ['Build'],
+    run: runScopedMutationTesting
+  },
+  { name: 'Browser E2E', args: ['run', 'test:e2e'], dependsOn: ['Build'] }
 ]
 
 export interface CheckStepResult {
   name: string
   passed: boolean
   durationMs: number
+  // True when this step never actually ran to completion — either it was
+  // killed mid-flight, or skipped entirely — because a different step had
+  // already failed. Distinguishes "this is the thing you need to fix" from
+  // "this just got caught in the fail-fast stop."
+  cancelled?: boolean
 }
 
 export interface RunFullCheckOptions {
@@ -44,26 +122,133 @@ export interface RunFullCheckOptions {
   onStepComplete?: (result: CheckStepResult) => void
 }
 
+// Owns the "stop everything" state behind methods rather than a raw
+// mutable field — besides encapsulating the "only the first failure
+// triggers a stop" logic in one place, a direct property read of a flag
+// that's mutated by concurrent sibling calls is exactly the kind of thing
+// TypeScript's control-flow narrowing gets wrong (it can't see the
+// mutation happening in a different async call), which trips
+// @typescript-eslint/no-unnecessary-condition on a check that's very much
+// necessary at runtime. A function call isn't narrowed the same way.
+interface Scheduler {
+  signal: AbortSignal
+  isStopped(): boolean
+  stopOnFailure(): void
+}
+
+function createScheduler(): Scheduler {
+  const controller = new AbortController()
+  let stopped = false
+
+  return {
+    signal: controller.signal,
+    isStopped: () => stopped,
+    stopOnFailure: () => {
+      if (stopped) return
+      stopped = true
+      controller.abort()
+    }
+  }
+}
+
+async function runStep(
+  step: CheckStep,
+  waitFor: Promise<unknown>[],
+  options: RunFullCheckOptions,
+  scheduler: Scheduler
+): Promise<CheckStepResult> {
+  // Wait for dependencies first — a rejected dependency (a failed step)
+  // must not prevent this one from still being attempted and reported
+  // (unless a failure has since triggered a full-check-wide stop, handled
+  // below), matching the existing "every step runs regardless of others
+  // failing" guarantee for dependency-only ordering.
+  await Promise.allSettled(waitFor)
+
+  // full-check is a local dev tool, not CI — once anything has failed,
+  // there's no reason to keep spending time/CPU on steps the developer is
+  // about to go fix something and rerun anyway. A step that hasn't started
+  // yet by the time that happens is skipped outright, never even spawned.
+  if (scheduler.isStopped()) {
+    return { name: step.name, passed: false, durationMs: 0, cancelled: true }
+  }
+
+  options.onStepStart?.(step)
+
+  const start = Date.now()
+  let passed = false
+  let cancelled = false
+
+  try {
+    if (step.run) {
+      await step.run(scheduler.signal)
+    } else {
+      await runCommand('pnpm', step.args, { signal: scheduler.signal })
+    }
+    passed = true
+  } catch (error) {
+    if (error instanceof CommandCancelledError) {
+      cancelled = true
+    } else {
+      // A genuine (non-cancelled) failure always triggers the stop —
+      // stopOnFailure() is idempotent, so if something else already
+      // stopped things, this is a no-op. This step still reports as a
+      // real failure either way: it exited non-zero on its own, whether or
+      // not another step happened to fail around the same time.
+      scheduler.stopOnFailure()
+    }
+  }
+
+  const result: CheckStepResult = {
+    name: step.name,
+    passed,
+    durationMs: Date.now() - start,
+    ...(cancelled ? { cancelled: true } : {})
+  }
+  options.onStepComplete?.(result)
+  return result
+}
+
 export async function runFullCheck(
   steps: CheckStep[] = CHECK_STEPS,
   options: RunFullCheckOptions = {}
 ): Promise<CheckStepResult[]> {
-  const results: CheckStepResult[] = []
+  const [install, ...rest] = steps
+  if (!install) return []
 
-  for (const step of steps) {
-    options.onStepStart?.(step)
+  const scheduler = createScheduler()
+  const promises = new Map<string, Promise<CheckStepResult>>()
 
-    const start = Date.now()
-    const passed = await runCommand('pnpm', step.args)
-      .then(() => true)
-      .catch(() => false)
-
-    const result: CheckStepResult = { name: step.name, passed, durationMs: Date.now() - start }
-    results.push(result)
-    options.onStepComplete?.(result)
+  function requireDependency(name: string, requestedBy: string): Promise<CheckStepResult> {
+    const promise = promises.get(name)
+    if (!promise) throw new Error(`Step "${requestedBy}" depends on unknown step "${name}"`)
+    return promise
   }
 
-  return results
+  // Install always runs alone, first — everything else, explicitly or
+  // implicitly, depends on it (nothing should touch node_modules while it's
+  // still being written).
+  const installPromise = runStep(install, [], options, scheduler)
+  promises.set(install.name, installPromise)
+
+  for (const step of rest) {
+    const waitFor = [
+      installPromise,
+      ...(step.dependsOn ?? []).map((depName) => requireDependency(depName, step.name))
+    ]
+    promises.set(step.name, runStep(step, waitFor, options, scheduler))
+  }
+
+  return Promise.all(
+    steps.map((step) => {
+      const promise = promises.get(step.name)
+      // Every name in `steps` was just registered above (or is `install`
+      // itself), so this is provably unreachable — it exists only because
+      // Map#get's return type is possibly-undefined.
+      /* v8 ignore next */
+      if (!promise) throw new Error(`No promise registered for step "${step.name}"`)
+      return promise
+    })
+  )
 }
 
 export function hasFailures(results: CheckStepResult[]): boolean {

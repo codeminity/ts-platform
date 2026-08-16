@@ -3,7 +3,7 @@
   "globalDependencies": ["tsconfig.base.json"],
   "tasks": {
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["^typecheck", "^build"],
       "inputs": ["src/**", "tsconfig.json"],
       "outputs": []
     },
