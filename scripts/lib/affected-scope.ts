@@ -26,7 +26,10 @@ interface TurboDryRun {
 export type AffectedScope =
   { type: 'full' } | { type: 'scoped'; packageDirs: string[]; appDirs: string[] }
 
-async function getChangedFiles(baseRef: string, exec: ExecFn): Promise<string[]> {
+// Exported so relevant-changes.ts (glob-based step skipping) can reuse the
+// exact same git-diff-plus-untracked-files logic instead of a second,
+// slightly-different implementation.
+export async function getChangedFiles(baseRef: string, exec: ExecFn): Promise<string[]> {
   const [diffResult, untrackedResult] = await Promise.all([
     exec(`git diff --name-only ${baseRef}`),
     exec('git ls-files --others --exclude-standard')

@@ -16,27 +16,32 @@ vi.mock('./lib/run-command', async (importOriginal) => {
   }
 })
 
-// CHECK_STEPS' real Mutation Testing/Lint/Typecheck entries call the real
-// runScopedMutationTesting/runScopedLint/runScopedTypecheck — without these
-// mocks, exercising CHECK_STEPS directly (e.g. "defaults to CHECK_STEPS")
-// would run real getAffectedScope() git/turbo commands as a side effect of
-// running the unit test.
+// CHECK_STEPS' real Mutation Testing/Lint/Typecheck/Lit CSS
+// Validation/Dependency Architecture entries call the real
+// runScopedMutationTesting/runScopedLint/runScopedTypecheck/runIfRelevant —
+// without these mocks, exercising CHECK_STEPS directly (e.g. "defaults to
+// CHECK_STEPS") would run real getAffectedScope()/hasRelevantChanges()
+// git/turbo commands as a side effect of running the unit test.
 vi.mock('./test-mutation', () => ({ runScopedMutationTesting: vi.fn() }))
 vi.mock('./lint', () => ({ runScopedLint: vi.fn() }))
 vi.mock('./typecheck', () => ({ runScopedTypecheck: vi.fn() }))
+vi.mock('./lib/run-if-relevant', () => ({ runIfRelevant: vi.fn() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
 const { runScopedMutationTesting } = await import('./test-mutation')
 const { runScopedLint } = await import('./lint')
 const { runScopedTypecheck } = await import('./typecheck')
+const { runIfRelevant } = await import('./lib/run-if-relevant')
 
 const mockedRunCommand = vi.mocked(runCommand)
 const mockedRunScopedMutationTesting = vi.mocked(runScopedMutationTesting)
 const mockedRunScopedLint = vi.mocked(runScopedLint)
 const mockedRunScopedTypecheck = vi.mocked(runScopedTypecheck)
+const mockedRunIfRelevant = vi.mocked(runIfRelevant)
 
 beforeEach(() => {
   mockedRunCommand.mockClear()
+  mockedRunIfRelevant.mockClear()
   mockedRunScopedMutationTesting.mockClear()
   mockedRunScopedLint.mockClear()
   mockedRunScopedTypecheck.mockClear()
@@ -97,16 +102,31 @@ describe('runFullCheck', () => {
     mockedRunScopedMutationTesting.mockResolvedValue(undefined)
     mockedRunScopedLint.mockResolvedValue(undefined)
     mockedRunScopedTypecheck.mockResolvedValue(undefined)
+    mockedRunIfRelevant.mockResolvedValue(undefined)
 
     const results = await runFullCheck()
 
-    // Every step except Mutation Testing/Lint/Typecheck (which use their
-    // own in-process `run` instead of the generic `pnpm run <script>` path
-    // — see CHECK_STEPS) goes through runCommand directly.
-    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 3)
+    // Every step except Mutation Testing/Lint/Typecheck/Lit CSS
+    // Validation/Dependency Architecture (which use their own in-process
+    // `run` instead of the generic `pnpm run <script>` path — see
+    // CHECK_STEPS) goes through runCommand directly.
+    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 5)
     expect(mockedRunScopedMutationTesting).toHaveBeenCalledTimes(1)
     expect(mockedRunScopedLint).toHaveBeenCalledTimes(1)
     expect(mockedRunScopedTypecheck).toHaveBeenCalledTimes(1)
+    expect(mockedRunIfRelevant).toHaveBeenCalledTimes(2)
+    expect(mockedRunIfRelevant).toHaveBeenCalledWith(
+      'Lit CSS Validation',
+      'packages/ui-kit/',
+      'validate:lit-css',
+      expect.any(AbortSignal)
+    )
+    expect(mockedRunIfRelevant).toHaveBeenCalledWith(
+      'Dependency Architecture',
+      'packages/',
+      'validate:deps',
+      expect.any(AbortSignal)
+    )
     expect(results).toHaveLength(CHECK_STEPS.length)
   })
 
@@ -115,6 +135,7 @@ describe('runFullCheck', () => {
     mockedRunScopedMutationTesting.mockResolvedValue(undefined)
     mockedRunScopedLint.mockResolvedValue(undefined)
     mockedRunScopedTypecheck.mockResolvedValue(undefined)
+    mockedRunIfRelevant.mockResolvedValue(undefined)
 
     await runFullCheck()
 
@@ -125,6 +146,11 @@ describe('runFullCheck', () => {
     ]) {
       const [signal] = mockedRun.mock.calls.at(0) ?? []
       expect(signal).toBeInstanceOf(AbortSignal)
+    }
+
+    // runIfRelevant's signal is its 4th positional argument, not its 1st.
+    for (const call of mockedRunIfRelevant.mock.calls) {
+      expect(call.at(3)).toBeInstanceOf(AbortSignal)
     }
   })
 
