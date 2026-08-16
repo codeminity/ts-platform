@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit'
 
-import { pageStyles } from './page.styles'
+import { pageStyles } from './page.styles.js'
 
 /**
  * Computes the page's own inline style from the layout offset it inherits

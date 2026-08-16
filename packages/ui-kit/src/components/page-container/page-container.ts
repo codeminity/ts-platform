@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit'
 
-import { pageContainerStyles } from './page-container.styles'
+import { pageContainerStyles } from './page-container.styles.js'
 
 /**
  * `<cdmt-page-container>` — wraps a `<cdmt-page>` (directly, or through
