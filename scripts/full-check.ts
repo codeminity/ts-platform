@@ -1,5 +1,7 @@
 import { CommandCancelledError, runCommand } from './lib/run-command'
+import { runScopedLint } from './lint'
 import { runScopedMutationTesting } from './test-mutation'
+import { runScopedTypecheck } from './typecheck'
 
 export interface CheckStep {
   name: string
@@ -57,7 +59,19 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Lit CSS Validation', args: ['run', 'validate:lit-css'] },
   { name: 'Format Validation', args: ['run', 'validate:format'] },
   { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },
-  { name: 'Lint', args: ['run', 'lint'], dependsOn: ['Build'] },
+  // Deliberately `run:` (in-process), same reasoning as Mutation Testing
+  // below: `pnpm lint`/`pnpm typecheck` are themselves now the *scoped*
+  // commands (scripts/lint.ts, scripts/typecheck.ts) — each computes which
+  // packages/apps are actually affected via getAffectedScope() and narrows
+  // the real lint/typecheck run to just those, falling back to the full,
+  // unscoped `lint:full`/`typecheck:full` whenever a change lands somewhere
+  // Turborepo's package graph can't attribute to a specific package/app
+  // (root config, scripts/). Routing that through a nested `pnpm run
+  // lint`/`pnpm run typecheck` spawned from inside an already-spawned child
+  // would reintroduce the exact orphaned-process class of bug fixed for
+  // Mutation Testing — the process each one still spawns needs the same
+  // signal this step's own cancellation uses, with no unmonitored hop.
+  { name: 'Lint', args: ['run', 'lint'], dependsOn: ['Build'], run: runScopedLint },
   { name: 'Test (coverage)', args: ['run', 'test:coverage'], dependsOn: ['Build'] },
   {
     name: 'Node Module Resolution',
@@ -65,12 +79,13 @@ export const CHECK_STEPS: CheckStep[] = [
     dependsOn: ['Build']
   },
   { name: 'API Exports Validation', args: ['run', 'validate:api-exports'], dependsOn: ['Build'] },
+  { name: 'Typecheck', args: ['run', 'typecheck'], dependsOn: ['Build'], run: runScopedTypecheck },
   // Also needs dist/ for its own reason, on top of the cross-package one
-  // above: it type-checks every TypeScript code block found in the docs
-  // against the package's real *published* types (dist/*.d.ts), not
-  // internal source — confirmed the hard way, running concurrently with
-  // Build produced "Missing build output" before this depended on it.
-  { name: 'Typecheck', args: ['run', 'typecheck'], dependsOn: ['Build'] },
+  // in the block comment above: it type-checks every TypeScript code block
+  // found in the docs against the package's real *published* types
+  // (dist/*.d.ts), not internal source — confirmed the hard way, running
+  // concurrently with Build produced "Missing build output" before this
+  // depended on it.
   { name: 'Document Validation', args: ['run', 'validate:docs'], dependsOn: ['Build'] },
   { name: 'Verify Packages', args: ['run', 'verify:packages'], dependsOn: ['Build'] },
   { name: 'Bundle Size', args: ['run', 'validate:size'], dependsOn: ['Build'] },

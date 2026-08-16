@@ -35,6 +35,15 @@ describe('runScopedMutationTesting', () => {
     })
   })
 
+  it("runs the full stryker script with no STRYKER_MUTATE_DIRS override when getAffectedPackageDirs returns 'full'", async () => {
+    mockedGetAffectedPackageDirs.mockResolvedValue('full')
+    mockedRunCommand.mockResolvedValue(undefined)
+
+    await runScopedMutationTesting()
+
+    expect(mockedRunCommand).toHaveBeenCalledWith('pnpm', ['run', 'test:mutation:full'], {})
+  })
+
   it('propagates a Stryker failure (e.g. mutation score below threshold)', async () => {
     mockedGetAffectedPackageDirs.mockResolvedValue(['packages/ui-kit'])
     mockedRunCommand.mockRejectedValue(new Error('Command failed'))

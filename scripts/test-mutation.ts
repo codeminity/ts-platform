@@ -9,17 +9,27 @@ import { runCommand } from './lib/run-command'
 export async function runScopedMutationTesting(signal?: AbortSignal): Promise<void> {
   const affectedDirs = await getAffectedPackageDirs()
 
-  if (affectedDirs.length === 0) {
+  if (affectedDirs !== 'full' && affectedDirs.length === 0) {
     console.log('No package changes since origin/main — skipping mutation testing.')
     return
   }
 
-  console.log(
-    `Mutation testing ${String(affectedDirs.length)} affected package(s): ${affectedDirs.join(', ')}`
-  )
+  // A 'full' result means a change landed outside packages/ entirely (root
+  // config, scripts/) — Turborepo's graph has no way to attribute that to
+  // specific packages, so the safe response is to mutate everything (no
+  // STRYKER_MUTATE_DIRS override), same as a bare `test:mutation:full` run.
+  if (affectedDirs === 'full') {
+    console.log('Change outside packages/ detected — running full mutation testing.')
+  } else {
+    console.log(
+      `Mutation testing ${String(affectedDirs.length)} affected package(s): ${affectedDirs.join(', ')}`
+    )
+  }
 
   await runCommand('pnpm', ['run', 'test:mutation:full'], {
     ...(signal ? { signal } : {}),
-    env: { STRYKER_MUTATE_DIRS: JSON.stringify(affectedDirs) }
+    ...(affectedDirs === 'full'
+      ? {}
+      : { env: { STRYKER_MUTATE_DIRS: JSON.stringify(affectedDirs) } })
   })
 }
