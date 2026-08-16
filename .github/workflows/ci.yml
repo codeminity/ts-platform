@@ -76,6 +76,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Lit CSS Validation
+        run: pnpm run validate:lit-css
+
       - name: Format Validation
         run: pnpm run validate:format
 

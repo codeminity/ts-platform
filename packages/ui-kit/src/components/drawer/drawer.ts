@@ -66,13 +66,15 @@ export class CdmtDrawer extends LitElement {
     }
 
     :host([data-cdmt-transitions-enabled]) {
-      transition:
-        transform ${themeVar('transitionDuration')} ${themeVar('transitionEasing')},
-        width ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+      transition-property: transform, width;
+      transition-duration: ${themeVar('transitionDuration')};
+      transition-timing-function: ${themeVar('transitionEasing')};
     }
 
     :host([data-cdmt-transitions-enabled][data-cdmt-no-mini-animation]) {
-      transition: transform ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+      transition-property: transform;
+      transition-duration: ${themeVar('transitionDuration')};
+      transition-timing-function: ${themeVar('transitionEasing')};
     }
 
     /* No visibility toggle here on purpose — visibility is inherited, so a
@@ -125,11 +127,15 @@ export class CdmtDrawer extends LitElement {
     }
 
     :host([bordered][side='left']) {
-      border-right: ${themeVar('borderWidth')} solid ${themeVar('colorBorder')};
+      border-right-width: ${themeVar('borderWidth')};
+      border-right-style: solid;
+      border-right-color: ${themeVar('colorBorder')};
     }
 
     :host([bordered][side='right']) {
-      border-left: ${themeVar('borderWidth')} solid ${themeVar('colorBorder')};
+      border-left-width: ${themeVar('borderWidth')};
+      border-left-style: solid;
+      border-left-color: ${themeVar('colorBorder')};
     }
 
     :host([elevated]) {
@@ -143,7 +149,9 @@ export class CdmtDrawer extends LitElement {
       z-index: 2050;
       opacity: 0;
       pointer-events: none;
-      transition: opacity ${themeVar('transitionDuration')} ${themeVar('transitionEasing')};
+      transition-property: opacity;
+      transition-duration: ${themeVar('transitionDuration')};
+      transition-timing-function: ${themeVar('transitionEasing')};
     }
 
     .cdmt-drawer__backdrop--visible {

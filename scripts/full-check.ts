@@ -19,6 +19,7 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Changeset Required', args: ['run', 'validate:changeset'] },
   { name: 'Build', args: ['run', 'build'] },
   { name: 'Lint', args: ['run', 'lint'] },
+  { name: 'Lit CSS Validation', args: ['run', 'validate:lit-css'] },
   { name: 'Format Validation', args: ['run', 'validate:format'] },
   { name: 'Typecheck', args: ['run', 'typecheck'] },
   { name: 'Test (coverage)', args: ['run', 'test:coverage'] },
