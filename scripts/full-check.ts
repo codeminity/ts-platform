@@ -1,4 +1,5 @@
 import { CommandCancelledError, runCommand } from './lib/run-command'
+import { runIfRelevant } from './lib/run-if-relevant'
 import { runScopedLint } from './lint'
 import { runScopedMutationTesting } from './test-mutation'
 import { runScopedTypecheck } from './typecheck'
@@ -56,9 +57,26 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Audit Dependencies', args: ['audit', '--audit-level=moderate'] },
   { name: 'Changeset Required', args: ['run', 'validate:changeset'] },
   { name: 'Build', args: ['run', 'build'] },
-  { name: 'Lit CSS Validation', args: ['run', 'validate:lit-css'] },
+  // Deliberately `run:` (in-process, same reasoning as Lint/Typecheck/
+  // Mutation Testing) instead of `args:`: these two are genuinely
+  // self-contained — no cross-package workspace dependency to reason
+  // about, so a plain "did anything under this path change" check (via
+  // hasRelevantChanges, not the heavier package-graph-aware
+  // getAffectedScope) is enough to safely skip them outright when nothing
+  // relevant did. See DECISIONS.md ADR-016 for why most of the *other*
+  // still-unscoped steps don't qualify for this simpler treatment.
+  {
+    name: 'Lit CSS Validation',
+    args: ['run', 'validate:lit-css'],
+    run: (signal) =>
+      runIfRelevant('Lit CSS Validation', 'packages/ui-kit/', 'validate:lit-css', signal)
+  },
   { name: 'Format Validation', args: ['run', 'validate:format'] },
-  { name: 'Dependency Architecture', args: ['run', 'validate:deps'] },
+  {
+    name: 'Dependency Architecture',
+    args: ['run', 'validate:deps'],
+    run: (signal) => runIfRelevant('Dependency Architecture', 'packages/', 'validate:deps', signal)
+  },
   // Deliberately `run:` (in-process), same reasoning as Mutation Testing
   // below: `pnpm lint`/`pnpm typecheck` are themselves now the *scoped*
   // commands (scripts/lint.ts, scripts/typecheck.ts) — each computes which
