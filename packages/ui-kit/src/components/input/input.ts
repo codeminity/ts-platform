@@ -1,6 +1,6 @@
-import { LitElement, css, html, unsafeCSS } from 'lit'
+import { LitElement, html } from 'lit'
 
-import { themeVar, themeVarText } from '../../theme/css-var.js'
+import { inputStyles } from './input.styles.js'
 
 /**
  * The `type` attribute a {@link CdmtInput} passes through to its native
@@ -28,46 +28,7 @@ export class CdmtInput extends LitElement {
     invalid: { type: Boolean, reflect: true }
   }
 
-  static override styles = css`
-    :host {
-      display: inline-block;
-    }
-
-    input {
-      box-sizing: border-box;
-      width: 100%;
-      font-family: ${themeVar('fontFamily')};
-      font-size: ${themeVar('fontSize')};
-      color: ${themeVar('colorText')};
-      background: ${themeVar('colorSurface')};
-      padding-top: ${themeVar('spacingSm')};
-      padding-bottom: ${themeVar('spacingSm')};
-      padding-left: ${themeVar('spacingMd')};
-      padding-right: ${themeVar('spacingMd')};
-      border-radius: ${themeVar('radiusMd')};
-      border-width: ${themeVar('borderWidth')};
-      border-style: solid;
-      border-color: ${themeVar('colorBorder')};
-      transition-property: opacity;
-      transition-duration: ${themeVar('transitionDuration')};
-      transition-timing-function: ${themeVar('transitionEasing')};
-    }
-
-    input:disabled {
-      cursor: not-allowed;
-      opacity: ${themeVar('opacityDisabled')};
-    }
-
-    input:focus {
-      outline: none;
-      border-color: ${themeVar('colorPrimary')};
-      box-shadow: ${unsafeCSS(`0 0 0 ${themeVarText('focusRingWidth')} ${themeVarText('focusRingColor')}`)};
-    }
-
-    :host([invalid]) input {
-      border-color: ${themeVar('colorNegative')};
-    }
-  `
+  static override styles = inputStyles
 
   // `declare` (no initializer): Lit installs a reactive getter/setter for
   // each entry in `properties` on the prototype at class-definition time.
