@@ -20,7 +20,7 @@ import { pageContainerStyles } from './page-container.styles.js'
  * @public
  */
 export class CdmtPageContainer extends LitElement {
-  static override styles = [pageContainerStyles]
+  static override styles = pageContainerStyles
 
   override render() {
     return html`<slot></slot>`

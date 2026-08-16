@@ -28,7 +28,7 @@ export class CdmtPage extends LitElement {
     styleFn: { attribute: false }
   }
 
-  static override styles = [pageStyles]
+  static override styles = pageStyles
 
   declare padding: boolean
   declare styleFn: CdmtPageStyleFn | undefined

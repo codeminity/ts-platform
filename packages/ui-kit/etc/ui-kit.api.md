@@ -30,7 +30,7 @@ export class CdmtButton extends LitElement {
     // (undocumented)
     render(): TemplateResult<1>;
     // (undocumented)
-    static styles: CSSResult[];
+    static styles: CSSResult;
     // (undocumented)
     variant: CdmtButtonVariant;
 }

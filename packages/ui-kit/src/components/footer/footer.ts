@@ -20,7 +20,7 @@ export class CdmtFooter extends LitElement {
     heightHint: { type: Number, attribute: 'height-hint' }
   }
 
-  static override styles = [footerStyles]
+  static override styles = footerStyles
 
   declare modelValue: boolean
   declare reveal: boolean

@@ -28,7 +28,7 @@ export class CdmtButton extends LitElement {
     disabled: { type: Boolean, reflect: true }
   }
 
-  static override styles = [buttonStyles]
+  static override styles = buttonStyles
 
   // `declare` (no initializer): Lit installs a reactive getter/setter for
   // each entry in `properties` on the prototype at class-definition time.

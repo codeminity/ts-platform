@@ -41,7 +41,7 @@ export class CdmtLayout extends LitElement {
     container: { type: Boolean, reflect: true }
   }
 
-  static override styles = [layoutStyles]
+  static override styles = layoutStyles
 
   declare view: string
   declare container: boolean
