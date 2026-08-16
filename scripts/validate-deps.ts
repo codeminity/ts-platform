@@ -30,7 +30,17 @@ export async function validateDeps(): Promise<void> {
     ruleSet,
     tsPreCompilationDeps: true,
     tsConfig: { fileName: 'tsconfig.base.json' },
-    exclude: '\\.test\\.ts$',
+    // `cruise(['packages'], ...)` walks the whole packages/ tree, not just
+    // src/ — without excluding dist/, this rule set (which only ever
+    // targets packages/**/src paths) also crawled generated build output.
+    // dist/ is actively rewritten by the concurrently-running Build
+    // full-check step, so this could race it mid-write and crash with an
+    // ENOENT on an esbuild content-hashed chunk file that existed a moment
+    // earlier — confirmed directly. `node_modules`/`temp` are excluded too:
+    // neither is architecture this rule set cares about, and both are
+    // pointless (or, for temp/, similarly racy against Verify Packages) to
+    // crawl regardless.
+    exclude: '\\.test\\.ts$|/(dist|node_modules|temp)/',
     doNotFollow: 'node_modules',
     outputType: 'err'
   })
