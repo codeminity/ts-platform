@@ -48,24 +48,13 @@ export const appStyles = `
     flex: 1;
   }
 
-  .app-drawer {
+  .app-footer__row {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 1.5rem 1rem;
-  }
-
-  .app-drawer a {
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--cdmt-radius-md);
-    text-decoration: none;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
     opacity: 0.7;
-  }
-
-  .app-drawer a.active {
-    opacity: 1;
-    background: var(--cdmt-color-surface);
-    font-weight: var(--cdmt-font-weight-bold);
   }
 
   .app-main {
