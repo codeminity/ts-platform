@@ -96,4 +96,41 @@ describe('typecheckExtras', () => {
 
     await expect(typecheckExtras()).rejects.toThrow('type error')
   })
+
+  it('starts every tsconfig without waiting for an earlier one to finish', async () => {
+    mockedGlobby.mockImplementation((pattern) =>
+      Promise.resolve(
+        pattern === 'packages/**/e2e/tsconfig.json'
+          ? ['packages/request/axios/e2e/tsconfig.json']
+          : []
+      )
+    )
+
+    const started: string[] = []
+    let resolveScripts: () => void = () => {
+      /* empty */
+    }
+    const scriptsGate = new Promise<void>((resolve) => {
+      resolveScripts = resolve
+    })
+
+    mockedRunCommand.mockImplementation((_command, args) => {
+      const tsconfig = args?.[3]
+      if (tsconfig) started.push(tsconfig)
+      return tsconfig === 'scripts/tsconfig.json' ? scriptsGate : Promise.resolve()
+    })
+
+    const resultPromise = typecheckExtras()
+
+    // e2e/axios's own tsc invocation has no reason to wait for
+    // scripts/tsconfig.json's — both should have started even though
+    // scripts/tsconfig.json's own runCommand promise is still pending.
+    await vi.waitFor(() => {
+      expect(started).toContain('scripts/tsconfig.json')
+      expect(started).toContain('packages/request/axios/e2e/tsconfig.json')
+    })
+
+    resolveScripts()
+    await resultPromise
+  })
 })
