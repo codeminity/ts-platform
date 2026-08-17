@@ -5,6 +5,21 @@ import { getStoredThemeMode, setStoredThemeMode } from './preferences.js'
 import { startRouter } from './router.js'
 import { appStyles } from './styles.js'
 
+declare global {
+  var litIssuedWarnings: Set<string> | undefined
+}
+
+// Silences Lit's own "Lit is in dev mode" console warning — expected here
+// (this docs app's dev server never runs as a production build) but noisy on
+// every reload. lit-html queues that warning as a microtask the first time
+// any lit-html module is evaluated (see its own `issueWarning`, gated on
+// `globalThis.litIssuedWarnings`); this only needs to run somewhere in this
+// file's synchronous top-level scope, before that queued microtask actually
+// fires — the `@codeminity/ui-kit` import above already evaluated lit-html's
+// module body (which only *queues* the warning) by the time this line runs.
+globalThis.litIssuedWarnings ??= new Set()
+globalThis.litIssuedWarnings.add('dev-mode')
+
 const styleEl = document.createElement('style')
 styleEl.textContent = appStyles
 document.head.append(styleEl)

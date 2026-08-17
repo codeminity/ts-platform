@@ -11,28 +11,39 @@ export function renderLeftDrawer(): LeftDrawer {
   drawer.bordered = true
   drawer.showIfAbove = true
 
-  const nav = document.createElement('nav')
-  nav.className = 'app-drawer'
+  const list = document.createElement('cdmt-list')
 
-  const links = pages.map((page) => {
-    const link = document.createElement('a')
-    link.href = page.path
-    link.textContent = page.title
-    // In overlay/mobile mode the drawer covers the page until dismissed —
-    // docked mode (desktop) leaves it open across navigation, matching how
-    // a persistent side nav is expected to behave there.
-    link.addEventListener('click', () => {
+  const entries = pages.map((page) => {
+    const item = document.createElement('cdmt-item')
+    item.clickable = true
+
+    const section = document.createElement('cdmt-item-section')
+    const label = document.createElement('cdmt-item-label')
+    label.textContent = page.title
+    section.append(label)
+    item.append(section)
+
+    // `page.path` (e.g. `'#/button'`) is exactly what the old `<a href>`
+    // used to navigate with — setting it straight onto `location.hash`
+    // triggers the same `hashchange` the router already listens for,
+    // without needing a real anchor element under `<cdmt-item>`.
+    item.addEventListener('click', () => {
+      location.hash = page.path
+      // In overlay/mobile mode the drawer covers the page until dismissed —
+      // docked mode (desktop) leaves it open across navigation, matching how
+      // a persistent side nav is expected to behave there.
       if (!drawer.isDocked) drawer.hide()
     })
-    nav.append(link)
-    return { page, link }
+
+    list.append(item)
+    return { page, item }
   })
 
-  drawer.append(nav)
+  drawer.append(list)
 
   function setActive(path: string): void {
-    for (const { page, link } of links) {
-      link.classList.toggle('active', page.path === path)
+    for (const { page, item } of entries) {
+      item.active = page.path === path
     }
   }
 
