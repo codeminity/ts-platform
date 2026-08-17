@@ -63,7 +63,7 @@ Integration layer for external systems.
 
 - **Unit tests** live next to the code they test, inside each package's `src/`.
 - **Real-browser (Playwright) end-to-end tests** live in each package's own `e2e/` — a sibling to `src/`, not inside it, since `vitest`'s own test discovery is scoped to `src/` and a `.spec.ts` file anywhere else under `packages/**` would otherwise collide with it. Shared harness code used across packages (fixtures, `playwright.config.ts`) lives at the repo root `e2e/`, the same role `scripts/` plays for cross-cutting tooling — neither is a package, so "tests live next to packages" doesn't apply to them.
-- **`stryker.config.ts`** (repo root) runs mutation testing across every package's production code, on-demand (`pnpm run test:mutation`), not CI-gated.
+- **`stryker.config.ts`** (repo root) runs mutation testing across every package's production code. Runs nightly via a scheduled CI workflow (`.github/workflows/mutation-nightly.yml`), not gated on individual PRs; `pnpm run test:mutation` runs the same full sweep on-demand locally, and `--mutate <file>` scopes a run to a single file for verifying a fix.
 
 ## Public API Rule
 

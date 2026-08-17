@@ -1,15 +1,5 @@
 import type { PartialStrykerOptions } from '@stryker-mutator/api/core'
 
-// `pnpm run test:mutation` (scripts/run-mutation.ts) sets this to the JSON
-// array of package dirs Turborepo's dependency graph says are actually
-// affected vs. origin/main, for a fast scoped local run — full-check and a
-// bare `stryker run` (no env var set) always mutate every package, which is
-// what `pnpm run test:mutation:full` and CI (if this is ever added there)
-// should use as the ground-truth sweep.
-const scopedDirs: string[] = process.env.STRYKER_MUTATE_DIRS
-  ? (JSON.parse(process.env.STRYKER_MUTATE_DIRS) as string[])
-  : []
-
 // Deliberately narrower than vitest.config.ts's own coverage include/exclude:
 // this mutates every *published* package's production code — the code an
 // external consumer actually depends on — not scripts/ (this repo's own
@@ -25,9 +15,7 @@ export default {
     // for this same reason across the repo — no explicit exclusion is
     // needed or wanted here (an explicit one that excludes nothing just
     // produces its own "did not exclude any files" warning).
-    ...(scopedDirs.length > 0
-      ? scopedDirs.map((dir) => `${dir}/src/**/*.ts`)
-      : ['packages/**/src/**/*.ts']),
+    'packages/**/src/**/*.ts',
     '!packages/**/src/**/*.test.ts',
     '!packages/**/src/**/index.ts',
     '!packages/**/src/**/*.interface.ts',
@@ -41,24 +29,22 @@ export default {
   ignoreStatic: true,
   // Stryker's sandbox setup copies the whole project directory as-is; none
   // of these generated/gitignored paths are needed (mutation testing runs
-  // against source, not any of this output), and every one of them is
-  // actively written by some *other* full-check step that now runs
-  // concurrently with this one. Without excluding a path, Stryker's own
-  // copy can race that sibling process mid-write and crash with an ENOENT
-  // on a file that existed a moment earlier — confirmed directly, twice:
-  // first for `coverage`/`dist` (Test (coverage)/Build), then again for
-  // `test-results` (Playwright's own output dir for Browser E2E, which
-  // also runs concurrently with this step): "ENOENT: no such file or
-  // directory, copyfile '...\test-results\...\*.network' ->
-  // '...\.stryker-tmp\sandbox-...\test-results\...'". `.stryker-tmp` is
-  // this step's own sandbox root and isn't in Stryker's own default
-  // ALWAYS_IGNORE list either — without excluding it too, one Stryker run
-  // could try to copy a previous run's still-settling sandbox into a new
-  // one. The rest (`.turbo`, `.eslintcache`, `.prettiercache`,
-  // `playwright-report`, `blob-report`, `reports`) are the same class of
-  // risk, added preemptively rather than waiting to hit each one directly:
-  // every one of them is written by a step that runs concurrently with
-  // Mutation Testing and none of them are ever read by it.
+  // against source, not any of this output). Originally added because
+  // mutation testing used to run as a `full-check` step concurrently with
+  // Build/Test (coverage)/Browser E2E, whose own output directories it
+  // would otherwise race mid-write and crash with an ENOENT on a file that
+  // existed a moment earlier — confirmed directly, twice: first for
+  // `coverage`/`dist` (Test (coverage)/Build), then again for
+  // `test-results` (Playwright's own output dir for Browser E2E): "ENOENT:
+  // no such file or directory, copyfile '...\test-results\...\*.network' ->
+  // '...\.stryker-tmp\sandbox-...\test-results\...'". Mutation testing now
+  // runs standalone in its own nightly CI workflow (DECISIONS.md ADR-017),
+  // not concurrently with anything else, but every one of these paths is
+  // still never read by it and copying them into the sandbox is still pure
+  // waste, so the exclusions stay. `.stryker-tmp` is this step's own
+  // sandbox root and isn't in Stryker's own default ALWAYS_IGNORE list
+  // either — without excluding it too, one Stryker run could try to copy a
+  // previous run's still-settling sandbox into a new one.
   ignorePatterns: [
     'coverage',
     'dist',
