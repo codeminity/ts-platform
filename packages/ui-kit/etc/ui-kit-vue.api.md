@@ -530,27 +530,99 @@ noWrap: boolean;
 
 // @public
 export const CdmtLayout: DefineComponent<ExtractPropTypes<    {
-view: {
-type: StringConstructor;
-default: string;
+fixedHeader: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedFooter: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+headerOverLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+headerOverRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+footerOverLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+footerOverRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
 };
 container: {
 type: BooleanConstructor;
 default: boolean;
+};
+transitionDuration: {
+type: StringConstructor;
+default: undefined;
 };
 }>, () => VNode<RendererNode, RendererElement, {
 [key: string]: any;
 }>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
-view: {
-type: StringConstructor;
-default: string;
+fixedHeader: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedFooter: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+fixedRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+headerOverLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+headerOverRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+footerOverLeftDrawer: {
+type: BooleanConstructor;
+default: boolean;
+};
+footerOverRightDrawer: {
+type: BooleanConstructor;
+default: boolean;
 };
 container: {
 type: BooleanConstructor;
 default: boolean;
 };
+transitionDuration: {
+type: StringConstructor;
+default: undefined;
+};
 }>> & Readonly<{}>, {
-view: string;
+transitionDuration: string;
+fixedHeader: boolean;
+fixedFooter: boolean;
+fixedLeftDrawer: boolean;
+fixedRightDrawer: boolean;
+headerOverLeftDrawer: boolean;
+headerOverRightDrawer: boolean;
+footerOverLeftDrawer: boolean;
+footerOverRightDrawer: boolean;
 container: boolean;
 }, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
