@@ -359,6 +359,176 @@ modelValue: string;
 }, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
 // @public
+export const CdmtItem: DefineComponent<ExtractPropTypes<    {
+disable: {
+type: BooleanConstructor;
+default: boolean;
+};
+active: {
+type: BooleanConstructor;
+default: boolean;
+};
+clickable: {
+type: BooleanConstructor;
+default: boolean;
+};
+dense: {
+type: BooleanConstructor;
+default: boolean;
+};
+insetLevel: {
+type: NumberConstructor;
+default: number;
+};
+manualFocus: {
+type: BooleanConstructor;
+default: boolean;
+};
+focused: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, "click"[], "click", PublicProps, Readonly<ExtractPropTypes<    {
+disable: {
+type: BooleanConstructor;
+default: boolean;
+};
+active: {
+type: BooleanConstructor;
+default: boolean;
+};
+clickable: {
+type: BooleanConstructor;
+default: boolean;
+};
+dense: {
+type: BooleanConstructor;
+default: boolean;
+};
+insetLevel: {
+type: NumberConstructor;
+default: number;
+};
+manualFocus: {
+type: BooleanConstructor;
+default: boolean;
+};
+focused: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>> & Readonly<{
+onClick?: (...args: any[]) => any;
+}>, {
+disable: boolean;
+active: boolean;
+clickable: boolean;
+dense: boolean;
+insetLevel: number;
+manualFocus: boolean;
+focused: boolean;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtItemLabel: DefineComponent<ExtractPropTypes<    {
+overline: {
+type: BooleanConstructor;
+default: boolean;
+};
+caption: {
+type: BooleanConstructor;
+default: boolean;
+};
+header: {
+type: BooleanConstructor;
+default: boolean;
+};
+lines: {
+type: NumberConstructor;
+default: number;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
+overline: {
+type: BooleanConstructor;
+default: boolean;
+};
+caption: {
+type: BooleanConstructor;
+default: boolean;
+};
+header: {
+type: BooleanConstructor;
+default: boolean;
+};
+lines: {
+type: NumberConstructor;
+default: number;
+};
+}>> & Readonly<{}>, {
+overline: boolean;
+caption: boolean;
+header: boolean;
+lines: number;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtItemSection: DefineComponent<ExtractPropTypes<    {
+avatar: {
+type: BooleanConstructor;
+default: boolean;
+};
+thumbnail: {
+type: BooleanConstructor;
+default: boolean;
+};
+side: {
+type: BooleanConstructor;
+default: boolean;
+};
+top: {
+type: BooleanConstructor;
+default: boolean;
+};
+noWrap: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
+avatar: {
+type: BooleanConstructor;
+default: boolean;
+};
+thumbnail: {
+type: BooleanConstructor;
+default: boolean;
+};
+side: {
+type: BooleanConstructor;
+default: boolean;
+};
+top: {
+type: BooleanConstructor;
+default: boolean;
+};
+noWrap: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>> & Readonly<{}>, {
+side: boolean;
+avatar: boolean;
+thumbnail: boolean;
+top: boolean;
+noWrap: boolean;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
 export const CdmtLayout: DefineComponent<ExtractPropTypes<    {
 view: {
 type: StringConstructor;
@@ -382,6 +552,50 @@ default: boolean;
 }>> & Readonly<{}>, {
 view: string;
 container: boolean;
+}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
+
+// @public
+export const CdmtList: DefineComponent<ExtractPropTypes<    {
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+dense: {
+type: BooleanConstructor;
+default: boolean;
+};
+separator: {
+type: BooleanConstructor;
+default: boolean;
+};
+padding: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>, () => VNode<RendererNode, RendererElement, {
+[key: string]: any;
+}>, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
+bordered: {
+type: BooleanConstructor;
+default: boolean;
+};
+dense: {
+type: BooleanConstructor;
+default: boolean;
+};
+separator: {
+type: BooleanConstructor;
+default: boolean;
+};
+padding: {
+type: BooleanConstructor;
+default: boolean;
+};
+}>> & Readonly<{}>, {
+bordered: boolean;
+dense: boolean;
+separator: boolean;
+padding: boolean;
 }, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
 // @public

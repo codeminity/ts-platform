@@ -298,6 +298,146 @@ export class CdmtInput extends LitElement {
 export type CdmtInputType = 'text' | 'email' | 'password';
 
 // @public
+export class CdmtItem extends LitElement {
+    constructor();
+    // (undocumented)
+    active: boolean;
+    // (undocumented)
+    clickable: boolean;
+    // (undocumented)
+    connectedCallback(): void;
+    // (undocumented)
+    dense: boolean;
+    // (undocumented)
+    disable: boolean;
+    // (undocumented)
+    disconnectedCallback(): void;
+    // (undocumented)
+    focused: boolean;
+    // (undocumented)
+    insetLevel: number;
+    // (undocumented)
+    manualFocus: boolean;
+    // (undocumented)
+    static properties: {
+        disable: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        active: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        clickable: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        dense: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        insetLevel: {
+            type: NumberConstructor;
+            attribute: string;
+        };
+        manualFocus: {
+            type: BooleanConstructor;
+            attribute: string;
+        };
+        focused: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+}
+
+// @public
+export class CdmtItemLabel extends LitElement {
+    constructor();
+    // (undocumented)
+    caption: boolean;
+    // (undocumented)
+    header: boolean;
+    // (undocumented)
+    lines: number;
+    // (undocumented)
+    overline: boolean;
+    // (undocumented)
+    static properties: {
+        overline: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        caption: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        header: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        lines: {
+            type: NumberConstructor;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    updated(changed: Map<string, unknown>): void;
+}
+
+// @public
+export class CdmtItemSection extends LitElement {
+    constructor();
+    // (undocumented)
+    avatar: boolean;
+    // (undocumented)
+    noWrap: boolean;
+    // (undocumented)
+    static properties: {
+        avatar: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        thumbnail: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        side: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        top: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        noWrap: {
+            type: BooleanConstructor;
+            reflect: boolean;
+            attribute: string;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    side: boolean;
+    // (undocumented)
+    static styles: CSSResult;
+    // (undocumented)
+    thumbnail: boolean;
+    // (undocumented)
+    top: boolean;
+}
+
+// @public
 export class CdmtLayout extends LitElement {
     constructor();
     // (undocumented)
@@ -324,6 +464,42 @@ export class CdmtLayout extends LitElement {
     updated(changed: Map<string, unknown>): void;
     // (undocumented)
     view: string;
+}
+
+// @public
+export class CdmtList extends LitElement {
+    constructor();
+    // (undocumented)
+    bordered: boolean;
+    // (undocumented)
+    dense: boolean;
+    // (undocumented)
+    padding: boolean;
+    // (undocumented)
+    static properties: {
+        bordered: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        dense: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        separator: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+        padding: {
+            type: BooleanConstructor;
+            reflect: boolean;
+        };
+    };
+    // (undocumented)
+    render(): TemplateResult<1>;
+    // (undocumented)
+    separator: boolean;
+    // (undocumented)
+    static styles: CSSResult;
 }
 
 // @public
