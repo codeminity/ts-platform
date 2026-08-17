@@ -16,25 +16,22 @@ vi.mock('./lib/run-command', async (importOriginal) => {
   }
 })
 
-// CHECK_STEPS' real Mutation Testing/Lint/Typecheck/Lit CSS
-// Validation/Dependency Architecture entries call the real
-// runScopedMutationTesting/runScopedLint/runScopedTypecheck/runIfRelevant —
-// without these mocks, exercising CHECK_STEPS directly (e.g. "defaults to
-// CHECK_STEPS") would run real getAffectedScope()/hasRelevantChanges()
-// git/turbo commands as a side effect of running the unit test.
-vi.mock('./test-mutation', () => ({ runScopedMutationTesting: vi.fn() }))
+// CHECK_STEPS' real Lint/Typecheck/Lit CSS Validation/Dependency
+// Architecture entries call the real
+// runScopedLint/runScopedTypecheck/runIfRelevant — without these mocks,
+// exercising CHECK_STEPS directly (e.g. "defaults to CHECK_STEPS") would
+// run real getAffectedScope()/hasRelevantChanges() git/turbo commands as a
+// side effect of running the unit test.
 vi.mock('./lint', () => ({ runScopedLint: vi.fn() }))
 vi.mock('./typecheck', () => ({ runScopedTypecheck: vi.fn() }))
 vi.mock('./lib/run-if-relevant', () => ({ runIfRelevant: vi.fn() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
-const { runScopedMutationTesting } = await import('./test-mutation')
 const { runScopedLint } = await import('./lint')
 const { runScopedTypecheck } = await import('./typecheck')
 const { runIfRelevant } = await import('./lib/run-if-relevant')
 
 const mockedRunCommand = vi.mocked(runCommand)
-const mockedRunScopedMutationTesting = vi.mocked(runScopedMutationTesting)
 const mockedRunScopedLint = vi.mocked(runScopedLint)
 const mockedRunScopedTypecheck = vi.mocked(runScopedTypecheck)
 const mockedRunIfRelevant = vi.mocked(runIfRelevant)
@@ -42,7 +39,6 @@ const mockedRunIfRelevant = vi.mocked(runIfRelevant)
 beforeEach(() => {
   mockedRunCommand.mockClear()
   mockedRunIfRelevant.mockClear()
-  mockedRunScopedMutationTesting.mockClear()
   mockedRunScopedLint.mockClear()
   mockedRunScopedTypecheck.mockClear()
 })
@@ -99,19 +95,17 @@ describe('runFullCheck', () => {
 
   it('defaults to CHECK_STEPS when no steps are given', async () => {
     mockedRunCommand.mockResolvedValue(undefined)
-    mockedRunScopedMutationTesting.mockResolvedValue(undefined)
     mockedRunScopedLint.mockResolvedValue(undefined)
     mockedRunScopedTypecheck.mockResolvedValue(undefined)
     mockedRunIfRelevant.mockResolvedValue(undefined)
 
     const results = await runFullCheck()
 
-    // Every step except Mutation Testing/Lint/Typecheck/Lit CSS
-    // Validation/Dependency Architecture (which use their own in-process
-    // `run` instead of the generic `pnpm run <script>` path — see
-    // CHECK_STEPS) goes through runCommand directly.
-    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 5)
-    expect(mockedRunScopedMutationTesting).toHaveBeenCalledTimes(1)
+    // Every step except Lint/Typecheck/Lit CSS Validation/Dependency
+    // Architecture (which use their own in-process `run` instead of the
+    // generic `pnpm run <script>` path — see CHECK_STEPS) goes through
+    // runCommand directly.
+    expect(mockedRunCommand).toHaveBeenCalledTimes(CHECK_STEPS.length - 4)
     expect(mockedRunScopedLint).toHaveBeenCalledTimes(1)
     expect(mockedRunScopedTypecheck).toHaveBeenCalledTimes(1)
     expect(mockedRunIfRelevant).toHaveBeenCalledTimes(2)
@@ -132,18 +126,13 @@ describe('runFullCheck', () => {
 
   it("CHECK_STEPS' scoped entries forward the scheduler's own signal to their run() function", async () => {
     mockedRunCommand.mockResolvedValue(undefined)
-    mockedRunScopedMutationTesting.mockResolvedValue(undefined)
     mockedRunScopedLint.mockResolvedValue(undefined)
     mockedRunScopedTypecheck.mockResolvedValue(undefined)
     mockedRunIfRelevant.mockResolvedValue(undefined)
 
     await runFullCheck()
 
-    for (const mockedRun of [
-      mockedRunScopedMutationTesting,
-      mockedRunScopedLint,
-      mockedRunScopedTypecheck
-    ]) {
+    for (const mockedRun of [mockedRunScopedLint, mockedRunScopedTypecheck]) {
       const [signal] = mockedRun.mock.calls.at(0) ?? []
       expect(signal).toBeInstanceOf(AbortSignal)
     }

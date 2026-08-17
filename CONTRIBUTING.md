@@ -72,9 +72,7 @@ The `core → adapter` direction and circular dependencies aren't just documente
   (`packages/**/src`) — any new file added there is mutation-tested
   automatically, no config edits needed. `scripts/` is deliberately excluded
   — see [DECISIONS.md](./DECISIONS.md#adr-007-mutation-testing-scope)
-- run `pnpm run test:mutation` before relying on 100% coverage as proof a new
-  test actually verifies behavior — coverage alone doesn't catch e.g. a
-  missing `?.` or an off-by-one that no test's inputs happen to expose
+- mutation testing runs nightly in CI (see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow)), not locally — 100% coverage alone doesn't prove a new test actually verifies behavior (it doesn't catch e.g. a missing `?.` or an off-by-one that no test's inputs happen to expose), so when a nightly run reports a survived mutant, write a test for the exact file/line it names, then verify locally with `pnpm exec stryker run stryker.config.ts --mutate <path/to/file.ts>` (scoped to just that file) before pushing
 - a mutant may legitimately be unkillable (e.g. a redundant `?.` inside a
   catch that already swallows the same failure) — mark it with
   `// Stryker disable next-line <Mutator>: <reason>` instead of writing a
@@ -200,13 +198,13 @@ If a publish succeeds on npm but the tag/GitHub Release don't appear, `release.y
 
 ## Full Local Check
 
-`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus mutation testing and browser e2e tests (both otherwise separate/manual):
+`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus browser e2e tests (otherwise a separate job there). Mutation testing is deliberately not included — it runs nightly in its own CI workflow instead, see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow):
 
 ```bash
 pnpm run full-check
 ```
 
-It does not stop at the first failure — every check runs regardless, and a summary at the end shows what passed and what didn't, so one run surfaces everything wrong instead of one problem at a time. This is slow (mutation testing and e2e are included); reach for the individual `pnpm run validate:*` / `pnpm test` scripts during normal development, and run the full thing before opening a PR.
+It does not stop at the first failure — every check runs regardless, and a summary at the end shows what passed and what didn't, so one run surfaces everything wrong instead of one problem at a time. This is slow (e2e is included); reach for the individual `pnpm run validate:*` / `pnpm test` scripts during normal development, and run the full thing before opening a PR.
 
 ---
 

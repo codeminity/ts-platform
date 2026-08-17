@@ -1,7 +1,6 @@
 import { CommandCancelledError, runCommand } from './lib/run-command'
 import { runIfRelevant } from './lib/run-if-relevant'
 import { runScopedLint } from './lint'
-import { runScopedMutationTesting } from './test-mutation'
 import { runScopedTypecheck } from './typecheck'
 
 export interface CheckStep {
@@ -18,8 +17,10 @@ export interface CheckStep {
   run?: (signal: AbortSignal) => Promise<void>
 }
 
-// Mirrors ci.yml's "Test / Build / Lint" job checks, plus the slow checks
-// (mutation, e2e) that only run manually / via separate jobs there.
+// Mirrors ci.yml's "Test / Build / Lint" job checks, plus the slow e2e
+// checks that only run via a separate job there. Mutation testing is
+// deliberately not part of this list at all — see DECISIONS.md ADR-017 for
+// why it moved to a standalone nightly CI workflow instead.
 // Changeset Required (changesets.yml) is folded in here too, right after
 // install, since it's cheap and exercises the changesets CLI's own
 // dependencies (e.g. js-yaml via read-yaml-file) - a path nothing else in
@@ -28,10 +29,9 @@ export interface CheckStep {
 //
 // Execution order here is NOT the same as run order — see runFullCheck.
 // Install always runs alone, first. Everything else runs concurrently
-// except the 3 steps that need Build's dist/ output (declared via
-// dependsOn), which wait for it specifically — not for slower unrelated
-// siblings like Mutation Testing, which is by far the longest single step
-// and deliberately isn't a dependency of anything.
+// except the steps that need Build's dist/ output (declared via
+// dependsOn), which wait for it specifically — not for other slower
+// unrelated siblings, none of which are a dependency of anything.
 // Steps below marked `dependsOn: ['Build']` all share the same real cause,
 // confirmed by directly emptying a package's dist/ and watching what each
 // command actually does (not inferred from reading the command's own code):
@@ -43,7 +43,7 @@ export interface CheckStep {
 // Running one of these concurrently with Build risks two different failure
 // shapes depending on the command: a loud crash (Cannot find module) for
 // anything that does real ESM resolution (Test (coverage), API Exports
-// Validation, Mutation Testing), or a *silent wrong result* for anything
+// Validation), or a *silent wrong result* for anything
 // type-aware (Lint's type-checked ESLint rules, Typecheck, Node Module
 // Resolution) — confirmed directly: with @codeminity/request-core's dist/
 // removed, ESLint reported 9 fabricated "unsafe access on unresolvable
@@ -107,35 +107,6 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Document Validation', args: ['run', 'validate:docs'], dependsOn: ['Build'] },
   { name: 'Verify Packages', args: ['run', 'verify:packages'], dependsOn: ['Build'] },
   { name: 'Bundle Size', args: ['run', 'validate:size'], dependsOn: ['Build'] },
-  // Also used to need explicit protection from Build/Test (coverage)
-  // racing over dist/ and coverage/ mid-write via Stryker's sandbox
-  // blindly copying the whole project — fixed at the root via
-  // stryker.config.ts's ignorePatterns, so the only reason this still
-  // depends on Build is the same cross-package one as everything else here
-  // (a mutated package that imports another workspace package needs that
-  // package's real dist to run its own tests at all).
-  //
-  // Deliberately `run: runScopedMutationTesting` (in-process) instead of
-  // `args: ['run', 'test:mutation']` (a nested `pnpm run` spawned from
-  // *inside* an already-spawned child): a fail-fast kill only reaches
-  // whatever process tree the AbortSignal was actually attached to.
-  // Routing through a second, independently-spawned `pnpm run` process
-  // meant the real Stryker process — spawned by *that* child, with no
-  // signal of its own — could come into existence in the exact window
-  // between the outer kill firing and taskkill's tree snapshot, and survive
-  // as an orphan (confirmed directly: a real fail-fast run left 15 live
-  // Stryker worker processes running for minutes after `pnpm run
-  // full-check` itself had already reported the step as cancelled and
-  // exited). Calling runScopedMutationTesting(signal) here means the one
-  // process it does still need to spawn (Stryker itself) is governed by
-  // the *same* signal this step's own cancellation uses, with no
-  // unmonitored hop in between.
-  {
-    name: 'Mutation Testing',
-    args: ['run', 'test:mutation'],
-    dependsOn: ['Build'],
-    run: runScopedMutationTesting
-  },
   { name: 'Browser E2E', args: ['run', 'test:e2e'], dependsOn: ['Build'] }
 ]
 

@@ -1,0 +1,55 @@
+name: Nightly Mutation Testing
+
+# A full, unscoped Stryker sweep runs on a schedule instead of locally or as
+# part of pnpm run full-check — see DECISIONS.md ADR-017. workflow_dispatch
+# lets this be triggered on demand too (verifying the workflow itself, or
+# checking a specific change sooner than the next scheduled run).
+on:
+  schedule:
+    - cron: '0 2 * * *'
+      timezone: 'Asia/Tehran'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        run: corepack install -g pnpm@11.22.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Mutation testing
+        run: pnpm run test:mutation
+
+      # Uploaded regardless of the step above passing or failing — a failed
+      # run is exactly when the report (which mutant survived, in which
+      # file, at which line) is needed most.
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mutation-report
+          path: reports/mutation
+          retention-days: 14
