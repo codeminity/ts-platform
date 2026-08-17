@@ -13,7 +13,8 @@ export interface CheckStep {
   // dependsOn (other than Install itself) run concurrently.
   dependsOn?: string[]
   // When present, run in-process instead of `runCommand('pnpm', args,
-  // {signal})` — see the Mutation Testing step below for why this exists.
+  // {signal})` — see the Lint/Typecheck steps below, and DECISIONS.md
+  // ADR-012's third bug, for why this exists.
   run?: (signal: AbortSignal) => Promise<void>
 }
 
@@ -57,8 +58,8 @@ export const CHECK_STEPS: CheckStep[] = [
   { name: 'Audit Dependencies', args: ['audit', '--audit-level=moderate'] },
   { name: 'Changeset Required', args: ['run', 'validate:changeset'] },
   { name: 'Build', args: ['run', 'build'] },
-  // Deliberately `run:` (in-process, same reasoning as Lint/Typecheck/
-  // Mutation Testing) instead of `args:`: these two are genuinely
+  // Deliberately `run:` (in-process, same reasoning as Lint/Typecheck
+  // below) instead of `args:`: these two are genuinely
   // self-contained — no cross-package workspace dependency to reason
   // about, so a plain "did anything under this path change" check (via
   // hasRelevantChanges, not the heavier package-graph-aware
@@ -77,18 +78,19 @@ export const CHECK_STEPS: CheckStep[] = [
     args: ['run', 'validate:deps'],
     run: (signal) => runIfRelevant('Dependency Architecture', 'packages/', 'validate:deps', signal)
   },
-  // Deliberately `run:` (in-process), same reasoning as Mutation Testing
-  // below: `pnpm lint`/`pnpm typecheck` are themselves now the *scoped*
-  // commands (scripts/lint.ts, scripts/typecheck.ts) — each computes which
-  // packages/apps are actually affected via getAffectedScope() and narrows
-  // the real lint/typecheck run to just those, falling back to the full,
-  // unscoped `lint:full`/`typecheck:full` whenever a change lands somewhere
+  // Deliberately `run:` (in-process): `pnpm lint`/`pnpm typecheck` are
+  // themselves now the *scoped* commands (scripts/lint.ts,
+  // scripts/typecheck.ts) — each computes which packages/apps are actually
+  // affected via getAffectedScope() and narrows the real lint/typecheck run
+  // to just those, falling back to the full, unscoped
+  // `lint:full`/`typecheck:full` whenever a change lands somewhere
   // Turborepo's package graph can't attribute to a specific package/app
   // (root config, scripts/). Routing that through a nested `pnpm run
   // lint`/`pnpm run typecheck` spawned from inside an already-spawned child
-  // would reintroduce the exact orphaned-process class of bug fixed for
-  // Mutation Testing — the process each one still spawns needs the same
-  // signal this step's own cancellation uses, with no unmonitored hop.
+  // would reintroduce the exact orphaned-process class of bug described in
+  // DECISIONS.md ADR-012's third bug — the process each one still spawns
+  // needs the same signal this step's own cancellation uses, with no
+  // unmonitored hop.
   { name: 'Lint', args: ['run', 'lint'], dependsOn: ['Build'], run: runScopedLint },
   { name: 'Test (coverage)', args: ['run', 'test:coverage'], dependsOn: ['Build'] },
   {
