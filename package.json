@@ -17,7 +17,7 @@
   "engines": {
     "node": "^22.13.0 || >=24.0.0"
   },
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -67,9 +67,9 @@
     "@microsoft/api-extractor": "^7.58.12",
     "@playwright/test": "^1.62.1",
     "@size-limit/preset-small-lib": "^13.0.3",
-    "@stryker-mutator/api": "^9.6.1",
-    "@stryker-mutator/core": "^9.6.1",
-    "@stryker-mutator/vitest-runner": "^9.6.1",
+    "@stryker-mutator/api": "^10.0.0",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "4.1.10",
     "dependency-cruiser": "^18.2.0",
@@ -89,7 +89,7 @@
     "size-limit": "^13.0.3",
     "socket": "^1.1.157",
     "tsx": "^4.23.12",
-    "turbo": "^2.10.9",
+    "turbo": "^2.10.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0",
     "vitest": "4.1.10"
