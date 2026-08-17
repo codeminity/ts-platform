@@ -30,25 +30,24 @@ describe('CdmtPageContainer', () => {
     expect(assigned).toBe('content')
   })
 
-  it('offsets from the layout header/footer/drawer CSS vars via padding', async () => {
-    el.style.setProperty('--cdmt-layout-header-height', '64px')
-    el.style.setProperty('--cdmt-layout-footer-height', '48px')
-    el.style.setProperty('--cdmt-layout-drawer-left-width', '300px')
-    el.style.setProperty('--cdmt-layout-drawer-right-width', '0px')
+  it('applies no padding of its own by default — offsetting is entirely owned by <cdmt-layout>', () => {
+    // <cdmt-layout> sets padding-top/bottom/left/right directly as an
+    // inline style (see CdmtLayout#recomputeOffsets) rather than this
+    // component reading a var() itself — a standalone <cdmt-page-container>
+    // used outside a <cdmt-layout> has no offset of its own to apply.
+    expect(el.style.paddingTop).toBe('')
+    expect(el.style.paddingBottom).toBe('')
+    expect(el.style.paddingLeft).toBe('')
+    expect(el.style.paddingRight).toBe('')
+  })
+
+  it('reflects whatever padding a parent sets directly as an inline style', async () => {
+    el.style.paddingTop = '64px'
+    el.style.paddingLeft = '300px'
     await el.updateComplete
 
     const styles = getComputedStyle(el)
     expect(styles.paddingTop).toBe('64px')
-    expect(styles.paddingBottom).toBe('48px')
     expect(styles.paddingLeft).toBe('300px')
-    expect(styles.paddingRight).toBe('0px')
-  })
-
-  it('defaults every offset to 0 when no layout vars are set', () => {
-    const styles = getComputedStyle(el)
-    expect(styles.paddingTop).toBe('0px')
-    expect(styles.paddingBottom).toBe('0px')
-    expect(styles.paddingLeft).toBe('0px')
-    expect(styles.paddingRight).toBe('0px')
   })
 })

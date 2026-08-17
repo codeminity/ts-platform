@@ -5,7 +5,7 @@ import { pageStyles } from './page.styles.js'
 /**
  * Computes the page's own inline style from the layout offset it inherits
  * (`heightOffset`: combined fixed header + fixed footer height, in px).
- * Overrides the default `min-height: calc(100vh - <offset>)` behavior.
+ * Overrides the default `min-height: 100%` behavior.
  *
  * @public
  */
@@ -13,12 +13,13 @@ export type CdmtPageStyleFn = (heightOffset: number) => Record<string, string>
 
 /**
  * `<cdmt-page>` — the main content area inside a `<cdmt-page-container>`.
- * Fills the remaining viewport height by default, reading
- * `--cdmt-layout-header-height`/`--cdmt-layout-footer-height` (set by the
- * nearest `<cdmt-layout>`) via plain CSS `var()` — reactive to header/footer
- * resizing with no JS observation needed. `styleFn`, when set, computes a
- * one-off inline style instead (from whatever the offset is at that moment)
- * — an escape hatch for custom layouts, not continuously reactive.
+ * Fills its parent `<cdmt-page-container>`'s own real height by default
+ * (`min-height: 100%` — that parent's own height is already correct,
+ * whether from a fixed header/footer's padding or a docked one's normal
+ * flex flow, so there's nothing left for this component to independently
+ * re-derive). `styleFn`, when set, computes a one-off inline style instead
+ * (from whatever the fixed header/footer offset is at that moment) — an
+ * escape hatch for custom layouts, not continuously reactive.
  *
  * @public
  */

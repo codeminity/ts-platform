@@ -7,16 +7,21 @@ export const headerStyles = css`
     display: block;
     box-sizing: border-box;
     background: ${themeVar('colorSurface')};
-    transition-property: transform;
-    transition-duration: ${themeVar('transitionDuration')};
+    /* left/right/margin-left/margin-right (the docked-vs-fixed horizontal
+       inset from a corner-claiming drawer) are set directly by
+       <cdmt-layout> as an inline style, not via var() here — see
+       CdmtLayout#applyInset's own comment for why (the same Chromium
+       var()-derived-property transition freeze documented on
+       <cdmt-page-container>, DECISIONS.md#adr-006). That's what makes it
+       safe to list them here. */
+    transition-property: transform, left, right, margin-left, margin-right;
+    transition-duration: var(--cdmt-layout-transition-duration, ${themeVar('transitionDuration')});
     transition-timing-function: ${themeVar('transitionEasing')};
   }
 
   :host([data-cdmt-fixed]) {
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 2000;
   }
 

@@ -5,46 +5,85 @@ import { layoutStyles } from './layout.styles.js'
 import type { CdmtDrawer } from '../drawer/drawer.js'
 import type { CdmtFooter } from '../footer/footer.js'
 import type { CdmtHeader } from '../header/header.js'
-
-interface ViewConfig {
-  header: boolean
-  footer: boolean
-  drawerLeft: boolean
-  drawerRight: boolean
-}
+import type { CdmtPageContainer } from '../page-container/page-container.js'
 
 /**
  * `<cdmt-layout>` — the outer coordinator: header/footer/drawer/page-container
  * are placed directly as children (any order, like real HTML — no explicit
- * `slot` attributes needed, this component auto-routes each by tag name),
- * and it decides which are `position: fixed` from the `view` string.
+ * `slot` attributes needed, this component auto-routes each by tag name).
  *
- * `view` is an 11-character string — 3 for the header row, a space, 3 for
- * the middle row, a space, 3 for the footer row (default `'hhh lpr fff'`).
- * Uppercase = fixed, lowercase = static (scrolls with the page). This
- * simplified parser reads the header/footer rows as "fixed if any letter in
- * that row is uppercase" and the middle row's 1st/3rd characters as the
- * left/right drawer's fixedness — covering real-world configurations
- * (default, and "everything fixed") without the full per-column generality
- * Quasar's notation technically allows.
+ * Eight plain boolean attributes configure it — no encoded string to parse.
+ * `fixed-header`/`fixed-footer`/`fixed-left-drawer`/`fixed-right-drawer`
+ * decide which pieces are `position: fixed` (pinned to the viewport) versus
+ * docked (scrolls with the page, default). `header-over-left-drawer`/
+ * `header-over-right-drawer`/`footer-over-left-drawer`/
+ * `footer-over-right-drawer` (default `true`, matching every one of them
+ * being unclaimed-by-a-drawer out of the box) decide, independently of
+ * fixedness, which element visually claims each of the four corners where a
+ * header/footer row meets a side drawer's column: `true` means the header/
+ * footer extends the full width there (a fixed drawer on that side starts
+ * below/above it instead of reaching that edge); `false` cedes the corner
+ * to the drawer (the header/footer insets itself instead, and a fixed
+ * drawer on that side extends all the way to that edge). These flags only
+ * have a visible effect once the corresponding drawer is actually fixed —
+ * a docked drawer never reaches into a header/footer's row to begin with.
  *
  * Measures its header/footer/docked-drawer children's real rendered size
  * (via `ResizeObserver`) and exposes it as `--cdmt-layout-*` CSS custom
- * properties, which `<cdmt-page-container>`/`<cdmt-page>` read to offset
- * their content — see those components' own doc comments.
+ * properties, which `<cdmt-page-container>`/`<cdmt-page>`/`<cdmt-header>`/
+ * `<cdmt-footer>`/`<cdmt-drawer>` read to offset their own content — see
+ * those components' own doc comments.
+ *
+ * `transition-duration` optionally overrides the theme's own token for just
+ * this layout's header/footer/drawer transitions — see that property's own
+ * doc comment.
  *
  * @public
  */
 export class CdmtLayout extends LitElement {
   static override properties = {
-    view: { type: String },
-    container: { type: Boolean, reflect: true }
+    fixedHeader: { type: Boolean, attribute: 'fixed-header', reflect: true },
+    fixedFooter: { type: Boolean, attribute: 'fixed-footer', reflect: true },
+    fixedLeftDrawer: { type: Boolean, attribute: 'fixed-left-drawer', reflect: true },
+    fixedRightDrawer: { type: Boolean, attribute: 'fixed-right-drawer', reflect: true },
+    headerOverLeftDrawer: { type: Boolean, attribute: 'header-over-left-drawer', reflect: true },
+    headerOverRightDrawer: {
+      type: Boolean,
+      attribute: 'header-over-right-drawer',
+      reflect: true
+    },
+    footerOverLeftDrawer: { type: Boolean, attribute: 'footer-over-left-drawer', reflect: true },
+    footerOverRightDrawer: {
+      type: Boolean,
+      attribute: 'footer-over-right-drawer',
+      reflect: true
+    },
+    container: { type: Boolean, reflect: true },
+    transitionDuration: { type: String, attribute: 'transition-duration', reflect: true }
   }
 
   static override styles = layoutStyles
 
-  declare view: string
+  declare fixedHeader: boolean
+  declare fixedFooter: boolean
+  declare fixedLeftDrawer: boolean
+  declare fixedRightDrawer: boolean
+  declare headerOverLeftDrawer: boolean
+  declare headerOverRightDrawer: boolean
+  declare footerOverLeftDrawer: boolean
+  declare footerOverRightDrawer: boolean
   declare container: boolean
+
+  /**
+   * Overrides the theme's `transitionDuration` token for every transition
+   * this layout coordinates — the header/footer's own transitions and the
+   * drawer's open/close slide — keeping them in sync with each other.
+   * Every other themed component (buttons, inputs, etc.) stays on the
+   * theme's own value. Leave unset to use that same theme value here too.
+   *
+   * A CSS `<time>` value, e.g. `'300ms'` or `'0.3s'`.
+   */
+  declare transitionDuration: string | undefined
 
   #resizeObserver = new ResizeObserver(() => {
     this.#recomputeOffsets()
@@ -64,7 +103,14 @@ export class CdmtLayout extends LitElement {
 
   constructor() {
     super()
-    this.view = 'hhh lpr fff'
+    this.fixedHeader = false
+    this.fixedFooter = false
+    this.fixedLeftDrawer = false
+    this.fixedRightDrawer = false
+    this.headerOverLeftDrawer = true
+    this.headerOverRightDrawer = true
+    this.footerOverLeftDrawer = true
+    this.footerOverRightDrawer = true
     this.container = false
   }
 
@@ -86,9 +132,36 @@ export class CdmtLayout extends LitElement {
   }
 
   override updated(changed: Map<string, unknown>): void {
-    if (changed.has('view')) {
-      this.#applyViewConfig()
+    if (changed.has('transitionDuration')) {
+      this.#applyTransitionDuration()
+    }
+    if (
+      changed.has('fixedHeader') ||
+      changed.has('fixedFooter') ||
+      changed.has('fixedLeftDrawer') ||
+      changed.has('fixedRightDrawer')
+    ) {
+      this.#applyFixedStates()
+    }
+    if (
+      changed.has('fixedHeader') ||
+      changed.has('fixedFooter') ||
+      changed.has('fixedLeftDrawer') ||
+      changed.has('fixedRightDrawer') ||
+      changed.has('headerOverLeftDrawer') ||
+      changed.has('headerOverRightDrawer') ||
+      changed.has('footerOverLeftDrawer') ||
+      changed.has('footerOverRightDrawer')
+    ) {
       this.#recomputeOffsets()
+    }
+  }
+
+  #applyTransitionDuration(): void {
+    if (this.transitionDuration) {
+      this.style.setProperty('--cdmt-layout-transition-duration', this.transitionDuration)
+    } else {
+      this.style.removeProperty('--cdmt-layout-transition-duration')
     }
   }
 
@@ -98,34 +171,9 @@ export class CdmtLayout extends LitElement {
 
   #handleChildrenChanged = (): void => {
     this.#routeChildrenToSlots()
-    this.#applyViewConfig()
+    this.#applyFixedStates()
     this.#observeChildren()
     this.#recomputeOffsets()
-  }
-
-  #parseView(): ViewConfig {
-    const parts = this.view.split(' ')
-    // `.split()` always returns at least one element, even for '' — so this
-    // fallback is genuinely unreachable (TypeScript's `noUncheckedIndexedAccess`
-    // still requires one syntactically) — on its own line so the disable
-    // below doesn't also suppress footerRow's (reachable, and tested).
-    // Stryker disable next-line StringLiteral
-    /* v8 ignore next */
-    const headerRow = parts[0] ?? ''
-    // Reachable (view with fewer than 2 parts), but its exact fallback text
-    // is unobservable beyond "isn't shaped like a real row" — startsWith('L')/
-    // endsWith('R') below both come out false for '' or any other short
-    // non-L/R-shaped string alike, so no behavioral test can tell them apart.
-    // Stryker disable next-line StringLiteral
-    const middleRow = parts[1] ?? ''
-    const footerRow = parts[2] ?? ''
-
-    return {
-      header: /[A-Z]/.test(headerRow),
-      footer: /[A-Z]/.test(footerRow),
-      drawerLeft: middleRow.startsWith('L'),
-      drawerRight: middleRow.endsWith('R')
-    }
   }
 
   #routeChildrenToSlots(): void {
@@ -149,17 +197,15 @@ export class CdmtLayout extends LitElement {
     }
   }
 
-  #applyViewConfig(): void {
-    const config = this.#parseView()
-
-    this.#header?.toggleAttribute('data-cdmt-fixed', config.header)
-    this.#footer?.toggleAttribute('data-cdmt-fixed', config.footer)
+  #applyFixedStates(): void {
+    this.#header?.toggleAttribute('data-cdmt-fixed', this.fixedHeader)
+    this.#footer?.toggleAttribute('data-cdmt-fixed', this.fixedFooter)
 
     const leftDrawer = this.#drawer('left')
-    if (leftDrawer) leftDrawer.viewFixed = config.drawerLeft
+    if (leftDrawer) leftDrawer.viewFixed = this.fixedLeftDrawer
 
     const rightDrawer = this.#drawer('right')
-    if (rightDrawer) rightDrawer.viewFixed = config.drawerRight
+    if (rightDrawer) rightDrawer.viewFixed = this.fixedRightDrawer
   }
 
   #observeChildren(): void {
@@ -182,6 +228,10 @@ export class CdmtLayout extends LitElement {
     return this.querySelector('cdmt-footer')
   }
 
+  get #pageContainer(): CdmtPageContainer | null {
+    return this.querySelector('cdmt-page-container')
+  }
+
   #drawer(side: 'left' | 'right'): CdmtDrawer | null {
     for (const drawer of this.querySelectorAll('cdmt-drawer')) {
       if (drawer.side === side) return drawer
@@ -195,19 +245,131 @@ export class CdmtLayout extends LitElement {
     const leftDrawer = this.#drawer('left')
     const rightDrawer = this.#drawer('right')
 
-    const headerHeight = this.#fixedHeight(header)
-    const footerHeight = this.#fixedHeight(footer)
-    const leftWidth = this.#dockedFixedWidth(leftDrawer)
-    const rightWidth = this.#dockedFixedWidth(rightDrawer)
+    const headerFixedHeight = this.#fixedHeight(header)
+    const footerFixedHeight = this.#fixedHeight(footer)
+    const headerRealHeight = this.#realHeight(header)
+    const footerRealHeight = this.#realHeight(footer)
+    const leftDockedFixedWidth = this.#dockedFixedWidth(leftDrawer)
+    const rightDockedFixedWidth = this.#dockedFixedWidth(rightDrawer)
 
-    this.style.setProperty('--cdmt-layout-header-height', `${String(headerHeight)}px`)
-    this.style.setProperty('--cdmt-layout-footer-height', `${String(footerHeight)}px`)
-    this.style.setProperty('--cdmt-layout-drawer-left-width', `${String(leftWidth)}px`)
-    this.style.setProperty('--cdmt-layout-drawer-right-width', `${String(rightWidth)}px`)
+    // <cdmt-page-container>'s own padding — driven purely by fixedness,
+    // unaffected by corner ownership: a fixed header/footer always removes
+    // itself from flow (needs padding to compensate) regardless of which
+    // corners it claims, and a docked-and-fixed drawer always reserves its
+    // own width the same way. Applied as a direct inline style, not a
+    // CSS var() — see #applyInset's own comment for why.
+    const pageContainer = this.#pageContainer
+    if (pageContainer) {
+      pageContainer.style.paddingTop = `${String(headerFixedHeight)}px`
+      pageContainer.style.paddingBottom = `${String(footerFixedHeight)}px`
+      pageContainer.style.paddingLeft = `${String(leftDockedFixedWidth)}px`
+      pageContainer.style.paddingRight = `${String(rightDockedFixedWidth)}px`
+    }
+
+    // <cdmt-header>/<cdmt-footer>'s own horizontal inset: only when the
+    // drawer on that side is actually docked-and-fixed (a docked, non-fixed
+    // drawer never reaches into their row; an overlay/mobile one is
+    // temporary and deliberately allowed to cover them) *and* this
+    // header/footer cedes that specific corner to it. Applied as a direct
+    // inline style, not a CSS var() — see #applyInset's own comment for why.
+    this.#applyInset(
+      header,
+      this.fixedHeader,
+      this.headerOverLeftDrawer ? 0 : leftDockedFixedWidth,
+      this.headerOverRightDrawer ? 0 : rightDockedFixedWidth
+    )
+    this.#applyInset(
+      footer,
+      this.fixedFooter,
+      this.footerOverLeftDrawer ? 0 : leftDockedFixedWidth,
+      this.footerOverRightDrawer ? 0 : rightDockedFixedWidth
+    )
+
+    // <cdmt-drawer>'s own margin-top/margin-bottom, docked (non-fixed) mode
+    // only: a fixed header/footer is removed from normal flow, so the flex
+    // row a docked drawer shares with it starts right at the very
+    // top/bottom of the viewport — <cdmt-page-container> already offsets
+    // its own content for that via padding (above), but a docked drawer has
+    // nothing accounting for it on its own, and would render sliding
+    // underneath the fixed header/footer instead of below/above it. Only
+    // applies while not fixed — a fixed drawer already gets its own
+    // top/bottom inset from its own stylesheet, and doubling it here would
+    // push it too far. Applied as a direct inline style, not a CSS var() —
+    // see #applyInset's own comment for why.
+    this.#applyDockedDrawerMargin(leftDrawer, headerFixedHeight, footerFixedHeight)
+    this.#applyDockedDrawerMargin(rightDrawer, headerFixedHeight, footerFixedHeight)
+
+    // <cdmt-drawer>'s own vertical inset, per side: a *fixed* drawer clears
+    // a header/footer's real space (regardless of the header/footer's own
+    // fixedness — a docked one is still visually there) only when that
+    // header/footer actually claims this drawer's corner; otherwise the
+    // drawer extends all the way to that edge itself.
+    this.style.setProperty(
+      '--cdmt-layout-drawer-left-top-inset',
+      `${String(this.headerOverLeftDrawer ? headerRealHeight : 0)}px`
+    )
+    this.style.setProperty(
+      '--cdmt-layout-drawer-left-bottom-inset',
+      `${String(this.footerOverLeftDrawer ? footerRealHeight : 0)}px`
+    )
+    this.style.setProperty(
+      '--cdmt-layout-drawer-right-top-inset',
+      `${String(this.headerOverRightDrawer ? headerRealHeight : 0)}px`
+    )
+    this.style.setProperty(
+      '--cdmt-layout-drawer-right-bottom-inset',
+      `${String(this.footerOverRightDrawer ? footerRealHeight : 0)}px`
+    )
+  }
+
+  // Sets left/right (fixed mode) or margin-left/margin-right (docked mode)
+  // directly as an inline style, never through a CSS var() — a transition on
+  // a property that also derives its value from an inherited var() token
+  // never re-samples that token in Chromium once the transition starts (see
+  // DECISIONS.md#adr-006, and <cdmt-page-container>'s own doc comment for
+  // where this was first confirmed). Only one pair is ever meaningful at a
+  // time (mirrors header.styles.ts/footer.styles.ts's own fixed-vs-docked
+  // split), but the inactive pair is still reset — a fixed header keeping a
+  // stale inline margin-left from a previous docked state would double-count
+  // that offset on top of `left`.
+  #applyInset(
+    element: (CdmtHeader | CdmtFooter) | null,
+    fixed: boolean,
+    left: number,
+    right: number
+  ): void {
+    if (!element) return
+    element.style.marginLeft = fixed ? '' : `${String(left)}px`
+    element.style.marginRight = fixed ? '' : `${String(right)}px`
+    element.style.left = fixed ? `${String(left)}px` : ''
+    element.style.right = fixed ? `${String(right)}px` : ''
+  }
+
+  #applyDockedDrawerMargin(
+    drawer: CdmtDrawer | null,
+    headerFixedHeight: number,
+    footerFixedHeight: number
+  ): void {
+    if (!drawer) return
+    const fixed = drawer.hasAttribute('data-cdmt-fixed')
+    drawer.style.marginTop = fixed ? '' : `${String(headerFixedHeight)}px`
+    drawer.style.marginBottom = fixed ? '' : `${String(footerFixedHeight)}px`
   }
 
   #fixedHeight(element: (CdmtHeader | CdmtFooter) | null): number {
     if (!element || element.hidden || !element.hasAttribute('data-cdmt-fixed')) return 0
+    return element.getBoundingClientRect().height
+  }
+
+  // Unlike #fixedHeight (0 whenever the element isn't fixed — correct for
+  // <cdmt-page-container>'s own padding, which a docked header/footer
+  // doesn't need at all, since it already pushes page-container down via
+  // normal flex flow), a *fixed* <cdmt-drawer> that's being told to clear a
+  // header/footer's corner needs that header/footer's real screen space
+  // either way: a docked one is still visually there, just not removed
+  // from flow.
+  #realHeight(element: (CdmtHeader | CdmtFooter) | null): number {
+    if (!element || element.hidden) return 0
     return element.getBoundingClientRect().height
   }
 

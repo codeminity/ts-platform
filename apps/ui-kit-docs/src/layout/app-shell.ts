@@ -26,11 +26,11 @@ export function mountAppShell(root: HTMLElement): AppShell {
   pageContainer.append(page)
 
   const layout = document.createElement('cdmt-layout')
-  // Header must be fixed ('H') so it stays above the drawer's own fixed
-  // overlay in mobile mode (the drawer always renders as a fixed overlay
-  // there, per its own documented behavior) — otherwise the drawer covers
-  // the header, including its hamburger toggle, making it unclickable.
-  layout.view = 'Hhh lpr fff'
+  // Header must be fixed so it stays above the drawer's own fixed overlay
+  // in mobile mode (the drawer always renders as a fixed overlay there, per
+  // its own documented behavior) — otherwise the drawer covers the header,
+  // including its hamburger toggle, making it unclickable.
+  layout.fixedHeader = true
   layout.append(header, drawer.element, pageContainer)
 
   root.replaceChildren(layout)

@@ -9,13 +9,14 @@ import { pageContainerStyles } from './page-container.styles.js'
  * CSS `var()` on the offsets `<cdmt-layout>` computes — reactive to
  * resizing/showing/hiding with no JS needed here.
  *
- * Deliberately no `transition` on padding — see DECISIONS.md#adr-006: a
- * `transition` on a property that also derives its value from an inherited
- * `var()` token permanently freezes it at its first-computed value in
- * Chromium (confirmed directly: the padding never re-samples the offset
- * after the very first paint, verified in a real browser). Padding updates
- * snap instantly instead, matching every other var()-derived property in
- * this package.
+ * Padding transitions alongside `<cdmt-layout>`'s header/footer/drawer
+ * animations — safely, because `<cdmt-layout>` sets each padding value here
+ * as a direct inline style, not through a `var()`. A `transition` on a
+ * property that also derives its value from an inherited `var()` token
+ * permanently freezes it at its first-computed value in Chromium (confirmed
+ * directly while first building this component); setting the value as a
+ * plain inline style instead — the same technique `<cdmt-drawer>` already
+ * uses for its own width — sidesteps that entirely.
  *
  * @public
  */

@@ -13,11 +13,34 @@ import { defineComponent, h } from 'vue'
 export const CdmtLayout = defineComponent({
   name: 'CdmtLayout',
   props: {
-    view: { type: String, default: 'hhh lpr fff' },
-    container: { type: Boolean, default: false }
+    fixedHeader: { type: Boolean, default: false },
+    fixedFooter: { type: Boolean, default: false },
+    fixedLeftDrawer: { type: Boolean, default: false },
+    fixedRightDrawer: { type: Boolean, default: false },
+    headerOverLeftDrawer: { type: Boolean, default: true },
+    headerOverRightDrawer: { type: Boolean, default: true },
+    footerOverLeftDrawer: { type: Boolean, default: true },
+    footerOverRightDrawer: { type: Boolean, default: true },
+    container: { type: Boolean, default: false },
+    transitionDuration: { type: String, default: undefined }
   },
   setup(props, { slots }) {
     return () =>
-      h('cdmt-layout', { view: props.view, container: props.container }, slots.default?.())
+      h(
+        'cdmt-layout',
+        {
+          fixedHeader: props.fixedHeader,
+          fixedFooter: props.fixedFooter,
+          fixedLeftDrawer: props.fixedLeftDrawer,
+          fixedRightDrawer: props.fixedRightDrawer,
+          headerOverLeftDrawer: props.headerOverLeftDrawer,
+          headerOverRightDrawer: props.headerOverRightDrawer,
+          footerOverLeftDrawer: props.footerOverLeftDrawer,
+          footerOverRightDrawer: props.footerOverRightDrawer,
+          container: props.container,
+          transitionDuration: props.transitionDuration
+        },
+        slots.default?.()
+      )
   }
 })

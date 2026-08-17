@@ -447,12 +447,70 @@ export class CdmtLayout extends LitElement {
     // (undocumented)
     disconnectedCallback(): void;
     // (undocumented)
+    fixedFooter: boolean;
+    // (undocumented)
+    fixedHeader: boolean;
+    // (undocumented)
+    fixedLeftDrawer: boolean;
+    // (undocumented)
+    fixedRightDrawer: boolean;
+    // (undocumented)
+    footerOverLeftDrawer: boolean;
+    // (undocumented)
+    footerOverRightDrawer: boolean;
+    // (undocumented)
+    headerOverLeftDrawer: boolean;
+    // (undocumented)
+    headerOverRightDrawer: boolean;
+    // (undocumented)
     static properties: {
-        view: {
-            type: StringConstructor;
+        fixedHeader: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        fixedFooter: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        fixedLeftDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        fixedRightDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        headerOverLeftDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        headerOverRightDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        footerOverLeftDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
+        };
+        footerOverRightDrawer: {
+            type: BooleanConstructor;
+            attribute: string;
+            reflect: boolean;
         };
         container: {
             type: BooleanConstructor;
+            reflect: boolean;
+        };
+        transitionDuration: {
+            type: StringConstructor;
+            attribute: string;
             reflect: boolean;
         };
     };
@@ -460,10 +518,9 @@ export class CdmtLayout extends LitElement {
     render(): TemplateResult<1>;
     // (undocumented)
     static styles: CSSResult;
+    transitionDuration: string | undefined;
     // (undocumented)
     updated(changed: Map<string, unknown>): void;
-    // (undocumented)
-    view: string;
 }
 
 // @public
