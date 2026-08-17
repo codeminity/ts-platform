@@ -66,8 +66,10 @@ export function resolveCommand(
 // the actual kill can survive as an orphan (confirmed directly against a
 // real Stryker run: 15 worker processes kept running for minutes after
 // `pnpm run full-check` itself had already reported the step cancelled and
-// exited) — the real fix for that is not spawning an unmonitored child in
-// the first place (see full-check.ts's Mutation Testing step), not
+// exited, back when mutation testing was still one of full-check's own
+// steps — see DECISIONS.md ADR-012's third bug) — the real fix for that is
+// not spawning an unmonitored child in the first place (see
+// full-check.ts's Lint/Typecheck steps for the pattern this led to), not
 // anything killProcessTree itself can guarantee after the fact.
 //
 // POSIX targets `-pid` (the negative form), signaling the whole process

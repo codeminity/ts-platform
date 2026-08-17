@@ -2,9 +2,9 @@ import { getAffectedScope } from './lib/affected-scope'
 import { runCommand } from './lib/run-command'
 
 // `signal`, when given, is forwarded to every process this spawns — see
-// full-check.ts's CHECK_STEPS comment (on Mutation Testing) for why this
-// runs in-process from there instead of via a nested `pnpm run typecheck`:
-// a spawn from *inside* an already-spawned child has no signal of its own,
+// full-check.ts's own `run:` comment on the Lint step for why this runs
+// in-process from there instead of via a nested `pnpm run typecheck`: a
+// spawn from *inside* an already-spawned child has no signal of its own,
 // and a fail-fast kill on the outer process can miss it entirely.
 export async function runScopedTypecheck(signal?: AbortSignal): Promise<void> {
   const scope = await getAffectedScope()

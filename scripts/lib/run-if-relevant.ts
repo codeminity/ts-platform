@@ -8,9 +8,9 @@ import { runCommand } from './run-command'
 // skip the underlying `pnpm run <scriptName>` outright when nothing under
 // `pathPrefix` changed, run it unscoped otherwise. `signal`, when given, is
 // forwarded straight through — this is called in-process (`run:` on the
-// CheckStep, not `args:`) for the same reason Mutation Testing/Lint/
-// Typecheck are: a nested `pnpm run` spawned from an already-spawned child
-// has no signal of its own for a fail-fast kill to reach.
+// CheckStep, not `args:`) for the same reason Lint/Typecheck are: a nested
+// `pnpm run` spawned from an already-spawned child has no signal of its own
+// for a fail-fast kill to reach.
 export async function runIfRelevant(
   label: string,
   pathPrefix: string,

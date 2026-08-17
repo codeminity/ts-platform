@@ -86,11 +86,13 @@ async function computeAffectedScope(
   }
 }
 
-// Unlike getAffectedPackageDirs (mutation testing's own, deliberately
-// packages/-only, always-scoped helper — see its own comment), this covers
-// apps/ too, and falls all the way back to `full` rather than silently
-// scoping to an empty (or wrong) set when a change lands somewhere
-// Turborepo's dependency graph has no visibility into at all.
+// Covers both packages/ and apps/, and falls all the way back to `full`
+// rather than silently scoping to an empty (or wrong) set when a change
+// lands somewhere Turborepo's dependency graph has no visibility into at
+// all. (An earlier, packages/-only sibling of this function, used for
+// mutation testing's own local scoping, existed briefly — removed in
+// DECISIONS.md ADR-017 once mutation testing itself moved off local
+// scoping entirely.)
 //
 // Also falls back to `full` on *any* unexpected failure — most notably,
 // `git diff --name-only origin/main` genuinely fails in CI: `actions/
