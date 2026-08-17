@@ -2,8 +2,16 @@
 
 ## Props
 
-- [x] view (11-character fixed/static notation — see the component's own doc comment for the exact simplified parsing rules)
+- [x] fixed-header
+- [x] fixed-footer
+- [x] fixed-left-drawer
+- [x] fixed-right-drawer
+- [x] header-over-left-drawer
+- [x] header-over-right-drawer
+- [x] footer-over-left-drawer
+- [x] footer-over-right-drawer
 - [x] container
+- [x] transition-duration (no Quasar equivalent — overrides the theme's `transitionDuration` token for just this layout's header/footer/drawer transitions)
 
 ## Slots
 

@@ -267,8 +267,19 @@ export class CdmtDrawer extends LitElement {
     return this.#isMobileMode || this.overlay || (this.mini && this.miniToOverlay) || this.viewFixed
   }
 
+  // Same `#isFixed && !isDocked` distinction `data-cdmt-overlay-fixed`
+  // already uses, and for the same reason: `#isFixed` alone is also true
+  // for a *docked*-and-fixed drawer (a permanent desktop sidebar, via
+  // `view-fixed` from <cdmt-layout>'s `view` string) — not just a genuine
+  // temporary overlay. Missing `!isDocked` here left a docked-fixed
+  // drawer's backdrop invisibly "visible" (opacity 0, but still
+  // `pointer-events: auto`, `position: fixed; inset: 0`) for as long as
+  // the drawer stayed open — which, being permanently docked, is forever —
+  // silently blocking every click on the rest of the page. Confirmed
+  // directly via `document.elementFromPoint`/`shadowRoot.elementFromPoint`
+  // after setting a fixed-docked `view`.
   get #isBackdropVisible(): boolean {
-    return this.modelValue && this.#isFixed
+    return this.modelValue && this.#isFixed && !this.isDocked
   }
 
   #applyModelValue({ initial }: { initial: boolean }): void {
@@ -324,8 +335,10 @@ export class CdmtDrawer extends LitElement {
         class="cdmt-drawer__backdrop ${this.#isBackdropVisible ? 'cdmt-drawer__backdrop--visible' : ''}"
         @click=${this.#handleBackdropClick}
       ></div>
-      <div class="cdmt-drawer__default-slot"><slot></slot></div>
-      <div class="cdmt-drawer__mini-slot"><slot name="mini"></slot></div>
+      <div class="cdmt-drawer__panel">
+        <div class="cdmt-drawer__default-slot"><slot></slot></div>
+        <div class="cdmt-drawer__mini-slot"><slot name="mini"></slot></div>
+      </div>
     `
   }
 }

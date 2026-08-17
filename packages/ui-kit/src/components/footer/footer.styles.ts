@@ -7,16 +7,18 @@ export const footerStyles = css`
     display: block;
     box-sizing: border-box;
     background: ${themeVar('colorSurface')};
-    transition-property: transform;
-    transition-duration: ${themeVar('transitionDuration')};
+    /* Same reasoning as <cdmt-header>'s own equivalent rule: left/right/
+       margin-left/margin-right are set directly by <cdmt-layout> as an
+       inline style, not via var() here — see CdmtLayout#applyInset's own
+       comment for why. */
+    transition-property: transform, left, right, margin-left, margin-right;
+    transition-duration: var(--cdmt-layout-transition-duration, ${themeVar('transitionDuration')});
     transition-timing-function: ${themeVar('transitionEasing')};
   }
 
   :host([data-cdmt-fixed]) {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
     z-index: 2000;
   }
 
