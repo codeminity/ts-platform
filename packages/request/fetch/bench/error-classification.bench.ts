@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest'
 
 import { classifyOutcome } from '../src/errors/outcome-to-event'
-import { createFetchOutcome } from '../src/mocks/create-fetch-outcome'
+import { createFetchOutcome } from '../src/shared/mocks/create-fetch-outcome'
 
 const knownStatusOutcome = createFetchOutcome({ response: new Response(null, { status: 503 }) })
 const unknownStatusOutcome = createFetchOutcome({ response: new Response(null, { status: 418 }) })

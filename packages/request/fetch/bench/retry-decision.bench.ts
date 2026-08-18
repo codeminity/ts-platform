@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest'
 
-import { createFetchOutcome } from '../src/mocks/create-fetch-outcome'
 import { shouldRetry } from '../src/retry/should-retry'
+import { createFetchOutcome } from '../src/shared/mocks/create-fetch-outcome'
 
 import type { RetryConfig } from '../src/retry/retry-config.interface'
 

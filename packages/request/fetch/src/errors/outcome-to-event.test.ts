@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
+import { createFetchOutcome } from '../shared/mocks/create-fetch-outcome.js'
 
 import { classifyOutcome } from './outcome-to-event.js'
 

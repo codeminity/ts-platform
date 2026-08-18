@@ -7,7 +7,7 @@ import {
 } from '@codeminity/request-core/test-utils'
 
 import { handleAuthRequest } from '../src/auth/handle-auth-request'
-import { createRequestConfig } from '../src/mocks/create-request-config'
+import { createRequestConfig } from '../src/shared/mocks/create-request-config'
 
 describe('handleAuthRequest (axios)', () => {
   bench('JWT mode, attaches Authorization header', async () => {

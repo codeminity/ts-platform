@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createAxiosMock } from '../mocks/create-axios.js'
+import { createAxiosMock } from '../shared/mocks/create-axios.js'
 
 import { attachResponseInterceptor } from './attach-response.js'
 import { handleResponseError } from './response-error.js'
