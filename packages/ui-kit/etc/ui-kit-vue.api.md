@@ -742,10 +742,10 @@ export interface UseThemeResult {
 // Warnings were encountered during analysis:
 //
 // src/vue/components/button/CdmtButton.ts:14:1 - (ae-forgotten-export) The symbol "CdmtButtonVariant" needs to be exported by the entry point index.d.ts
-// src/vue/components/drawer/CdmtDrawer.ts:24:1 - (ae-forgotten-export) The symbol "CdmtDrawerSide" needs to be exported by the entry point index.d.ts
-// src/vue/components/drawer/CdmtDrawer.ts:54:23 - (ae-forgotten-export) The symbol "CdmtDrawerBehavior" needs to be exported by the entry point index.d.ts
-// src/vue/components/input/CdmtInput.ts:23:1 - (ae-forgotten-export) The symbol "CdmtInputType" needs to be exported by the entry point index.d.ts
-// src/vue/components/page/CdmtPage.ts:18:1 - (ae-forgotten-export) The symbol "CdmtPageStyleFn" needs to be exported by the entry point index.d.ts
+// src/vue/components/form/input/CdmtInput.ts:23:1 - (ae-forgotten-export) The symbol "CdmtInputType" needs to be exported by the entry point index.d.ts
+// src/vue/components/layout/drawer/CdmtDrawer.ts:24:1 - (ae-forgotten-export) The symbol "CdmtDrawerSide" needs to be exported by the entry point index.d.ts
+// src/vue/components/layout/drawer/CdmtDrawer.ts:54:23 - (ae-forgotten-export) The symbol "CdmtDrawerBehavior" needs to be exported by the entry point index.d.ts
+// src/vue/components/layout/page/CdmtPage.ts:18:1 - (ae-forgotten-export) The symbol "CdmtPageStyleFn" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
