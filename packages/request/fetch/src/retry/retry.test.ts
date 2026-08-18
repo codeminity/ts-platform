@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createFetchOutcome } from '../mocks/create-fetch-outcome.js'
+import { createFetchOutcome } from '../shared/mocks/create-fetch-outcome.js'
 
 import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 

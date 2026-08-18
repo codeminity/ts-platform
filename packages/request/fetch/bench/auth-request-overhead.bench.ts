@@ -7,7 +7,7 @@ import {
 } from '@codeminity/request-core/test-utils'
 
 import { handleAuthRequest } from '../src/auth/handle-auth-request'
-import { createRequestInit } from '../src/mocks/create-request-init'
+import { createRequestInit } from '../src/shared/mocks/create-request-init'
 
 import type { Config } from '../src/shared/config.interface'
 

@@ -8,7 +8,7 @@ import {
 } from '@codeminity/request-core/test-utils'
 
 import { ErrorEventEnum } from '../errors/error-event.enum.js'
-import { createRequestConfig } from '../mocks/create-request-config.js'
+import { createRequestConfig } from '../shared/mocks/create-request-config.js'
 
 import { handleAuthRequest } from './handle-auth-request.js'
 

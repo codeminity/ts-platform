@@ -6,7 +6,7 @@ import {
   createRefreshQueue as createRefreshQueueMock
 } from '@codeminity/request-core/test-utils'
 
-import { createRequestInit } from '../mocks/create-request-init.js'
+import { createRequestInit } from '../shared/mocks/create-request-init.js'
 
 import { handleAuthRequest } from './handle-auth-request.js'
 
