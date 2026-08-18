@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import '../drawer/drawer.js'
-import '../footer/footer.js'
-import '../header/header.js'
-import '../page-container/page-container.js'
+import './drawer/drawer.js'
+import './footer/footer.js'
+import './header/header.js'
+import './page-container/page-container.js'
 import './layout.js'
 
 import type { CdmtLayout } from './layout.js'

@@ -2,10 +2,10 @@ import { LitElement, html } from 'lit'
 
 import { layoutStyles } from './layout.styles.js'
 
-import type { CdmtDrawer } from '../drawer/drawer.js'
-import type { CdmtFooter } from '../footer/footer.js'
-import type { CdmtHeader } from '../header/header.js'
-import type { CdmtPageContainer } from '../page-container/page-container.js'
+import type { CdmtDrawer } from './drawer/drawer.js'
+import type { CdmtFooter } from './footer/footer.js'
+import type { CdmtHeader } from './header/header.js'
+import type { CdmtPageContainer } from './page-container/page-container.js'
 
 /**
  * `<cdmt-layout>` — the outer coordinator: header/footer/drawer/page-container

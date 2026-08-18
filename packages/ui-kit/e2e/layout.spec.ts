@@ -4,8 +4,8 @@ import { bundlePackageForBrowser } from '../../../e2e/browser/fixtures/bundle-pa
 import { startPageServer } from '../../../e2e/browser/fixtures/echo-server'
 
 import type { RunningServer } from '../../../e2e/browser/fixtures/echo-server'
-import type { CdmtDrawer } from '../src/components/drawer/drawer.js'
-import type { CdmtHeader } from '../src/components/header/header.js'
+import type { CdmtDrawer } from '../src/components/layout/drawer/drawer.js'
+import type { CdmtHeader } from '../src/components/layout/header/header.js'
 import type { CdmtLayout } from '../src/components/layout/layout.js'
 import type { Page } from '@playwright/test'
 
