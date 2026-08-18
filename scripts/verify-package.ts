@@ -86,7 +86,7 @@ async function verifyRuntimeImport(
 // exactly the shape a bundler's tree-shaking (driven by package.json's
 // "sideEffects" field) can delete entirely if that field is wrong. A plain
 // Node import (verifyRuntimeImport, above) never tree-shakes, so it can't
-// catch this — only a real bundler run can. See ui-kit/core's own
+// catch this — only a real bundler run can. See this repo's own
 // DECISIONS.md#adr-004-sideeffects-true-not-false for the real bug this
 // exists to catch a regression of.
 export async function verifyTreeShakenSideEffect(

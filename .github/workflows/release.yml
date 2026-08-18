@@ -35,7 +35,7 @@ name: Release
 # `permissions:` grant fixes this — `workflows` isn't even a valid
 # GITHUB_TOKEN permission key). A human's own git push is exempt from this
 # restriction and always works. Confirmed 2026-08-14: this recovery path
-# failed for @codeminity/ui-kit-core@0.1.0 because a later PR (#212, a fix
+# failed for a package's release because a later PR (#212, a fix
 # to this very file) had already moved main's tip past the release commit
 # by the time recovery was attempted — recovered by pushing the tag
 # manually (unsigned, since gitsign's OIDC signing isn't available outside

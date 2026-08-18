@@ -7,7 +7,7 @@
 A collection of production-ready TypeScript packages, published as `@codeminity/*` on npm:
 
 - **HTTP requests** — [`@codeminity/axios`](./packages/request/axios) and [`@codeminity/fetch`](./packages/request/fetch), built on a shared, framework-agnostic core, [`@codeminity/request-core`](./packages/request/core) — with built-in retry logic (exponential backoff, jitter, `Retry-After` support), JWT authentication, and automatic token refresh.
-- **UI components** — [`@codeminity/ui-kit-core`](./packages/ui-kit/core), framework-agnostic Web Components (built with Lit) styled through CSS custom-property design tokens — usable from Vue, React, Angular, or plain HTML.
+- **UI components** — [`@codeminity/ui-kit`](./packages/ui-kit), framework-agnostic Web Components (built with Lit) styled through CSS custom-property design tokens — usable from Vue, React, Angular, or plain HTML.
 
 ts-platform is the universal, modular monorepo platform within the Codeminity ecosystem that hosts them.
 
@@ -51,12 +51,12 @@ No assumptions about environment, framework, or deployment target.
 
 ## Packages
 
-| Package                                               | Version                                                                                                                     | Description                                                                                                                                    |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@codeminity/request-core`](./packages/request/core) | [![npm](https://img.shields.io/npm/v/@codeminity/request-core.svg)](https://www.npmjs.com/package/@codeminity/request-core) | Framework-agnostic request lifecycle engine (auth, refresh coordination, retry orchestration).                                                 |
-| [`@codeminity/axios`](./packages/request/axios)       | [![npm](https://img.shields.io/npm/v/@codeminity/axios.svg)](https://www.npmjs.com/package/@codeminity/axios)               | Axios adapter built on top of `@codeminity/request-core`.                                                                                      |
-| [`@codeminity/fetch`](./packages/request/fetch)       | [![npm](https://img.shields.io/npm/v/@codeminity/fetch.svg)](https://www.npmjs.com/package/@codeminity/fetch)               | Native `fetch` adapter built on top of `@codeminity/request-core`.                                                                             |
-| [`@codeminity/ui-kit-core`](./packages/ui-kit/core)   | [![npm](https://img.shields.io/npm/v/@codeminity/ui-kit-core.svg)](https://www.npmjs.com/package/@codeminity/ui-kit-core)   | Framework-agnostic UI components built as native Web Components (Lit). Live gallery: [ui-kit-docs](https://codeminity.github.io/ui-kit-docs/). |
+| Package                                               | Version                                                                                                                     | Description                                                                                    |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`@codeminity/request-core`](./packages/request/core) | [![npm](https://img.shields.io/npm/v/@codeminity/request-core.svg)](https://www.npmjs.com/package/@codeminity/request-core) | Framework-agnostic request lifecycle engine (auth, refresh coordination, retry orchestration). |
+| [`@codeminity/axios`](./packages/request/axios)       | [![npm](https://img.shields.io/npm/v/@codeminity/axios.svg)](https://www.npmjs.com/package/@codeminity/axios)               | Axios adapter built on top of `@codeminity/request-core`.                                      |
+| [`@codeminity/fetch`](./packages/request/fetch)       | [![npm](https://img.shields.io/npm/v/@codeminity/fetch.svg)](https://www.npmjs.com/package/@codeminity/fetch)               | Native `fetch` adapter built on top of `@codeminity/request-core`.                             |
+| [`@codeminity/ui-kit`](./packages/ui-kit)             | [![npm](https://img.shields.io/npm/v/@codeminity/ui-kit.svg)](https://www.npmjs.com/package/@codeminity/ui-kit)             | Framework-agnostic UI components built as native Web Components (Lit).                         |
 
 Each package has its own README with installation instructions, a quick start, and full documentation.
 
