@@ -11,7 +11,7 @@
 - [x] footer-over-left-drawer
 - [x] footer-over-right-drawer
 - [x] container
-- [x] transition-duration (no Quasar equivalent — overrides the theme's `transitionDuration` token for just this layout's header/footer/drawer transitions)
+- [x] transition-duration (no parity equivalent — overrides the theme's `transitionDuration` token for just this layout's header/footer/drawer transitions)
 
 ## Slots
 
@@ -25,7 +25,7 @@
 
 ## Methods
 
-(none — Quasar's own layout component doesn't expose any either)
+(none)
 
 ## Theming
 

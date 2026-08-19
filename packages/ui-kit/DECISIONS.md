@@ -26,7 +26,7 @@ Architecture Decision Records for `@codeminity/ui-kit`. Each entry: **Context** 
 
 **Consequences:**
 
-- Mirrors the ergonomics of frameworks that already do this well (e.g. Quasar's `Dark.set()`/`toggle()`), but as this package's own framework-agnostic primitive.
+- A stateful singleton with imperative mutators is a familiar, well-understood ergonomic (the same shape as any framework's own dark-mode/theme API), expressed here as this package's own framework-agnostic primitive.
 - `'auto'` mode follows `prefers-color-scheme` live via a `matchMedia` listener, set up once (idempotent — calling `setMode('auto')` twice doesn't double-subscribe).
 - No `typeof window` guards anywhere in `theme-controller.ts` — this package is Lit-based Web Components, which already require a real DOM to load at all (`customElements.define()` throws immediately in plain Node), so a no-DOM environment structurally can never reach this code. Adding the guard back would be untestable dead code, not real safety.
 - `createUIKit()` (the Vue plugin) and `useTheme()` (the Vue composable) are both thin wrappers around this same singleton — Vue-side state and any other access (another framework, a plain script) always agree, because it's the same instance.
