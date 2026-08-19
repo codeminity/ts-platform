@@ -177,7 +177,7 @@ describe('CdmtLayout', () => {
     layout.remove()
   })
 
-  it('marks the matching-side drawer viewFixed from fixedLeftDrawer/fixedRightDrawer', async () => {
+  it('marks the matching-side drawer layoutFixed from fixedLeftDrawer/fixedRightDrawer', async () => {
     const layout = await mountLayout(
       '<cdmt-drawer side="left"></cdmt-drawer><cdmt-drawer side="right"></cdmt-drawer>'
     )
@@ -189,18 +189,18 @@ describe('CdmtLayout', () => {
     layout.fixedRightDrawer = true
     await layout.updateComplete
 
-    expect(leftDrawer?.viewFixed).toBe(true)
-    expect(rightDrawer?.viewFixed).toBe(true)
+    expect(leftDrawer?.layoutFixed).toBe(true)
+    expect(rightDrawer?.layoutFixed).toBe(true)
     layout.remove()
   })
 
-  it('does not mark a drawer viewFixed when its own fixed-left-drawer/right flag is false', async () => {
+  it('does not mark a drawer layoutFixed when its own fixed-left-drawer/right flag is false', async () => {
     const layout = await mountLayout(
       '<cdmt-drawer side="left"></cdmt-drawer><cdmt-drawer side="right"></cdmt-drawer>'
     )
     const drawers = [...layout.querySelectorAll('cdmt-drawer')]
 
-    expect(drawers.every((drawer) => !drawer.viewFixed)).toBe(true)
+    expect(drawers.every((drawer) => !drawer.layoutFixed)).toBe(true)
     layout.remove()
   })
 
@@ -604,7 +604,7 @@ describe('CdmtLayout', () => {
     layout.fixedLeftDrawer = true
     await layout.updateComplete
 
-    expect(drawer.viewFixed).toBe(true)
+    expect(drawer.layoutFixed).toBe(true)
     layout.remove()
   })
 
@@ -615,12 +615,12 @@ describe('CdmtLayout', () => {
     layout.fixedRightDrawer = true
     await layout.updateComplete
 
-    expect(drawer.viewFixed).toBe(true)
+    expect(drawer.layoutFixed).toBe(true)
     layout.remove()
   })
 
   it('recomputes offsets from fixedLeftDrawer alone', async () => {
-    // Deliberately no drawer mounted: a real drawer's own `viewFixed` update
+    // Deliberately no drawer mounted: a real drawer's own `layoutFixed` update
     // (from #applyFixedStates, a separate gate) dispatches its own
     // cdmt-layout-child-change event, which would trigger a recompute via
     // that side channel and mask whether *this* gate actually fired.

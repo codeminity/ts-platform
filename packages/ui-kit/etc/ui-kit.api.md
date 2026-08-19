@@ -59,6 +59,8 @@ export class CdmtDrawer extends LitElement {
     hide(): void;
     get isDocked(): boolean;
     // (undocumented)
+    layoutFixed: boolean;
+    // (undocumented)
     mini: boolean;
     // (undocumented)
     miniToOverlay: boolean;
@@ -126,7 +128,7 @@ export class CdmtDrawer extends LitElement {
             type: BooleanConstructor;
             attribute: string;
         };
-        viewFixed: {
+        layoutFixed: {
             attribute: boolean;
         };
     };
@@ -144,8 +146,6 @@ export class CdmtDrawer extends LitElement {
     toggle(): void;
     // (undocumented)
     updated(changed: Map<string, unknown>): void;
-    // (undocumented)
-    viewFixed: boolean;
     // (undocumented)
     width: number;
     // (undocumented)
