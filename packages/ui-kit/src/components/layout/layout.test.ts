@@ -316,31 +316,103 @@ describe('CdmtLayout', () => {
     expect(header.style.marginRight).toBe('')
     expect(footer.style.marginLeft).toBe('')
     expect(footer.style.marginRight).toBe('')
+
+    // becoming docked again must actually clear a previously-set left/right,
+    // not just leave it stale — otherwise the last fixed-mode offset would
+    // silently linger underneath the margin this same transition sets up.
+    layout.fixedHeader = false
+    layout.fixedFooter = false
+    await layout.updateComplete
+
+    expect(header.style.left).toBe('')
+    expect(header.style.right).toBe('')
+    expect(footer.style.left).toBe('')
+    expect(footer.style.right).toBe('')
     layout.remove()
   })
 
   it('insets a docked (non-fixed) header/footer, via margin (not left/right), by a docked-and-fixed drawer', async () => {
+    const layout = await mountLayout(
+      '<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer><cdmt-drawer side="left"></cdmt-drawer><cdmt-drawer side="right"></cdmt-drawer>'
+    )
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
+    const drawers = [...layout.querySelectorAll('cdmt-drawer')]
+    const leftDrawer = required(
+      drawers.find((d) => d.side === 'left'),
+      'expected a left drawer'
+    )
+    const rightDrawer = required(
+      drawers.find((d) => d.side === 'right'),
+      'expected a right drawer'
+    )
+    stubRect(leftDrawer, 200)
+    stubRect(rightDrawer, 220)
+
+    layout.fixedLeftDrawer = true
+    layout.fixedRightDrawer = true
+    layout.headerOverLeftDrawer = false
+    layout.headerOverRightDrawer = false
+    layout.footerOverLeftDrawer = false
+    layout.footerOverRightDrawer = false
+    await layout.updateComplete
+    leftDrawer.show()
+    rightDrawer.show()
+    await Promise.all([leftDrawer.updateComplete, rightDrawer.updateComplete])
+    await Promise.resolve()
+
+    expect(header.style.marginLeft).toBe('200px')
+    expect(header.style.marginRight).toBe('220px')
+    expect(footer.style.marginLeft).toBe('200px')
+    expect(footer.style.marginRight).toBe('220px')
+    // docked mode uses margin, never left/right (position isn't fixed anyway)
+    expect(header.style.left).toBe('')
+    expect(footer.style.left).toBe('')
+    layout.remove()
+  })
+
+  it("sets a docked (non-fixed) drawer's margin-top/margin-bottom from the header/footer fixed height", async () => {
     const layout = await mountLayout(
       '<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer><cdmt-drawer side="left"></cdmt-drawer>'
     )
     const header = required(layout.querySelector('cdmt-header'), 'expected a header')
     const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
     const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
-    stubRect(drawer, 200)
+    stubRect(header, 64)
+    stubRect(footer, 48)
 
+    layout.fixedHeader = true
+    layout.fixedFooter = true
+    await layout.updateComplete
+    await Promise.resolve()
+
+    // the drawer stays docked (fixedLeftDrawer is false) — its own margin
+    // compensates for the fixed header/footer removing themselves from flow.
+    expect(drawer.style.marginTop).toBe('64px')
+    expect(drawer.style.marginBottom).toBe('48px')
+    layout.remove()
+  })
+
+  it("clears a fixed drawer's margin-top/margin-bottom (its own stylesheet already insets it)", async () => {
+    const layout = await mountLayout(
+      '<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer><cdmt-drawer side="left"></cdmt-drawer>'
+    )
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
+    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
+    stubRect(header, 64)
+    stubRect(footer, 48)
+
+    layout.fixedHeader = true
+    layout.fixedFooter = true
     layout.fixedLeftDrawer = true
-    layout.headerOverLeftDrawer = false
-    layout.footerOverLeftDrawer = false
     await layout.updateComplete
     drawer.show()
     await drawer.updateComplete
     await Promise.resolve()
 
-    expect(header.style.marginLeft).toBe('200px')
-    expect(footer.style.marginLeft).toBe('200px')
-    // docked mode uses margin, never left/right (position isn't fixed anyway)
-    expect(header.style.left).toBe('')
-    expect(footer.style.left).toBe('')
+    expect(drawer.style.marginTop).toBe('')
+    expect(drawer.style.marginBottom).toBe('')
     layout.remove()
   })
 
@@ -481,6 +553,151 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(header.getBoundingClientRect).not.toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('does not run #applyFixedStates when an unrelated property (container) changes', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const toggleSpy = vi.spyOn(header, 'toggleAttribute')
+
+    layout.container = true
+    await layout.updateComplete
+
+    expect(toggleSpy).not.toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('runs #applyFixedStates and recomputes offsets from fixedHeader alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.fixedHeader = true
+    await layout.updateComplete
+
+    expect(header.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('runs #applyFixedStates and recomputes offsets from fixedFooter alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.fixedFooter = true
+    await layout.updateComplete
+
+    expect(footer.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('runs #applyFixedStates from fixedLeftDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-drawer side="left"></cdmt-drawer>')
+    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
+
+    layout.fixedLeftDrawer = true
+    await layout.updateComplete
+
+    expect(drawer.viewFixed).toBe(true)
+    layout.remove()
+  })
+
+  it('runs #applyFixedStates from fixedRightDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-drawer side="right"></cdmt-drawer>')
+    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
+
+    layout.fixedRightDrawer = true
+    await layout.updateComplete
+
+    expect(drawer.viewFixed).toBe(true)
+    layout.remove()
+  })
+
+  it('recomputes offsets from fixedLeftDrawer alone', async () => {
+    // Deliberately no drawer mounted: a real drawer's own `viewFixed` update
+    // (from #applyFixedStates, a separate gate) dispatches its own
+    // cdmt-layout-child-change event, which would trigger a recompute via
+    // that side channel and mask whether *this* gate actually fired.
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.fixedLeftDrawer = true
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('recomputes offsets from fixedRightDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.fixedRightDrawer = true
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('recomputes offsets from headerOverLeftDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.headerOverLeftDrawer = false
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('recomputes offsets from headerOverRightDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.headerOverRightDrawer = false
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('recomputes offsets from footerOverLeftDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.footerOverLeftDrawer = false
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
+    layout.remove()
+  })
+
+  it('recomputes offsets from footerOverRightDrawer alone', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+    rectSpy.mockClear()
+
+    layout.footerOverRightDrawer = false
+    await layout.updateComplete
+
+    expect(rectSpy).toHaveBeenCalled()
     layout.remove()
   })
 
