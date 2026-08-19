@@ -53,6 +53,6 @@ describe('CdmtInput (Vue)', () => {
     input.value = 'typed@example.com'
     input.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
 
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['typed@example.com'])
+    expect(wrapper.emitted('update:modelValue')?.[0]).toStrictEqual(['typed@example.com'])
   })
 })

@@ -19,7 +19,7 @@ describe('buildLocalOverrides', () => {
       ['@codeminity/request-core', '/tmp/request-core-0.4.0.tgz']
     ])
 
-    expect(buildLocalOverrides('@codeminity/axios', localPackages)).toEqual({
+    expect(buildLocalOverrides('@codeminity/axios', localPackages)).toStrictEqual({
       '@codeminity/request-core': 'file:/tmp/request-core-0.4.0.tgz'
     })
   })

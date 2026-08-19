@@ -50,8 +50,8 @@ describe('CHECK_STEPS', () => {
   })
 
   it('installs and audits dependencies before any `pnpm run` script', () => {
-    expect(CHECK_STEPS[0]?.args).toEqual(['install', '--frozen-lockfile'])
-    expect(CHECK_STEPS[1]?.args).toEqual(['audit', '--audit-level=moderate'])
+    expect(CHECK_STEPS[0]?.args).toStrictEqual(['install', '--frozen-lockfile'])
+    expect(CHECK_STEPS[1]?.args).toStrictEqual(['audit', '--audit-level=moderate'])
     expect(CHECK_STEPS.slice(2).every((step) => step.args[0] === 'run')).toBe(true)
   })
 })
@@ -71,7 +71,7 @@ describe('runFullCheck', () => {
 
     expect(mockedRunCommand).toHaveBeenCalledWith('pnpm', ['run', 'passing'], expect.anything())
     expect(mockedRunCommand).toHaveBeenCalledWith('pnpm', ['run', 'failing'], expect.anything())
-    expect(results.map(({ name, passed }) => ({ name, passed }))).toEqual([
+    expect(results.map(({ name, passed }) => ({ name, passed }))).toStrictEqual([
       { name: 'Passing step', passed: true },
       { name: 'Failing step', passed: false }
     ])
@@ -184,7 +184,7 @@ describe('runFullCheck', () => {
     resolveBuild()
     await resultPromise
 
-    expect(callOrder).toEqual(['start:build', 'end:build', 'start:verify'])
+    expect(callOrder).toStrictEqual(['start:build', 'end:build', 'start:verify'])
   })
 
   it('runs independent steps concurrently, not waiting for one another', async () => {
@@ -230,7 +230,7 @@ describe('runFullCheck', () => {
   it('returns an empty array for an empty steps list', async () => {
     const results = await runFullCheck([])
 
-    expect(results).toEqual([])
+    expect(results).toStrictEqual([])
     expect(mockedRunCommand).not.toHaveBeenCalled()
   })
 
@@ -288,7 +288,7 @@ describe('runFullCheck', () => {
     // Fail genuinely ran and failed; Never should have been skipped
     // outright — runCommand was never even called for it.
     expect(mockedRunCommand).not.toHaveBeenCalledWith('pnpm', ['run', 'never'], expect.anything())
-    expect(results).toEqual(
+    expect(results).toStrictEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Fail', passed: false }),
         expect.objectContaining({ name: 'Never', passed: false, cancelled: true, durationMs: 0 })
@@ -314,7 +314,7 @@ describe('runFullCheck', () => {
 
     const results = await runFullCheck(twoFailuresSteps)
 
-    expect(results).toEqual(
+    expect(results).toStrictEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'FailA', passed: false }),
         expect.objectContaining({ name: 'FailB', passed: false })
@@ -359,7 +359,7 @@ describe('runFullCheck', () => {
     resolveSlow?.()
 
     const results = await resultPromise
-    expect(results).toEqual(
+    expect(results).toStrictEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Slow', passed: false, cancelled: true })
       ])
@@ -394,7 +394,7 @@ describe('runFullCheck', () => {
 
       const results = await runFullCheck(customSteps)
 
-      expect(results).toEqual(
+      expect(results).toStrictEqual(
         expect.arrayContaining([expect.objectContaining({ name: 'Custom', passed: true })])
       )
     })
@@ -430,7 +430,7 @@ describe('runFullCheck', () => {
 
       const results = await resultPromise
 
-      expect(results).toEqual(
+      expect(results).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: 'Custom', passed: false }),
           expect.objectContaining({ name: 'Sibling', passed: false, cancelled: true })
@@ -447,7 +447,7 @@ describe('runFullCheck', () => {
 
       const results = await runFullCheck(customSteps)
 
-      expect(results).toEqual(
+      expect(results).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: 'Custom', passed: false, cancelled: true })
         ])

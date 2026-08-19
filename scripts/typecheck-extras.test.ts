@@ -34,7 +34,7 @@ describe('findExtraTsconfigs', () => {
     expect(mockedGlobby).toHaveBeenCalledWith('packages/**/bench/tsconfig.json', {
       ignore: ['**/node_modules/**']
     })
-    expect(result).toEqual([
+    expect(result).toStrictEqual([
       'e2e/tsconfig.json',
       'packages/request/axios/e2e/tsconfig.json',
       'packages/request/core/bench/tsconfig.json',
@@ -49,7 +49,11 @@ describe('findExtraTsconfigs', () => {
 
     const result = await findExtraTsconfigs()
 
-    expect(result).toEqual(['e2e/tsconfig.json', 'scripts/tsconfig.json', 'tsconfig.tooling.json'])
+    expect(result).toStrictEqual([
+      'e2e/tsconfig.json',
+      'scripts/tsconfig.json',
+      'tsconfig.tooling.json'
+    ])
   })
 })
 

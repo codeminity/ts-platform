@@ -30,7 +30,7 @@ describe('package entry point (real, unmocked)', () => {
     })
 
     const res = await api.get('/ping')
-    expect(res.data).toEqual({ ok: true })
+    expect(res.data).toStrictEqual({ ok: true })
   })
 
   it('create() can be called multiple times without recursion or shared-state corruption', async () => {
@@ -39,12 +39,12 @@ describe('package entry point (real, unmocked)', () => {
 
     const [resA, resB] = await Promise.all([apiA.get('/x'), apiB.get('/x')])
 
-    expect(resA.data).toEqual({ from: 'a' })
-    expect(resB.data).toEqual({ from: 'b' })
+    expect(resA.data).toStrictEqual({ from: 'a' })
+    expect(resB.data).toStrictEqual({ from: 'b' })
   })
 
   it('default export stays callable and usable like plain axios, independent of create()', () => {
-    expect(typeof codeminityAxios).toBe('function')
+    expect(codeminityAxios).toBeTypeOf('function')
 
     const spy: Mock<() => never> = vi.spyOn(codeminityAxios, 'create' as never)
     create({ adapter: fakeAdapter(() => ({ data: {} })) })
@@ -92,7 +92,7 @@ describe('package entry point (real, unmocked)', () => {
       }
     })
 
-    await expect(api.get('/missing')).rejects.toThrow()
+    await expect(api.get('/missing')).rejects.toThrow('Not Found')
     expect(seenEvent).toBe('not_found')
   })
 

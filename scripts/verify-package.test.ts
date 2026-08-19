@@ -205,7 +205,7 @@ describe('verifyPackage', () => {
     )
 
     expect(packCall).toBeDefined()
-    expect(packCall?.[2]).toEqual(
+    expect(packCall?.[2]).toStrictEqual(
       expect.objectContaining({
         cwd: path.resolve('.')
       })
@@ -422,7 +422,7 @@ describe('verifyPackage', () => {
       ([command, args]) => command === 'pnpm' && args?.includes('add')
     )
 
-    expect(addCall?.[1]).toEqual(
+    expect(addCall?.[1]).toStrictEqual(
       expect.arrayContaining([expect.stringMatching(/^@happy-dom\/global-registrator@/)])
     )
 
@@ -440,7 +440,7 @@ describe('verifyPackage', () => {
       ([command, args]) => command === 'pnpm' && args?.includes('add')
     )
 
-    expect(addCall?.[1]).not.toEqual(
+    expect(addCall?.[1]).not.toStrictEqual(
       expect.arrayContaining([expect.stringMatching(/^@happy-dom\/global-registrator@/)])
     )
 

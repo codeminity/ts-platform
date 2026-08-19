@@ -193,7 +193,7 @@ describe('handleResponseError', () => {
 
     request.mockResolvedValue({ data: 'ok' })
 
-    await expect(handleResponseError(instance, globalConfig, error)).resolves.toEqual({
+    await expect(handleResponseError(instance, globalConfig, error)).resolves.toStrictEqual({
       data: 'ok'
     })
 

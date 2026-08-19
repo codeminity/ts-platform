@@ -4,7 +4,7 @@ import { ErrorEventEnum } from './error-event.enum.js'
 
 describe('ErrorEventEnum', () => {
   it('exposes the expected error event kinds', () => {
-    expect(ErrorEventEnum).toEqual({
+    expect(ErrorEventEnum).toStrictEqual({
       NETWORK: 'network',
       TIMEOUT: 'timeout',
       ABORT: 'abort',

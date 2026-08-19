@@ -21,7 +21,7 @@ describe('createFetch', () => {
 
     const apiFetch = createFetch()
 
-    expect(typeof apiFetch).toBe('function')
+    expect(apiFetch).toBeTypeOf('function')
   })
 
   it('delegates each call to performRequest with the instance config and refresh queue', async () => {

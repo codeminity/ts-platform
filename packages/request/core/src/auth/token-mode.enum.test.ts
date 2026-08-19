@@ -4,7 +4,7 @@ import { TokenModeEnum } from './token-mode.enum.js'
 
 describe('TokenModeEnum', () => {
   it('exposes the expected token modes', () => {
-    expect(TokenModeEnum).toEqual({
+    expect(TokenModeEnum).toStrictEqual({
       JWT: 'JWT',
       COOKIE: 'COOKIE'
     })

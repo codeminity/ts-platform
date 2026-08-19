@@ -50,7 +50,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec)
 
-    expect(scope).toEqual({ type: 'full' })
+    expect(scope).toStrictEqual({ type: 'full' })
     // The whole point of falling back is to skip the (unreliable, for a
     // root-level change) turbo dependency-graph lookup entirely.
     expect(exec).not.toHaveBeenCalledWith(expect.stringContaining('turbo run build'))
@@ -61,7 +61,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec)
 
-    expect(scope).toEqual({ type: 'full' })
+    expect(scope).toStrictEqual({ type: 'full' })
   })
 
   it('falls back to full when an untracked (new) file sits outside packages/ and apps/', async () => {
@@ -69,7 +69,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec)
 
-    expect(scope).toEqual({ type: 'full' })
+    expect(scope).toStrictEqual({ type: 'full' })
   })
 
   it('returns an empty scoped result when nothing changed at all', async () => {
@@ -77,7 +77,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec)
 
-    expect(scope).toEqual({ type: 'scoped', packageDirs: [], appDirs: [] })
+    expect(scope).toStrictEqual({ type: 'scoped', packageDirs: [], appDirs: [] })
   })
 
   it('returns an empty scoped result when turbo reports no affected packages', async () => {
@@ -88,7 +88,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec)
 
-    expect(scope).toEqual({ type: 'scoped', packageDirs: [], appDirs: [] })
+    expect(scope).toStrictEqual({ type: 'scoped', packageDirs: [], appDirs: [] })
   })
 
   it('maps affected turbo package names back to real directories under both packages/ and apps/', async () => {
@@ -108,7 +108,7 @@ describe('getAffectedScope', () => {
 
     const scope = await getAffectedScope('origin/main', exec, packagesDir, appsDir)
 
-    expect(scope).toEqual({
+    expect(scope).toStrictEqual({
       type: 'scoped',
       packageDirs: [uiKit.dir.split(path.sep).join('/')],
       appDirs: [uiKitDocs.dir.split(path.sep).join('/')]
@@ -143,7 +143,7 @@ describe('getAffectedScope', () => {
     try {
       const scope = await getAffectedScope('origin/main', exec)
 
-      expect(scope).toEqual({ type: 'full' })
+      expect(scope).toStrictEqual({ type: 'full' })
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('bad revision origin/main'))
     } finally {
       warnSpy.mockRestore()
@@ -159,7 +159,7 @@ describe('getAffectedScope', () => {
     try {
       const scope = await getAffectedScope('origin/main', exec)
 
-      expect(scope).toEqual({ type: 'full' })
+      expect(scope).toStrictEqual({ type: 'full' })
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('a plain string rejection'))
     } finally {
       warnSpy.mockRestore()
@@ -183,7 +183,7 @@ describe('getAffectedScope', () => {
     try {
       const scope = await getAffectedScope('origin/main', exec)
 
-      expect(scope).toEqual({ type: 'full' })
+      expect(scope).toStrictEqual({ type: 'full' })
     } finally {
       warnSpy.mockRestore()
     }

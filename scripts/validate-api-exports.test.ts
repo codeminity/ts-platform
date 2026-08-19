@@ -172,7 +172,7 @@ describe('validate-api-exports', () => {
 
     const result = await validatePackages()
 
-    expect(result).toEqual(['@codeminity/ui-kit', '@codeminity/ui-kit/vue'])
+    expect(result).toStrictEqual(['@codeminity/ui-kit', '@codeminity/ui-kit/vue'])
     expect(extractExportsFromSource).toHaveBeenCalledWith(expect.any(String), 'src/index.ts')
     expect(extractExportsFromSource).toHaveBeenCalledWith(expect.any(String), 'src/vue/index.ts')
   })
@@ -210,7 +210,7 @@ describe('validate-api-exports', () => {
 
     const result = await validatePackages()
 
-    expect(result).toEqual([])
+    expect(result).toStrictEqual([])
     expect(loadRuntimeModule).not.toHaveBeenCalled()
   })
 
@@ -229,7 +229,7 @@ describe('validate-api-exports', () => {
 
     const result = await validatePackages()
 
-    expect(result).toEqual(['@codeminity/ui-kit'])
+    expect(result).toStrictEqual(['@codeminity/ui-kit'])
     expect(hasTypeExport).not.toHaveBeenCalled()
   })
 })

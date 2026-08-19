@@ -35,8 +35,10 @@ describe('emitterCallback (property-based)', () => {
             )
           ).resolves.toBeUndefined()
 
-          if (hasOnEvent) expect(onEvent).toHaveBeenCalledWith('event', { code: 1 })
-          if (hasOnError) expect(onError).toHaveBeenCalledWith({ code: 1 })
+          expect(onEvent?.mock.calls ?? []).toStrictEqual(
+            hasOnEvent ? [['event', { code: 1 }]] : []
+          )
+          expect(onError?.mock.calls ?? []).toStrictEqual(hasOnError ? [[{ code: 1 }]] : [])
         }
       )
     )

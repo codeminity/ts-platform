@@ -41,7 +41,7 @@ describe('CdmtFooter (Vue)', () => {
 
     element.dispatchEvent(new CustomEvent('cdmt-reveal', { detail: true }))
 
-    expect(wrapper.emitted('reveal')?.[0]).toEqual([true])
+    expect(wrapper.emitted('reveal')?.[0]).toStrictEqual([true])
   })
 
   it('renders slotted content', () => {

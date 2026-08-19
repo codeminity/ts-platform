@@ -45,9 +45,9 @@ describe('validateDeps', () => {
     const call = cruise.mock.calls[0] as
       [string[], { validate?: boolean; ruleSet?: { forbidden?: { name?: string }[] } }] | undefined
 
-    expect(call?.[0]).toEqual(['packages'])
+    expect(call?.[0]).toStrictEqual(['packages'])
     expect(call?.[1].validate).toBe(true)
-    expect(call?.[1].ruleSet?.forbidden?.map((rule) => rule.name)).toEqual([
+    expect(call?.[1].ruleSet?.forbidden?.map((rule) => rule.name)).toStrictEqual([
       'no-circular',
       'core-no-adapter-deps'
     ])

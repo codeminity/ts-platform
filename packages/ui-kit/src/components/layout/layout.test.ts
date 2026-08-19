@@ -745,7 +745,7 @@ describe('CdmtLayout', () => {
     const layout = await mountLayout('<cdmt-drawer side="left"></cdmt-drawer>')
     const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
 
-    expect(observeCalls).toEqual([drawer])
+    expect(observeCalls).toStrictEqual([drawer])
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -770,7 +770,7 @@ describe('CdmtLayout', () => {
     const layout = await mountLayout('<cdmt-drawer side="right"></cdmt-drawer>')
     const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
 
-    expect(observeCalls).toEqual([drawer])
+    expect(observeCalls).toStrictEqual([drawer])
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -810,6 +810,13 @@ describe('CdmtLayout', () => {
 
   it('renders header/drawer/page-container/footer slots in its shadow root', () => {
     const slots = [...(el.shadowRoot?.querySelectorAll('slot') ?? [])].map((slot) => slot.name)
-    expect(slots).toEqual(['header', 'drawer-left', 'page-container', 'drawer-right', 'footer', ''])
+    expect(slots).toStrictEqual([
+      'header',
+      'drawer-left',
+      'page-container',
+      'drawer-right',
+      'footer',
+      ''
+    ])
   })
 })

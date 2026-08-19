@@ -49,7 +49,7 @@ describe('CdmtHeader (Vue)', () => {
 
     element.dispatchEvent(new CustomEvent('cdmt-reveal', { detail: false }))
 
-    expect(wrapper.emitted('reveal')?.[0]).toEqual([false])
+    expect(wrapper.emitted('reveal')?.[0]).toStrictEqual([false])
   })
 
   it('renders slotted content', () => {

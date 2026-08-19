@@ -56,7 +56,7 @@ describe('mergeTheme', () => {
     expect(merged.tokens.colors.primary.light.foreground).toBe(
       material.tokens.colors.primary.light.foreground
     )
-    expect(merged.tokens.colors.primary.dark).toEqual(material.tokens.colors.primary.dark)
+    expect(merged.tokens.colors.primary.dark).toStrictEqual(material.tokens.colors.primary.dark)
   })
 
   it('overrides the text exception (plain light/dark strings, not a ColorRole)', () => {
@@ -91,10 +91,10 @@ describe('mergeTheme', () => {
     })
 
     expect(merged.tokens.custom?.accent2?.light.value).toBe('#123456')
-    expect(merged.tokens.colors.primary).toEqual(material.tokens.colors.primary)
+    expect(merged.tokens.colors.primary).toStrictEqual(material.tokens.colors.primary)
   })
 
   it('returns an equivalent preset when given no overrides', () => {
-    expect(mergeTheme(material, {})).toEqual(material)
+    expect(mergeTheme(material, {})).toStrictEqual(material)
   })
 })
