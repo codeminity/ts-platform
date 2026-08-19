@@ -3,11 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const performRequest = vi.fn()
 const createRefreshQueue = vi.fn(() => ({ run: vi.fn() }))
 
-vi.mock('@codeminity/request-core', () => ({
+vi.mock(import('@codeminity/request-core'), () => ({
   createRefreshQueue
 }))
 
-vi.mock('./shared/perform-request.ts', () => ({
+vi.mock(import('./shared/perform-request.js'), () => ({
   performRequest
 }))
 

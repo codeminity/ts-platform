@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { AxiosInstance } from 'axios'
+import type { AxiosInstance, AxiosStatic } from 'axios'
 
 const instance = {} as AxiosInstance
 
@@ -9,17 +9,18 @@ const createMock = vi.fn(() => instance)
 const attachAuthInterceptor = vi.fn()
 const attachResponseInterceptor = vi.fn()
 
-vi.mock('axios', () => ({
-  default: {
-    create: createMock
-  }
+vi.mock(import('axios'), () => ({
+  // Only `axios.create()` is ever called by the code under test — the rest
+  // of the real AxiosStatic shape (Cancel, CancelToken, Axios, ...) is
+  // deliberately not part of this mock.
+  default: { create: createMock } as unknown as AxiosStatic
 }))
 
-vi.mock('./auth/attach-auth.ts', () => ({
+vi.mock(import('./auth/attach-auth.js'), () => ({
   attachAuthInterceptor
 }))
 
-vi.mock('./shared/attach-response.ts', () => ({
+vi.mock(import('./shared/attach-response.js'), () => ({
   attachResponseInterceptor
 }))
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const cruise = vi.fn()
 
-vi.mock('dependency-cruiser', () => ({
+vi.mock(import('dependency-cruiser'), () => ({
   cruise
 }))
 

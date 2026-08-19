@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { getAxiosInstance } from './get-axios-instance.js'
 
-vi.mock('axios', () => ({
-  default: vi.fn()
+vi.mock(import('axios'), () => ({
+  // `axios` itself is called directly as a function here — the rest of the
+  // real AxiosStatic shape is deliberately not part of this mock.
+  default: vi.fn() as unknown as typeof axios
 }))
 
 describe('getAxiosInstance', () => {

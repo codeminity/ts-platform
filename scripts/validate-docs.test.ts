@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { runCommand } from './lib/run-command'
 import { validateDocs } from './validate-docs'
 
-vi.mock('globby', () => ({
+vi.mock(import('globby'), () => ({
   globby: vi.fn()
 }))
 
-vi.mock('./lib/run-command', () => ({
+vi.mock(import('./lib/run-command'), () => ({
   runCommand: vi.fn()
 }))
 

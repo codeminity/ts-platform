@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { findTarball, packPackage } from './pack-package'
 import { runCommand } from './run-command'
 
-vi.mock('./run-command', () => ({
+vi.mock(import('./run-command'), () => ({
   runCommand: vi.fn()
 }))
 
