@@ -6,13 +6,13 @@ describe('extractTypeScriptBlocks', () => {
   it('extracts a single ts code block with its starting line', () => {
     const markdown = ['# Title', '', '```ts', 'const a = 1', '```', ''].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([{ code: 'const a = 1', line: 3 }])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([{ code: 'const a = 1', line: 3 }])
   })
 
   it('extracts a typescript-tagged block the same as a ts-tagged one', () => {
     const markdown = ['```typescript', 'const a = 1', '```'].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([{ code: 'const a = 1', line: 1 }])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([{ code: 'const a = 1', line: 1 }])
   })
 
   it('extracts multiple blocks in order', () => {
@@ -26,7 +26,7 @@ describe('extractTypeScriptBlocks', () => {
       '```'
     ].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([
       { code: 'const a = 1', line: 1 },
       { code: 'const b = 2', line: 5 }
     ])
@@ -35,7 +35,7 @@ describe('extractTypeScriptBlocks', () => {
   it('ignores non-typescript code blocks', () => {
     const markdown = ['```bash', 'pnpm install', '```'].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([])
   })
 
   it('skips a block immediately preceded by the skip marker', () => {
@@ -46,7 +46,7 @@ describe('extractTypeScriptBlocks', () => {
       '```'
     ].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([])
   })
 
   it('does not skip a block when the skip marker precedes unrelated text', () => {
@@ -58,16 +58,16 @@ describe('extractTypeScriptBlocks', () => {
       '```'
     ].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([{ code: 'const a = 1', line: 3 }])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([{ code: 'const a = 1', line: 3 }])
   })
 
   it('returns an empty array for markdown with no code blocks', () => {
-    expect(extractTypeScriptBlocks('# Just a heading\n\nSome text.')).toEqual([])
+    expect(extractTypeScriptBlocks('# Just a heading\n\nSome text.')).toStrictEqual([])
   })
 
   it('handles an unterminated code fence without throwing', () => {
     const markdown = ['```ts', 'const a = 1'].join('\n')
 
-    expect(extractTypeScriptBlocks(markdown)).toEqual([{ code: 'const a = 1', line: 1 }])
+    expect(extractTypeScriptBlocks(markdown)).toStrictEqual([{ code: 'const a = 1', line: 1 }])
   })
 })

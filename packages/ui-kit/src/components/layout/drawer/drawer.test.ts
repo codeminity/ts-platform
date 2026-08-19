@@ -47,6 +47,18 @@ function getBackdrop(el: CdmtDrawer): HTMLElement {
   return backdrop as HTMLElement
 }
 
+function getDefaultSlotWrapper(el: CdmtDrawer): HTMLElement {
+  const wrapper = el.shadowRoot?.querySelector('.cdmt-drawer__default-slot')
+  if (!wrapper) throw new Error('expected a default-slot wrapper to exist')
+  return wrapper as HTMLElement
+}
+
+function getMiniSlotWrapper(el: CdmtDrawer): HTMLElement {
+  const wrapper = el.shadowRoot?.querySelector('.cdmt-drawer__mini-slot')
+  if (!wrapper) throw new Error('expected a mini-slot wrapper to exist')
+  return wrapper as HTMLElement
+}
+
 describe('CdmtDrawer', () => {
   let el: CdmtDrawer
 
@@ -135,7 +147,7 @@ describe('CdmtDrawer', () => {
     el.show()
     await el.updateComplete
 
-    expect(events).toEqual(['before-show', 'model-value-change:true', 'show'])
+    expect(events).toStrictEqual(['before-show', 'model-value-change:true', 'show'])
   })
 
   it('dispatches before-hide/model-value-change/hide in order when hidden', async () => {
@@ -152,7 +164,7 @@ describe('CdmtDrawer', () => {
     el.hide()
     await el.updateComplete
 
-    expect(events).toEqual(['before-hide', 'model-value-change:false', 'hide'])
+    expect(events).toStrictEqual(['before-hide', 'model-value-change:false', 'hide'])
   })
 
   it('does not dispatch any show/hide events on initial connect', async () => {
@@ -356,7 +368,8 @@ describe('CdmtDrawer', () => {
     // willUpdate's own #computeIsMobileMode call — a separate matchMedia
     // invocation from #setupBreakpointWatcher's (which also runs on this
     // same first update), so this asserts on the *last* call specifically.
-    const calls = vi.mocked(window.matchMedia).mock.calls
+    const matchMediaSpy = vi.mocked(window.matchMedia)
+    const calls = matchMediaSpy.mock.calls
     expect(calls.some((call) => call[0] === '(max-width: 900px)')).toBe(true)
     el2.remove()
   })
@@ -452,7 +465,7 @@ describe('CdmtDrawer', () => {
     el.overlay = true
     await el.updateComplete
 
-    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toEqual(['none', ''])
+    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toStrictEqual(['none', ''])
     expect(el.style.transition).toBe('')
   })
 
@@ -501,7 +514,7 @@ describe('CdmtDrawer', () => {
     await el.updateComplete
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
-    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toEqual(['none', ''])
+    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toStrictEqual(['none', ''])
   })
 
   it('shows the backdrop only when open and in a fixed/overlay mode', async () => {
@@ -599,9 +612,7 @@ describe('CdmtDrawer', () => {
 
   it('stacks its content wrappers above the backdrop, so slotted content stays clickable while the backdrop is visible', () => {
     const backdropZIndex = Number(getComputedStyle(getBackdrop(el)).zIndex)
-    const defaultSlotWrapper = el.shadowRoot?.querySelector('.cdmt-drawer__default-slot')
-    if (!defaultSlotWrapper) throw new Error('expected a default-slot wrapper to exist')
-    const contentZIndex = Number(getComputedStyle(defaultSlotWrapper).zIndex)
+    const contentZIndex = Number(getComputedStyle(getDefaultSlotWrapper(el)).zIndex)
 
     expect(contentZIndex).toBeGreaterThan(backdropZIndex)
   })
@@ -616,8 +627,7 @@ describe('CdmtDrawer', () => {
     el.append(miniSpan)
     await el.updateComplete
 
-    const miniWrapper = el.shadowRoot?.querySelector('.cdmt-drawer__mini-slot')
-    if (!miniWrapper) throw new Error('expected a mini-slot wrapper to exist')
+    const miniWrapper = getMiniSlotWrapper(el)
 
     expect(getComputedStyle(miniWrapper).display).toBe('none')
 

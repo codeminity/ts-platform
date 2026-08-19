@@ -50,6 +50,6 @@ describe('configuredAxios', () => {
   })
 
   it('stays callable like plain axios, independent of create()', () => {
-    expect(typeof configuredAxios).toBe('function')
+    expect(configuredAxios).toBeTypeOf('function')
   })
 })

@@ -110,7 +110,7 @@ describe('validateDocs', () => {
       compilerOptions: { paths: Record<string, string[]> }
     }
 
-    expect(tsconfig.compilerOptions.paths).toEqual({})
+    expect(tsconfig.compilerOptions.paths).toStrictEqual({})
   })
 
   it('ignores private packages when building the paths map', async () => {
@@ -159,7 +159,7 @@ describe('validateDocs', () => {
       compilerOptions: { paths: Record<string, string[]> }
     }
 
-    expect(Object.keys(tsconfig.compilerOptions.paths)).toEqual([
+    expect(Object.keys(tsconfig.compilerOptions.paths)).toStrictEqual([
       '@codeminity/request-core',
       '@codeminity/request-core/test-utils'
     ])

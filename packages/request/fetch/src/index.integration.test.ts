@@ -18,7 +18,7 @@ describe('package entry point (real, unmocked)', () => {
 
     const res = await apiFetch('/ping')
 
-    await expect(res.json()).resolves.toEqual({ ok: true })
+    await expect(res.json()).resolves.toStrictEqual({ ok: true })
   })
 
   it('createFetch() can be called multiple times without shared state', async () => {
@@ -31,8 +31,8 @@ describe('package entry point (real, unmocked)', () => {
 
     const [resA, resB] = await Promise.all([apiFetchA('/x'), apiFetchB('/x')])
 
-    await expect(resA.json()).resolves.toEqual({ from: 'a' })
-    await expect(resB.json()).resolves.toEqual({ from: 'b' })
+    await expect(resA.json()).resolves.toStrictEqual({ from: 'a' })
+    await expect(resB.json()).resolves.toStrictEqual({ from: 'b' })
   })
 
   it('attaches Authorization header end-to-end via getToken', async () => {
@@ -113,13 +113,10 @@ describe('package entry point (real, unmocked)', () => {
 
     const results = await Promise.allSettled([apiFetch('/a'), apiFetch('/b'), apiFetch('/c')])
 
-    expect(results.every((result) => result.status === 'fulfilled')).toBe(true)
-
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        expect(result.value.status).toBe(401)
-      }
-    }
+    const statuses = results.map((result) =>
+      result.status === 'fulfilled' ? result.value.status : (result.reason as unknown)
+    )
+    expect(statuses).toStrictEqual([401, 401, 401])
   })
 
   it('retries a genuine network failure and eventually succeeds', async () => {
@@ -132,7 +129,7 @@ describe('package entry point (real, unmocked)', () => {
 
     const res = await apiFetch('/flaky')
 
-    await expect(res.json()).resolves.toEqual({ ok: true })
+    await expect(res.json()).resolves.toStrictEqual({ ok: true })
     expect(fetch).toHaveBeenCalledTimes(3)
   })
 
@@ -172,7 +169,7 @@ describe('package entry point (real, unmocked)', () => {
     expect(responses).toHaveLength(5)
 
     for (const res of responses) {
-      await expect(res.json()).resolves.toEqual({ ok: true })
+      await expect(res.json()).resolves.toStrictEqual({ ok: true })
     }
   })
 
@@ -225,13 +222,13 @@ describe('package entry point (real, unmocked)', () => {
     const first = await Promise.all([apiFetch('/a'), apiFetch('/b')])
 
     for (const res of first) {
-      await expect(res.json()).resolves.toEqual({ ok: true })
+      await expect(res.json()).resolves.toStrictEqual({ ok: true })
     }
 
     const second = await Promise.all([apiFetch('/c'), apiFetch('/d')])
 
     for (const res of second) {
-      await expect(res.json()).resolves.toEqual({ ok: true })
+      await expect(res.json()).resolves.toStrictEqual({ ok: true })
     }
 
     expect(refreshCount).toBe(2)

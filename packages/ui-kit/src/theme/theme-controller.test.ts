@@ -14,10 +14,10 @@ async function freshGetThemeController(): Promise<typeof GetThemeController> {
   return mod.getThemeController
 }
 
-let matchMediaListeners: ((event: MediaQueryListEvent) => void)[] = []
-let matchMediaMatches = false
-let matchMediaQueries: string[] = []
-let matchMediaListenerTypes: string[] = []
+let matchMediaListeners: ((event: MediaQueryListEvent) => void)[]
+let matchMediaMatches: boolean
+let matchMediaQueries: string[]
+let matchMediaListenerTypes: string[]
 
 beforeEach(() => {
   matchMediaListeners = []
@@ -49,7 +49,7 @@ describe('getThemeController', () => {
 
     const controller = getThemeController()
 
-    expect(controller.theme).toEqual(material)
+    expect(controller.theme).toStrictEqual(material)
     expect(controller.mode).toBe('light')
     expect(controller.isDark).toBe(false)
     expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
@@ -96,11 +96,11 @@ describe('getThemeController', () => {
     controller.setMode('auto')
 
     expect(controller.isDark).toBe(true)
-    expect(matchMediaQueries).toEqual([
+    expect(matchMediaQueries).toStrictEqual([
       '(prefers-color-scheme: dark)',
       '(prefers-color-scheme: dark)'
     ])
-    expect(matchMediaListenerTypes).toEqual(['change'])
+    expect(matchMediaListenerTypes).toStrictEqual(['change'])
   })
 
   it("setMode with a non-'auto' mode never touches matchMedia", async () => {
@@ -110,7 +110,7 @@ describe('getThemeController', () => {
     controller.setMode('dark')
     controller.setMode('light')
 
-    expect(matchMediaQueries).toEqual([])
+    expect(matchMediaQueries).toStrictEqual([])
   })
 
   it("mode 'auto' re-resolves and notifies subscribers when the system scheme changes", async () => {
@@ -140,7 +140,7 @@ describe('getThemeController', () => {
     // (2 total), but only the *first* call also sets up the change listener
     // via `#watchSystemScheme` — a second subscription would double-fire it.
     expect(matchMediaQueries).toHaveLength(3)
-    expect(matchMediaListenerTypes).toEqual(['change'])
+    expect(matchMediaListenerTypes).toStrictEqual(['change'])
   })
 
   it("a system-scheme change is ignored once mode has moved away from 'auto'", async () => {

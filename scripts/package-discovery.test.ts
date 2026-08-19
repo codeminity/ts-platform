@@ -49,11 +49,11 @@ describe('findWorkspacePackages', () => {
     createPackage(core)
     createPackage(axios)
 
-    expect(findWorkspacePackages(workspace)).toEqual([axios, core])
+    expect(findWorkspacePackages(workspace)).toStrictEqual([axios, core])
   })
 
   it('returns empty array when workspace directory does not exist', () => {
-    expect(findWorkspacePackages(path.join(os.tmpdir(), 'missing-workspace'))).toEqual([])
+    expect(findWorkspacePackages(path.join(os.tmpdir(), 'missing-workspace'))).toStrictEqual([])
   })
 
   it('does not scan nested directories after finding package.json', () => {
@@ -65,7 +65,7 @@ describe('findWorkspacePackages', () => {
 
     createPackage(path.join(packageDir, 'nested'))
 
-    expect(findWorkspacePackages(workspace)).toEqual([packageDir])
+    expect(findWorkspacePackages(workspace)).toStrictEqual([packageDir])
   })
 
   it('ignores directories without package.json', () => {
@@ -75,7 +75,7 @@ describe('findWorkspacePackages', () => {
       recursive: true
     })
 
-    expect(findWorkspacePackages(workspace)).toEqual([])
+    expect(findWorkspacePackages(workspace)).toStrictEqual([])
   })
 
   it('ignores files inside workspace directories', () => {
@@ -87,6 +87,6 @@ describe('findWorkspacePackages', () => {
 
     fs.writeFileSync(path.join(workspace, 'README.md'), '')
 
-    expect(findWorkspacePackages(workspace)).toEqual([])
+    expect(findWorkspacePackages(workspace)).toStrictEqual([])
   })
 })

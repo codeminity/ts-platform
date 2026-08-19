@@ -67,7 +67,7 @@ describe('hasRelevantChanges', () => {
     // without actually caring about the (real, environment-dependent)
     // result, matching the same pattern already used for the sibling
     // getAffectedScope defaults.
-    await expect(hasRelevantChanges('some/nonexistent/prefix/')).resolves.toEqual(
+    await expect(hasRelevantChanges('some/nonexistent/prefix/')).resolves.toStrictEqual(
       expect.any(Boolean)
     )
   })

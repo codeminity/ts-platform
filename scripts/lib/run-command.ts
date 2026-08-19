@@ -120,7 +120,7 @@ export function runCommand(
   platform: NodeJS.Platform = process.platform
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const resolved = resolveCommand(command)
+    const resolved = resolveCommand(command, platform)
 
     const child = spawn(resolved.command, [...resolved.argsPrefix, ...args], {
       ...(options.cwd ? { cwd: path.resolve(options.cwd) } : {}),

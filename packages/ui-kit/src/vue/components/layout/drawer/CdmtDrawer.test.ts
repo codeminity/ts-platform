@@ -62,7 +62,7 @@ describe('CdmtDrawer (Vue)', () => {
 
     element.dispatchEvent(new CustomEvent('cdmt-model-value-change', { detail: true }))
 
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([true])
+    expect(wrapper.emitted('update:modelValue')?.[0]).toStrictEqual([true])
   })
 
   it('emits before-show/show/before-hide/hide from their native cdmt-* events', async () => {

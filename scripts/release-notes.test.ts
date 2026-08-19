@@ -31,7 +31,7 @@ afterEach(() => {
 
 describe('parseReleaseTag', () => {
   it('splits a scoped package tag on the last "@"', () => {
-    expect(parseReleaseTag('@codeminity/axios@0.7.1')).toEqual({
+    expect(parseReleaseTag('@codeminity/axios@0.7.1')).toStrictEqual({
       name: '@codeminity/axios',
       version: '0.7.1'
     })

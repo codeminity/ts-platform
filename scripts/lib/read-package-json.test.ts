@@ -28,7 +28,7 @@ describe('readPackageJson', () => {
   it('returns the package name', () => {
     const directory = createPackageJson({ name: '@codeminity/axios' })
 
-    expect(readPackageJson(directory)).toEqual({ name: '@codeminity/axios' })
+    expect(readPackageJson(directory)).toStrictEqual({ name: '@codeminity/axios' })
   })
 
   it('throws when package.json has no name', () => {

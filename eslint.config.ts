@@ -181,9 +181,37 @@ export default defineConfig(
     },
     rules: {
       '@typescript-eslint/unbound-method': 'off',
+
       // Catches a test body with no `expect()` call at all — the classic
       // shape of a test that runs code but never actually asserts anything.
-      'vitest/expect-expect': 'error'
+      'vitest/expect-expect': 'error',
+
+      // Genuine test-integrity rules — each catches a real "fake" or
+      // silently-broken test shape, not a style preference.
+      'vitest/no-conditional-expect': 'error',
+      'vitest/no-standalone-expect': 'error',
+      'vitest/no-disabled-tests': 'error',
+      'vitest/no-focused-tests': 'error',
+      'vitest/no-identical-title': 'error',
+      'vitest/valid-expect': 'error',
+      'vitest/valid-expect-in-promise': 'error',
+      'vitest/no-import-node-test': 'error',
+      'vitest/no-commented-out-tests': 'error',
+      'vitest/valid-describe-callback': 'error',
+      'vitest/valid-title': 'error',
+      'vitest/no-mocks-import': 'error',
+      'vitest/no-unneeded-async-expect-function': 'error',
+      'vitest/prefer-called-exactly-once-with': 'error',
+      'vitest/unbound-method': 'error',
+      'vitest/no-conditional-in-test': 'error',
+      'vitest/require-hook': 'error',
+      'vitest/require-to-throw-message': 'error',
+      'vitest/prefer-expect-type-of': 'error',
+
+      // `toStrictEqual` also checks undefined properties and prototype/class
+      // identity, which `toEqual` silently ignores — catches real equality
+      // bugs `toEqual` would miss, not just a style preference.
+      'vitest/prefer-strict-equal': 'error'
     }
   },
 

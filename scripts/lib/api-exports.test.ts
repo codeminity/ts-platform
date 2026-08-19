@@ -16,7 +16,7 @@ describe('extractExportsFromSource', () => {
   it('returns empty exports when entry file does not exist', () => {
     const result = extractExportsFromSource(tempDir)
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       runtime: [],
       types: []
     })
@@ -53,8 +53,10 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual(expect.arrayContaining(['hello', 'Widget', 'value', 'Mode']))
-    expect(result.types).toEqual(expect.arrayContaining(['User', 'Config', 'Mode']))
+    expect(result.runtime).toStrictEqual(
+      expect.arrayContaining(['hello', 'Widget', 'value', 'Mode'])
+    )
+    expect(result.types).toStrictEqual(expect.arrayContaining(['User', 'Config', 'Mode']))
   })
 
   it('ignores non-exported (private) local declarations', () => {
@@ -68,8 +70,8 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual(['publicFn'])
-    expect(result.types).toEqual([])
+    expect(result.runtime).toStrictEqual(['publicFn'])
+    expect(result.types).toStrictEqual([])
   })
 
   it('detects named re-exports, the dominant style in this codebase', () => {
@@ -80,7 +82,7 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual(expect.arrayContaining(['create', 'TokenModeEnum']))
+    expect(result.runtime).toStrictEqual(expect.arrayContaining(['create', 'TokenModeEnum']))
   })
 
   it('treats `export type { X }` as a type-only export, not a runtime export', () => {
@@ -90,8 +92,8 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.types).toEqual(['AuthConfig'])
-    expect(result.runtime).toEqual([])
+    expect(result.types).toStrictEqual(['AuthConfig'])
+    expect(result.runtime).toStrictEqual([])
   })
 
   it('does not require a plain named re-export to also satisfy a .d.ts type pattern', () => {
@@ -121,8 +123,8 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual([])
-    expect(result.types).toEqual([])
+    expect(result.runtime).toStrictEqual([])
+    expect(result.types).toStrictEqual([])
   })
 
   it('returns false for a declaration without the export keyword', () => {
@@ -130,7 +132,7 @@ describe('extractExportsFromText', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual([])
+    expect(result.runtime).toStrictEqual([])
   })
 })
 
@@ -175,7 +177,7 @@ describe('isExported', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual([])
+    expect(result.runtime).toStrictEqual([])
   })
 
   it('ignores exported variables that are not identifiers', () => {
@@ -185,7 +187,7 @@ describe('isExported', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual([])
+    expect(result.runtime).toStrictEqual([])
   })
 
   it('ignores export declarations without named exports', () => {
@@ -195,8 +197,8 @@ describe('isExported', () => {
 
     const result = extractExportsFromText(source)
 
-    expect(result.runtime).toEqual([])
-    expect(result.types).toEqual([])
+    expect(result.runtime).toStrictEqual([])
+    expect(result.types).toStrictEqual([])
   })
 
   it('handles type-only export declarations', () => {
@@ -243,7 +245,7 @@ describe('isExported', () => {
 
     const result = extractExportsFromSource('/fake-package')
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       runtime: [],
       types: []
     })

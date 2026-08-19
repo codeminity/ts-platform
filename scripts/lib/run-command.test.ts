@@ -11,6 +11,11 @@ import {
   type SpawnedProcess
 } from './run-command'
 
+function required<T>(value: T | null | undefined, message: string): T {
+  if (value == null) throw new Error(message)
+  return value
+}
+
 function createChild(): SpawnedProcess & EventEmitter {
   return new EventEmitter() as SpawnedProcess & EventEmitter
 }
@@ -32,26 +37,26 @@ function createSpawnMock(child: SpawnedProcess) {
 
 describe('resolveCommand', () => {
   it('keeps non-windows commands unchanged', () => {
-    expect(resolveCommand('node')).toEqual({
+    expect(resolveCommand('node')).toStrictEqual({
       command: 'node',
       argsPrefix: []
     })
   })
 
   it('resolves pnpm for Windows', () => {
-    expect(resolveCommand('pnpm', 'win32')).toEqual({
+    expect(resolveCommand('pnpm', 'win32')).toStrictEqual({
       command: 'cmd.exe',
       argsPrefix: ['/d', '/s', '/c', 'pnpm']
     })
   })
 
   it('resolves pnpm for Linux/macOS', () => {
-    expect(resolveCommand('pnpm', 'linux')).toEqual({
+    expect(resolveCommand('pnpm', 'linux')).toStrictEqual({
       command: 'pnpm',
       argsPrefix: []
     })
 
-    expect(resolveCommand('pnpm', 'darwin')).toEqual({
+    expect(resolveCommand('pnpm', 'darwin')).toStrictEqual({
       command: 'pnpm',
       argsPrefix: []
     })
@@ -126,13 +131,7 @@ describe('runCommand', () => {
 
     await promise
 
-    const call = spawn.mock.calls.at(0)
-
-    expect(call).toBeDefined()
-
-    if (!call) {
-      return
-    }
+    const call = required(spawn.mock.calls.at(0), 'expected spawn to have been called')
 
     expect('cwd' in call[2]).toBe(false)
   })
@@ -158,13 +157,7 @@ describe('runCommand', () => {
 
     await promise
 
-    const call = spawn.mock.calls.at(0)
-
-    expect(call).toBeDefined()
-
-    if (!call) {
-      return
-    }
+    const call = required(spawn.mock.calls.at(0), 'expected spawn to have been called')
 
     const options = call[2]
 
@@ -173,26 +166,34 @@ describe('runCommand', () => {
     expect(options.env?.TEST).toBe('true')
   })
 
-  it('uses platform-specific pnpm command resolution', async () => {
+  it('uses cmd.exe pnpm command resolution on win32', async () => {
     const child = createChild()
 
     const spawn = createSpawnMock(child)
 
-    const promise = runCommand('pnpm', ['build'], {}, spawn)
+    const promise = runCommand('pnpm', ['build'], {}, spawn, undefined, 'win32')
 
     child.emit('close', 0)
 
     await promise
 
-    if (process.platform === 'win32') {
-      expect(spawn).toHaveBeenCalledWith(
-        'cmd.exe',
-        ['/d', '/s', '/c', 'pnpm', 'build'],
-        expect.any(Object)
-      )
+    expect(spawn).toHaveBeenCalledWith(
+      'cmd.exe',
+      ['/d', '/s', '/c', 'pnpm', 'build'],
+      expect.any(Object)
+    )
+  })
 
-      return
-    }
+  it('uses direct pnpm command resolution on non-Windows platforms', async () => {
+    const child = createChild()
+
+    const spawn = createSpawnMock(child)
+
+    const promise = runCommand('pnpm', ['build'], {}, spawn, undefined, 'linux')
+
+    child.emit('close', 0)
+
+    await promise
 
     expect(spawn).toHaveBeenCalledWith('pnpm', ['build'], expect.any(Object))
   })
