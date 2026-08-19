@@ -15,15 +15,15 @@ export type CdmtDrawerBehavior = 'default' | 'desktop' | 'mobile'
 /**
  * `<cdmt-drawer>` — a side panel inside `<cdmt-layout>`. In "mobile mode"
  * (viewport narrower than `breakpoint`, or `behavior="mobile"`) it always
- * behaves as an overlay with a backdrop, regardless of the `overlay` prop —
- * matching Quasar's own documented behavior. `persistent` blocks backdrop
- * click / Escape from closing it; a real close still works via `hide()`,
- * `toggle()`, or setting `model-value` false.
+ * behaves as an overlay with a backdrop, regardless of the `overlay` prop.
+ * `persistent` blocks backdrop click / Escape from closing it; a real close
+ * still works via `hide()`, `toggle()`, or setting `model-value` false.
  *
  * Whether it renders fixed (vs. pushing/pulling page content statically) is
- * decided by the parent `<cdmt-layout>`'s `view` string, marked via an
- * internal `data-cdmt-fixed` attribute — except in mobile mode or `overlay`,
- * which force fixed positioning unconditionally (Quasar's documented rule).
+ * decided by the parent `<cdmt-layout>`'s `fixed-left-drawer`/
+ * `fixed-right-drawer` attribute, marked via an internal `data-cdmt-fixed`
+ * attribute — except in mobile mode or `overlay`, which force fixed
+ * positioning unconditionally.
  *
  * @public
  */
@@ -129,10 +129,10 @@ export class CdmtDrawer extends LitElement {
   }
 
   override willUpdate(): void {
-    // `showIfAbove` only forces initial visibility ("on initial render" per
-    // Quasar's own docs) — deriving `modelValue` here, in `willUpdate`
-    // (before render), folds into this same update cycle instead of
-    // scheduling a new one, unlike mutating it from `updated()`.
+    // `showIfAbove` only forces initial visibility, on first render —
+    // deriving `modelValue` here, in `willUpdate` (before render), folds
+    // into this same update cycle instead of scheduling a new one, unlike
+    // mutating it from `updated()`.
     if (
       !this.#hasCompletedFirstUpdate &&
       this.showIfAbove &&

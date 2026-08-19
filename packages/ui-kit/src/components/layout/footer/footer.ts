@@ -6,8 +6,7 @@ import { footerStyles } from './footer.styles.js'
  * `<cdmt-footer>` — a footer row inside `<cdmt-layout>`. Same fixed/reveal
  * mechanics as `<cdmt-header>` (see its doc comment), mirrored to the bottom
  * edge. Unlike the header, `reveal` here has no offset threshold — it
- * reacts to scroll direction immediately, matching Quasar's own QFooter API
- * (no `reveal-offset` prop there).
+ * reacts to scroll direction immediately, with no `reveal-offset` prop.
  *
  * @public
  */

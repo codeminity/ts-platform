@@ -4,14 +4,14 @@ import { headerStyles } from './header.styles.js'
 
 /**
  * `<cdmt-header>` — a header row inside `<cdmt-layout>`. Whether it renders
- * `position: fixed` is decided by the parent `<cdmt-layout>`'s `view` string,
- * which marks it via an internal `data-cdmt-fixed` attribute — not a prop
- * this component reads itself.
+ * `position: fixed` is decided by the parent `<cdmt-layout>`'s `fixed-header`
+ * attribute, which marks it via an internal `data-cdmt-fixed` attribute —
+ * not a prop this component reads itself.
  *
  * `reveal` mode hides the header on scroll-down past `reveal-offset` and
- * brings it back on scroll-up, via a CSS transform (doesn't affect the
- * height `<cdmt-layout>` measures, matching Quasar's own behavior of
- * reserving the space regardless of the transform).
+ * brings it back on scroll-up, via a CSS transform — this deliberately
+ * doesn't affect the height `<cdmt-layout>` measures, so the reserved space
+ * stays put regardless of the transform.
  *
  * @public
  */
