@@ -43,9 +43,10 @@ export class CdmtDrawer extends LitElement {
     elevated: { type: Boolean, reflect: true },
     persistent: { type: Boolean },
     showIfAbove: { type: Boolean, attribute: 'show-if-above' },
-    // Set by the parent <cdmt-layout> from its `view` string parsing — not
-    // a public prop consumers set themselves, hence no attribute.
-    viewFixed: { attribute: false }
+    // Set by the parent <cdmt-layout> from its own fixed-left-drawer/
+    // fixed-right-drawer attribute — not a public prop consumers set
+    // themselves, hence no attribute.
+    layoutFixed: { attribute: false }
   }
 
   static override styles = drawerStyles
@@ -64,7 +65,7 @@ export class CdmtDrawer extends LitElement {
   declare elevated: boolean
   declare persistent: boolean
   declare showIfAbove: boolean
-  declare viewFixed: boolean
+  declare layoutFixed: boolean
 
   #isMobileMode = false
   #mediaQuery: MediaQueryList | undefined
@@ -85,7 +86,7 @@ export class CdmtDrawer extends LitElement {
     this.elevated = false
     this.persistent = false
     this.showIfAbove = false
-    this.viewFixed = false
+    this.layoutFixed = false
   }
 
   // Lit's `updated()` fires on the *first* render too — a reactive property
@@ -173,7 +174,7 @@ export class CdmtDrawer extends LitElement {
       changed.has('miniWidth') ||
       changed.has('overlay') ||
       changed.has('miniToOverlay') ||
-      changed.has('viewFixed')
+      changed.has('layoutFixed')
     ) {
       this.#syncFixedAndNotifyLayout()
     }
@@ -264,20 +265,23 @@ export class CdmtDrawer extends LitElement {
   }
 
   get #isFixed(): boolean {
-    return this.#isMobileMode || this.overlay || (this.mini && this.miniToOverlay) || this.viewFixed
+    return (
+      this.#isMobileMode || this.overlay || (this.mini && this.miniToOverlay) || this.layoutFixed
+    )
   }
 
   // Same `#isFixed && !isDocked` distinction `data-cdmt-overlay-fixed`
   // already uses, and for the same reason: `#isFixed` alone is also true
   // for a *docked*-and-fixed drawer (a permanent desktop sidebar, via
-  // `view-fixed` from <cdmt-layout>'s `view` string) — not just a genuine
-  // temporary overlay. Missing `!isDocked` here left a docked-fixed
-  // drawer's backdrop invisibly "visible" (opacity 0, but still
-  // `pointer-events: auto`, `position: fixed; inset: 0`) for as long as
-  // the drawer stayed open — which, being permanently docked, is forever —
-  // silently blocking every click on the rest of the page. Confirmed
-  // directly via `document.elementFromPoint`/`shadowRoot.elementFromPoint`
-  // after setting a fixed-docked `view`.
+  // `layoutFixed` from <cdmt-layout>'s own fixed-left-drawer/
+  // fixed-right-drawer attribute) — not just a genuine temporary overlay.
+  // Missing `!isDocked` here left a docked-fixed drawer's backdrop
+  // invisibly "visible" (opacity 0, but still `pointer-events: auto;
+  // position: fixed; inset: 0`) for as long as the drawer stayed open —
+  // which, being permanently docked, is forever — silently blocking every
+  // click on the rest of the page. Confirmed directly via
+  // `document.elementFromPoint`/`shadowRoot.elementFromPoint` after
+  // setting a fixed-docked drawer.
   get #isBackdropVisible(): boolean {
     return this.modelValue && this.#isFixed && !this.isDocked
   }

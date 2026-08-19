@@ -395,8 +395,8 @@ describe('CdmtDrawer', () => {
     el2.remove()
   })
 
-  it('is forced fixed by the parent layout via the viewFixed property', async () => {
-    el.viewFixed = true
+  it('is forced fixed by the parent layout via the layoutFixed property', async () => {
+    el.layoutFixed = true
     await el.updateComplete
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
@@ -416,8 +416,8 @@ describe('CdmtDrawer', () => {
     expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(true)
   })
 
-  it('does not mark itself overlay-fixed when fixed purely via viewFixed (docked, sits beside a fixed header/footer)', async () => {
-    el.viewFixed = true
+  it('does not mark itself overlay-fixed when fixed purely via layoutFixed (docked, sits beside a fixed header/footer)', async () => {
+    el.layoutFixed = true
     await el.updateComplete
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)

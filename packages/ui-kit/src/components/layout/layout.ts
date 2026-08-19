@@ -202,10 +202,10 @@ export class CdmtLayout extends LitElement {
     this.#footer?.toggleAttribute('data-cdmt-fixed', this.fixedFooter)
 
     const leftDrawer = this.#drawer('left')
-    if (leftDrawer) leftDrawer.viewFixed = this.fixedLeftDrawer
+    if (leftDrawer) leftDrawer.layoutFixed = this.fixedLeftDrawer
 
     const rightDrawer = this.#drawer('right')
-    if (rightDrawer) rightDrawer.viewFixed = this.fixedRightDrawer
+    if (rightDrawer) rightDrawer.layoutFixed = this.fixedRightDrawer
   }
 
   #observeChildren(): void {
