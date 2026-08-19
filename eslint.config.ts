@@ -1,4 +1,5 @@
 import js from '@eslint/js'
+import vitest from '@vitest/eslint-plugin'
 import { defineConfig } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import importX from 'eslint-plugin-import-x'
@@ -175,8 +176,14 @@ export default defineConfig(
   // test file
   {
     files: ['**/*.test.ts'],
+    plugins: {
+      vitest
+    },
     rules: {
-      '@typescript-eslint/unbound-method': 'off'
+      '@typescript-eslint/unbound-method': 'off',
+      // Catches a test body with no `expect()` call at all — the classic
+      // shape of a test that runs code but never actually asserts anything.
+      'vitest/expect-expect': 'error'
     }
   },
 
