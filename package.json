@@ -71,6 +71,7 @@
     "@stryker-mutator/vitest-runner": "^9.6.1",
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/eslint-plugin": "^1.6.27",
     "dependency-cruiser": "^18.2.0",
     "esbuild": "^0.28.2",
     "eslint": "^10.8.1",
