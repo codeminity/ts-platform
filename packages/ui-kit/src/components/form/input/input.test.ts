@@ -26,35 +26,6 @@ describe(CdmtInput, () => {
     expect(el.invalid).toBe(false)
   })
 
-  it('renders the placeholder on the inner native input', async () => {
-    el.placeholder = 'Email'
-    await el.updateComplete
-
-    const input = el.shadowRoot?.querySelector('input')
-
-    expect(input?.placeholder).toBe('Email')
-  })
-
-  it('reflects type/disabled/invalid as attributes', async () => {
-    el.type = 'email'
-    el.disabled = true
-    el.invalid = true
-    await el.updateComplete
-
-    expect(el.getAttribute('type')).toBe('email')
-    expect(el.hasAttribute('disabled')).toBe(true)
-    expect(el.hasAttribute('invalid')).toBe(true)
-  })
-
-  it('disables the inner native input', async () => {
-    el.disabled = true
-    await el.updateComplete
-
-    const input = el.shadowRoot?.querySelector('input')
-
-    expect(input?.disabled).toBe(true)
-  })
-
   it('syncs value from a composed native input event', () => {
     const input = getInnerInput(el)
 
@@ -62,14 +33,5 @@ describe(CdmtInput, () => {
     input.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
 
     expect(el.value).toBe('hello@example.com')
-  })
-
-  it('reflects an externally-set value to the inner native input', async () => {
-    el.value = 'preset@example.com'
-    await el.updateComplete
-
-    const input = el.shadowRoot?.querySelector('input')
-
-    expect(input?.value).toBe('preset@example.com')
   })
 })

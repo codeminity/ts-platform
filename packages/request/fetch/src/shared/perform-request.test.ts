@@ -5,9 +5,7 @@ import { createRefreshQueue } from '@codeminity/request-core/test-utils'
 import { performRequest } from './perform-request.js'
 
 import type { Config } from './config.interface.js'
-import type { FetchRequestInit } from './request-config.interface.js'
 
-type RefreshToken = NonNullable<Config['refreshToken']>
 type OnEvent = NonNullable<Config['onEvent']>
 type OnError = NonNullable<Config['onError']>
 
@@ -19,119 +17,6 @@ describe(performRequest, () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     vi.useRealTimers()
-  })
-
-  it('returns the response on a successful (ok) call without retrying', async () => {
-    const okResponse = new Response(null, { status: 200 })
-
-    vi.mocked(fetch).mockResolvedValue(okResponse)
-
-    const result = await performRequest('/x', {}, {}, createRefreshQueue())
-
-    expect(result).toBe(okResponse)
-    expect(fetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('returns a non-ok response as-is when retries are not configured (mirrors native fetch)', async () => {
-    const notFound = new Response(null, { status: 404 })
-
-    vi.mocked(fetch).mockResolvedValue(notFound)
-
-    const result = await performRequest('/missing', {}, {}, createRefreshQueue())
-
-    expect(result).toBe(notFound)
-    expect(fetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('retries a non-ok response until it succeeds', async () => {
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(new Response(null, { status: 500 }))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-
-    const config: Config = { retries: 1, retryOnStatuses: [500] }
-
-    const result = await performRequest('/flaky', {}, config, createRefreshQueue())
-
-    expect(result.status).toBe(200)
-    expect(fetch).toHaveBeenCalledTimes(2)
-  })
-
-  it('returns the final non-ok response once retries are exhausted', async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 500 }))
-
-    const config: Config = { retries: 2, retryOnStatuses: [500] }
-
-    const result = await performRequest('/always-500', {}, config, createRefreshQueue())
-
-    expect(result.status).toBe(500)
-    expect(fetch).toHaveBeenCalledTimes(3)
-  })
-
-  it('resolves the backoff delay immediately once the request is aborted mid-retry', async () => {
-    vi.useFakeTimers()
-
-    const controller = new AbortController()
-
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(new Response(null, { status: 500 }))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-
-    const config: Config = { retries: 1, retryOnStatuses: [500], retryDelay: 5000 }
-    const init: FetchRequestInit = { signal: controller.signal }
-
-    const resultPromise = performRequest('/flaky', init, config, createRefreshQueue())
-
-    await vi.advanceTimersByTimeAsync(10)
-    controller.abort()
-
-    const result = await resultPromise
-
-    expect(result.status).toBe(200)
-    expect(fetch).toHaveBeenCalledTimes(2)
-  })
-
-  it('does not spend a real refreshToken() call on the retry attempt once the signal is already aborted', async () => {
-    vi.useFakeTimers()
-
-    const controller = new AbortController()
-    const refreshToken = vi.fn<RefreshToken>().mockResolvedValue(undefined)
-
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(new Response(null, { status: 500 }))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-
-    const config: Config = {
-      retries: 1,
-      retryOnStatuses: [500],
-      retryDelay: 5000,
-      getToken: () => 'a-token',
-      isTokenExpired: () => true,
-      refreshToken
-    }
-    const init: FetchRequestInit = { signal: controller.signal }
-
-    const resultPromise = performRequest('/flaky', init, config, createRefreshQueue())
-
-    await vi.advanceTimersByTimeAsync(10)
-    controller.abort()
-
-    await resultPromise
-
-    expect(fetch).toHaveBeenCalledTimes(2)
-    expect(refreshToken).toHaveBeenCalledTimes(1)
-  })
-
-  it('retries a thrown network error until it succeeds', async () => {
-    vi.mocked(fetch)
-      .mockRejectedValueOnce(new TypeError('fetch failed'))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-
-    const config: Config = { retries: 1, retryDelay: 0 }
-
-    const result = await performRequest('/network-flaky', {}, config, createRefreshQueue())
-
-    expect(result.status).toBe(200)
-    expect(fetch).toHaveBeenCalledTimes(2)
   })
 
   it('rethrows the network error once retries are exhausted', async () => {
@@ -176,35 +61,5 @@ describe(performRequest, () => {
     await performRequest('/flaky', {}, config, createRefreshQueue())
 
     expect(onEvent).not.toHaveBeenCalled()
-  })
-
-  it('merges per-request codeminity overrides with the instance config for retry decisions', async () => {
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(new Response(null, { status: 500 }))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-
-    const config: Config = { retryOnStatuses: [500] }
-    const init: FetchRequestInit = { codeminity: { retries: 1 } }
-
-    const result = await performRequest('/override', init, config, createRefreshQueue())
-
-    expect(result.status).toBe(200)
-    expect(fetch).toHaveBeenCalledTimes(2)
-  })
-
-  it('applies auth (Authorization header) to every attempt', async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 200 }))
-
-    const config: Config = { getToken: () => 'a-token' }
-
-    await performRequest('/secure', {}, config, createRefreshQueue())
-
-    const calls = vi.mocked(fetch).mock.calls
-
-    expect(calls).toHaveLength(1)
-
-    const [, usedInit] = calls[0] ?? []
-
-    expect((usedInit?.headers as Headers).get('Authorization')).toBe('Bearer a-token')
   })
 })

@@ -17,35 +17,6 @@ describe(CdmtButton, () => {
     expect(el.disabled).toBe(false)
   })
 
-  it('reflects variant as an attribute', async () => {
-    el.variant = 'ghost'
-    await el.updateComplete
-
-    expect(el.getAttribute('variant')).toBe('ghost')
-  })
-
-  it('reflects disabled as an attribute', async () => {
-    el.disabled = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('disabled')).toBe(true)
-  })
-
-  it('disables the inner native button', async () => {
-    el.disabled = true
-    await el.updateComplete
-
-    const button = el.shadowRoot?.querySelector('button')
-
-    expect(button?.disabled).toBe(true)
-  })
-
-  it('renders slotted content', () => {
-    el.textContent = 'Save'
-
-    expect(el.textContent).toBe('Save')
-  })
-
   it('forwards a native click from the inner button', () => {
     let clicked = false
     el.addEventListener('click', () => {

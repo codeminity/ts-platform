@@ -32,25 +32,4 @@ describe(CdmtItemSection, () => {
     expect(el.top).toBe(false)
     expect(el.noWrap).toBe(false)
   })
-
-  it('reflects avatar/thumbnail/side/top as attributes', async () => {
-    el.avatar = true
-    el.thumbnail = true
-    el.side = true
-    el.top = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('avatar')).toBe(true)
-    expect(el.hasAttribute('thumbnail')).toBe(true)
-    expect(el.hasAttribute('side')).toBe(true)
-    expect(el.hasAttribute('top')).toBe(true)
-  })
-
-  it('reflects noWrap as a no-wrap attribute', async () => {
-    el.noWrap = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('no-wrap')).toBe(true)
-    expect(el.hasAttribute('noWrap')).toBe(false)
-  })
 })

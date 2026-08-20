@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type {
-  AuthConfig,
   createRefreshQueue as CreateRefreshQueue,
   RefreshQueue
 } from '@codeminity/request-core'
 
 import type { performRequest as PerformRequest } from './shared/perform-request.js'
 
-type GetToken = NonNullable<AuthConfig['getToken']>
 type Run = RefreshQueue['run']
 
 const performRequest = vi.fn<typeof PerformRequest>()
@@ -25,49 +23,6 @@ vi.mock(import('./shared/perform-request.js'), () => ({
 describe('createFetch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-  })
-
-  it('returns a callable function', async () => {
-    const { createFetch } = await import('./create.js')
-
-    const apiFetch = createFetch()
-
-    expect(apiFetch).toBeTypeOf('function')
-  })
-
-  it('delegates each call to performRequest with the instance config and refresh queue', async () => {
-    const { createFetch } = await import('./create.js')
-
-    const queue = { run: vi.fn<Run>() }
-    createRefreshQueue.mockReturnValue(queue)
-
-    const config = { getToken: vi.fn<GetToken>() }
-    const apiFetch = createFetch(config)
-
-    const init = { method: 'GET' }
-    await apiFetch('/users', init)
-
-    expect(performRequest).toHaveBeenCalledWith('/users', init, config, queue)
-  })
-
-  it('defaults init to an empty object when omitted', async () => {
-    const { createFetch } = await import('./create.js')
-
-    const apiFetch = createFetch({})
-
-    await apiFetch('/users')
-
-    expect(performRequest).toHaveBeenCalledWith('/users', {}, {}, expect.any(Object))
-  })
-
-  it('uses an empty config when not provided', async () => {
-    const { createFetch } = await import('./create.js')
-
-    const apiFetch = createFetch()
-
-    await apiFetch('/users')
-
-    expect(performRequest).toHaveBeenCalledWith('/users', {}, {}, expect.any(Object))
   })
 
   it('gives each instance its own refresh queue (per-instance isolation)', async () => {

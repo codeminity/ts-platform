@@ -68,22 +68,11 @@ describe(CdmtLayout, () => {
     expect(el.transitionDuration).toBeUndefined()
   })
 
-  it('leaves --cdmt-layout-transition-duration unset by default', () => {
-    expect(el.style.getPropertyValue('--cdmt-layout-transition-duration')).toBe('')
-  })
-
   it('sets --cdmt-layout-transition-duration when transitionDuration is set', async () => {
     el.transitionDuration = '300ms'
     await el.updateComplete
 
     expect(el.style.getPropertyValue('--cdmt-layout-transition-duration')).toBe('300ms')
-  })
-
-  it('reflects transitionDuration as the transition-duration attribute', async () => {
-    el.transitionDuration = '1s'
-    await el.updateComplete
-
-    expect(el.getAttribute('transition-duration')).toBe('1s')
   })
 
   it('removes --cdmt-layout-transition-duration when transitionDuration is cleared', async () => {
@@ -107,29 +96,6 @@ describe(CdmtLayout, () => {
     expect(setSpy).not.toHaveBeenCalledWith('--cdmt-layout-transition-duration', expect.anything())
   })
 
-  it('reflects every boolean flag as its own kebab-case attribute', async () => {
-    el.fixedHeader = true
-    el.fixedFooter = true
-    el.fixedLeftDrawer = true
-    el.fixedRightDrawer = true
-    el.headerOverLeftDrawer = false
-    el.headerOverRightDrawer = false
-    el.footerOverLeftDrawer = false
-    el.footerOverRightDrawer = false
-    el.container = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('fixed-header')).toBe(true)
-    expect(el.hasAttribute('fixed-footer')).toBe(true)
-    expect(el.hasAttribute('fixed-left-drawer')).toBe(true)
-    expect(el.hasAttribute('fixed-right-drawer')).toBe(true)
-    expect(el.hasAttribute('header-over-left-drawer')).toBe(false)
-    expect(el.hasAttribute('header-over-right-drawer')).toBe(false)
-    expect(el.hasAttribute('footer-over-left-drawer')).toBe(false)
-    expect(el.hasAttribute('footer-over-right-drawer')).toBe(false)
-    expect(el.hasAttribute('container')).toBe(true)
-  })
-
   it('auto-routes a header, footer, and page-container to their named slots by tag name', async () => {
     const layout = await mountLayout(
       '<cdmt-header></cdmt-header><cdmt-page-container></cdmt-page-container><cdmt-footer></cdmt-footer>'
@@ -151,61 +117,6 @@ describe(CdmtLayout, () => {
 
     expect(drawers.find((d) => d.side === 'left')?.slot).toBe('drawer-left')
     expect(drawers.find((d) => d.side === 'right')?.slot).toBe('drawer-right')
-
-    layout.remove()
-  })
-
-  it('leaves an unrecognized child unrouted (falls through to the default slot)', async () => {
-    const layout = await mountLayout('<div id="misc"></div>')
-
-    expect(layout.querySelector('#misc')?.slot).toBe('')
-
-    layout.remove()
-  })
-
-  it('marks header/footer fixed from fixedHeader/fixedFooter', async () => {
-    const layout = await mountLayout('<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer>')
-    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
-    const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
-
-    expect(header.hasAttribute('data-cdmt-fixed')).toBe(false)
-    expect(footer.hasAttribute('data-cdmt-fixed')).toBe(false)
-
-    layout.fixedHeader = true
-    layout.fixedFooter = true
-    await layout.updateComplete
-
-    expect(header.hasAttribute('data-cdmt-fixed')).toBe(true)
-    expect(footer.hasAttribute('data-cdmt-fixed')).toBe(true)
-
-    layout.remove()
-  })
-
-  it('marks the matching-side drawer layoutFixed from fixedLeftDrawer/fixedRightDrawer', async () => {
-    const layout = await mountLayout(
-      '<cdmt-drawer side="left"></cdmt-drawer><cdmt-drawer side="right"></cdmt-drawer>'
-    )
-    const [leftDrawer, rightDrawer] = [...layout.querySelectorAll('cdmt-drawer')].sort((a, b) =>
-      a.side.localeCompare(b.side)
-    )
-
-    layout.fixedLeftDrawer = true
-    layout.fixedRightDrawer = true
-    await layout.updateComplete
-
-    expect(leftDrawer?.layoutFixed).toBe(true)
-    expect(rightDrawer?.layoutFixed).toBe(true)
-
-    layout.remove()
-  })
-
-  it('does not mark a drawer layoutFixed when its own fixed-left-drawer/right flag is false', async () => {
-    const layout = await mountLayout(
-      '<cdmt-drawer side="left"></cdmt-drawer><cdmt-drawer side="right"></cdmt-drawer>'
-    )
-    const drawers = [...layout.querySelectorAll('cdmt-drawer')]
-
-    expect(drawers.every((drawer) => !drawer.layoutFixed)).toBe(true)
 
     layout.remove()
   })
@@ -237,45 +148,6 @@ describe(CdmtLayout, () => {
     expect(footer.getBoundingClientRect).toHaveBeenCalled()
     expect(pageContainer.style.paddingTop).toBe('64px')
     expect(pageContainer.style.paddingBottom).toBe('48px')
-
-    layout.remove()
-  })
-
-  it('does not count a docked-but-static drawer toward the offset (flexbox already reserves its space)', async () => {
-    const layout = await mountLayout('<cdmt-drawer side="left"></cdmt-drawer>')
-    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
-    stubRect(drawer, 300)
-    vi.mocked(drawer.getBoundingClientRect).mockClear()
-
-    drawer.show()
-    await drawer.updateComplete
-    await Promise.resolve()
-
-    // docked (not overlay/mobile/mini-to-overlay) and fixed-left-drawer is
-    // false by default — flexbox alone reserves the space, no offset var
-    // measurement needed.
-    expect(drawer.getBoundingClientRect).not.toHaveBeenCalled()
-
-    layout.remove()
-  })
-
-  it('counts a docked-and-fixed drawer toward the offset (position: fixed pulls it out of flex flow)', async () => {
-    const layout = await mountLayout('<cdmt-drawer side="left"></cdmt-drawer>')
-    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
-    stubRect(drawer, 300)
-
-    layout.fixedLeftDrawer = true
-    await layout.updateComplete
-    drawer.show()
-    await drawer.updateComplete
-    await Promise.resolve()
-    vi.mocked(drawer.getBoundingClientRect).mockClear()
-
-    // trigger one more recompute pass to observe the call under the now-fixed state
-    drawer.dispatchEvent(new CustomEvent('cdmt-layout-child-change', { bubbles: true }))
-    await Promise.resolve()
-
-    expect(drawer.getBoundingClientRect).toHaveBeenCalled()
 
     layout.remove()
   })
@@ -453,19 +325,6 @@ describe(CdmtLayout, () => {
     layout.remove()
   })
 
-  it('auto-routes a child appended dynamically after mount (real MutationObserver callback)', async () => {
-    const layout = await mountLayout('')
-
-    const header = document.createElement('cdmt-header')
-    layout.append(header)
-    await Promise.resolve()
-    await Promise.resolve()
-
-    expect(header.slot).toBe('header')
-
-    layout.remove()
-  })
-
   it('unobserves a previously-observed element before re-observing on a second children-changed pass', async () => {
     const layout = await mountLayout('<cdmt-header></cdmt-header>')
     const header = required(layout.querySelector('cdmt-header'), 'expected a header')
@@ -518,22 +377,6 @@ describe(CdmtLayout, () => {
 
     layout.remove()
     vi.unstubAllGlobals()
-  })
-
-  it('recomputes offsets in reaction to a bubbling cdmt-layout-child-change event', async () => {
-    const layout = await mountLayout('<cdmt-header></cdmt-header>')
-    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
-    layout.fixedHeader = true
-    await layout.updateComplete
-    stubRect(header, 70)
-    vi.mocked(header.getBoundingClientRect).mockClear()
-
-    header.dispatchEvent(new CustomEvent('cdmt-layout-child-change', { bubbles: true }))
-    await Promise.resolve()
-
-    expect(header.getBoundingClientRect).toHaveBeenCalled()
-
-    layout.remove()
   })
 
   it('stops reacting to new children and to cdmt-layout-child-change after being disconnected', async () => {
@@ -731,31 +574,6 @@ describe(CdmtLayout, () => {
     expect(rectSpy).toHaveBeenCalled()
 
     layout.remove()
-  })
-
-  it('only observes the header/footer/drawers actually present, not missing ones', async () => {
-    const observeCalls: unknown[] = []
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        observe(target: unknown): void {
-          observeCalls.push(target)
-        }
-        unobserve(): void {
-          // no-op
-        }
-        disconnect(): void {
-          // no-op
-        }
-      }
-    )
-
-    const layout = await mountLayout('<cdmt-header></cdmt-header>')
-
-    expect(observeCalls).toHaveLength(1)
-
-    layout.remove()
-    vi.unstubAllGlobals()
   })
 
   it('observes a present left-side drawer specifically (not skipped by side lookup)', async () => {

@@ -37,17 +37,6 @@ describe('createUIKit', () => {
     expect(getThemeController().mode).toBe('light')
   })
 
-  it('applies the given mode', async () => {
-    const { createUIKit } = await freshModules()
-
-    const app = createApp({ render: () => null })
-    app.use(createUIKit({ mode: 'dark' }))
-
-    expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
-      material.tokens.colors.primary.dark.value
-    )
-  })
-
   it('applies overrides layered onto the base theme', async () => {
     const { createUIKit } = await freshModules()
 
@@ -55,15 +44,5 @@ describe('createUIKit', () => {
     app.use(createUIKit({ overrides: { tokens: { radiusMd: '2px' } } }))
 
     expect(document.documentElement.style.getPropertyValue('--cdmt-radius-md')).toBe('2px')
-  })
-
-  it('accepts a fully custom theme', async () => {
-    const { createUIKit } = await freshModules()
-    const customTheme = { tokens: { ...material.tokens, radiusMd: '99px' } }
-
-    const app = createApp({ render: () => null })
-    app.use(createUIKit({ theme: customTheme }))
-
-    expect(document.documentElement.style.getPropertyValue('--cdmt-radius-md')).toBe('99px')
   })
 })

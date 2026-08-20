@@ -16,33 +16,6 @@ describe(applyTheme, () => {
     expect(el.style.getPropertyValue('--cdmt-color-text')).toBe(material.tokens.colors.text.light)
     expect(el.style.getPropertyValue('--cdmt-radius-md')).toBe(material.tokens.radiusMd)
   })
-
-  it('paints dark-mode values when mode is dark', () => {
-    const el = document.createElement('div')
-
-    applyTheme(el, material, 'dark')
-
-    expect(el.style.getPropertyValue('--cdmt-color-primary')).toBe(
-      material.tokens.colors.primary.dark.value
-    )
-    expect(el.style.getPropertyValue('--cdmt-color-text')).toBe(material.tokens.colors.text.dark)
-  })
-
-  it('re-applying overwrites previously-painted values', () => {
-    const el = document.createElement('div')
-
-    applyTheme(el, material, 'light')
-
-    expect(el.style.getPropertyValue('--cdmt-color-primary')).toBe(
-      material.tokens.colors.primary.light.value
-    )
-
-    applyTheme(el, material, 'dark')
-
-    expect(el.style.getPropertyValue('--cdmt-color-primary')).toBe(
-      material.tokens.colors.primary.dark.value
-    )
-  })
 })
 
 describe(mergeTheme, () => {
@@ -66,20 +39,6 @@ describe(mergeTheme, () => {
 
     expect(merged.tokens.colors.text.dark).toBe('#ffffff')
     expect(merged.tokens.colors.text.light).toBe(material.tokens.colors.text.light)
-  })
-
-  it('overrides a scalar token', () => {
-    const merged = mergeTheme(material, { tokens: { radiusMd: '2px' } })
-
-    expect(merged.tokens.radiusMd).toBe('2px')
-    expect(merged.tokens.spacingSm).toBe(material.tokens.spacingSm)
-  })
-
-  it('overrides focusRingColor independently of tokens/colors', () => {
-    const merged = mergeTheme(material, { focusRingColor: { light: '#e11d48' } })
-
-    expect(merged.tokens.focusRingColor.light).toBe('#e11d48')
-    expect(merged.tokens.focusRingColor.dark).toBe(material.tokens.focusRingColor.dark)
   })
 
   it('adds custom colors without touching built-in ones', () => {

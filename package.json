@@ -50,6 +50,7 @@
     "sbom": "pnpm sbom --sbom-format cyclonedx --prod --split --out sbom/%s.cdx.json",
     "test:e2e": "playwright test --config=e2e/browser/playwright.config.ts",
     "test:mutation": "stryker run stryker.config.ts",
+    "find-redundant-tests": "tsx scripts/find-redundant-tests-run.ts",
     "bench": "vitest bench --run",
     "bench:baseline": "vitest bench --run --outputJson bench-baseline.json",
     "bench:compare": "vitest bench --run --compare bench-baseline.json",

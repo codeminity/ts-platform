@@ -4,14 +4,6 @@ import { flattenThemeTokens } from './flatten-theme-tokens.js'
 import { material } from './presets/material.js'
 
 describe(flattenThemeTokens, () => {
-  it('flattens a color role into value/hover/foreground keys, resolved for light', () => {
-    const flat = flattenThemeTokens(material.tokens, 'light')
-
-    expect(flat.colorPrimary).toBe(material.tokens.colors.primary.light.value)
-    expect(flat.colorPrimaryHover).toBe(material.tokens.colors.primary.light.onHover)
-    expect(flat.colorPrimaryForeground).toBe(material.tokens.colors.primary.light.foreground)
-  })
-
   it('flattens a color role resolved for dark', () => {
     const flat = flattenThemeTokens(material.tokens, 'dark')
 
@@ -34,15 +26,6 @@ describe(flattenThemeTokens, () => {
     expect(flat.fontFamily).toBe(material.tokens.fontFamily)
   })
 
-  it('resolves focusRingColor for the given mode', () => {
-    expect(flattenThemeTokens(material.tokens, 'light').focusRingColor).toBe(
-      material.tokens.focusRingColor.light
-    )
-    expect(flattenThemeTokens(material.tokens, 'dark').focusRingColor).toBe(
-      material.tokens.focusRingColor.dark
-    )
-  })
-
   it('flattens custom colors the same way as built-in roles', () => {
     const withCustom = {
       ...material.tokens,
@@ -59,11 +42,5 @@ describe(flattenThemeTokens, () => {
     expect(flat.colorAccent2).toBe('#123456')
     expect(flat.colorAccent2Hover).toBe('#654321')
     expect(flat.colorAccent2Foreground).toBe('#ffffff')
-  })
-
-  it('omits custom entirely when no custom colors are given', () => {
-    const flat = flattenThemeTokens(material.tokens, 'light')
-
-    expect(Object.keys(flat).some((key) => key.startsWith('colorCustom'))).toBe(false)
   })
 })

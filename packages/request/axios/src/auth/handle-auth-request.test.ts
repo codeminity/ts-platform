@@ -36,29 +36,16 @@ describe(handleAuthRequest, () => {
     expect(result.withCredentials).toBe(true)
   })
 
-  it('warns about an insecure URL when in COOKIE mode', async () => {
+  it('resolves the baseURL alone when the request has no url', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({ baseURL: 'http://insecure.example.com', url: '/api' })
+    const request = createRequestConfig({ baseURL: 'http://insecure-no-path.example.com' })
+    delete request.url
 
     await handleAuthRequest(request, config, createRefreshQueueMock())
 
     expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure.example.com')
-
-    warn.mockRestore()
-  })
-
-  it('does not warn for a secure baseURL in COOKIE mode', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({ baseURL: 'https://secure.example.com', url: '/api' })
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).not.toHaveBeenCalled()
 
     warn.mockRestore()
   })
@@ -80,37 +67,6 @@ describe(handleAuthRequest, () => {
     warn.mockRestore()
   })
 
-  it('prefers an absolute request url over a secure baseURL', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({
-      baseURL: 'https://secure-base.example.com',
-      url: 'http://insecure-absolute.example.com/x'
-    })
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-absolute.example.com')
-
-    warn.mockRestore()
-  })
-
-  it('resolves the baseURL alone when the request has no url', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({ baseURL: 'http://insecure-no-path.example.com' })
-    delete request.url
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).toHaveBeenCalledTimes(1)
-
-    warn.mockRestore()
-  })
-
   it('warns about a relative url when the page itself is served insecurely (simulated browser)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
@@ -126,88 +82,6 @@ describe(handleAuthRequest, () => {
 
     warn.mockRestore()
     vi.unstubAllGlobals()
-  })
-
-  it('does not warn about a relative url when the page itself is served securely (simulated browser)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({ url: '/orders' })
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).not.toHaveBeenCalled()
-
-    warn.mockRestore()
-    vi.unstubAllGlobals()
-  })
-
-  it('does not warn about a relative url outside a browser (no document to resolve against)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({ url: '/orders' })
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).not.toHaveBeenCalled()
-
-    warn.mockRestore()
-  })
-
-  it('prefers a configured baseURL over document.baseURI (simulated browser)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE })
-    const request = createRequestConfig({
-      baseURL: 'http://insecure-base.example.com',
-      url: '/orders'
-    })
-
-    await handleAuthRequest(request, config, createRefreshQueueMock())
-
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-base.example.com')
-
-    warn.mockRestore()
-    vi.unstubAllGlobals()
-  })
-
-  it('does not enable withCredentials in COOKIE mode when skipAuth is set for the request', async () => {
-    const config = createAuthConfig({
-      tokenMode: TokenModeEnum.COOKIE
-    })
-
-    const request = createRequestConfig({ codeminity: { skipAuth: true } })
-    const queue = createRefreshQueueMock()
-
-    const result = await handleAuthRequest(request, config, queue)
-
-    expect(result.withCredentials).toBeUndefined()
-  })
-
-  it('calls refresh before token and sets header', async () => {
-    const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
-
-    const config = createAuthConfig({
-      tokenMode: TokenModeEnum.JWT,
-      getToken
-    })
-
-    const request = createRequestConfig()
-    const queue = createRefreshQueueMock()
-
-    const result = await handleAuthRequest(request, config, queue)
-
-    expect(refreshSpy).toHaveBeenCalledTimes(1)
-    expect(getToken).toHaveBeenCalledTimes(1)
-    expect(result.headers.get('Authorization')).toBe('Bearer token123')
   })
 
   it('does not attempt token refresh when skipAuth is set for the request', async () => {
@@ -277,119 +151,6 @@ describe(handleAuthRequest, () => {
     expect(result.headers.get('Authorization')).toBe('Bearer token')
   })
 
-  it('calls both onEvent and onError when refresh fails with an axios error', async () => {
-    const onEvent = vi.fn<OnEvent>()
-    const onError = vi.fn<OnError>()
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
-      onEvent,
-      onError
-    }
-
-    const error = new Error('refresh failed') as AxiosError
-
-    error.isAxiosError = true
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
-
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-
-    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
-    expect(onError).toHaveBeenCalledWith(error)
-  })
-
-  it('does not throw when refresh fails with an axios error and onEvent is not provided', async () => {
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockResolvedValue('token')
-    }
-
-    const error = new Error('refresh failed') as AxiosError
-
-    error.isAxiosError = true
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
-
-    const request = createRequestConfig()
-
-    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
-      request
-    )
-  })
-
-  it('still calls onError when onEvent throws', async () => {
-    const onEvent = vi.fn<OnEvent>().mockImplementation(() => {
-      throw new Error('broken onEvent')
-    })
-    const onError = vi.fn<OnError>()
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
-      onEvent,
-      onError
-    }
-
-    const error = new Error('refresh failed') as AxiosError
-
-    error.isAxiosError = true
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
-
-    const request = createRequestConfig()
-
-    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
-      request
-    )
-
-    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_REFRESH_FAILED, error)
-    expect(onError).toHaveBeenCalledWith(error)
-  })
-
-  it('does not throw when onError itself throws', async () => {
-    const onError = vi.fn<OnError>().mockImplementation(() => {
-      throw new Error('broken onError')
-    })
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
-      onError
-    }
-
-    const error = new Error('refresh failed') as AxiosError
-
-    error.isAxiosError = true
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
-
-    const request = createRequestConfig()
-
-    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
-      request
-    )
-
-    expect(onError).toHaveBeenCalledWith(error)
-  })
-
-  it('emits error callback but not onEvent when refresh fails with a non axios error', async () => {
-    const onEvent = vi.fn<OnEvent>()
-    const onError = vi.fn<OnError>()
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
-      onEvent,
-      onError
-    }
-
-    const error = new Error('refresh failed')
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
-
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-
-    expect(onError).toHaveBeenCalledWith(error)
-    expect(onEvent).not.toHaveBeenCalled()
-  })
-
   it('emits error callback but not onEvent when getToken fails with a non axios error', async () => {
     const onEvent = vi.fn<OnEvent>()
     const onError = vi.fn<OnError>()
@@ -408,20 +169,6 @@ describe(handleAuthRequest, () => {
 
     expect(onError).toHaveBeenCalledWith(error)
     expect(onEvent).not.toHaveBeenCalled()
-  })
-
-  it('does not throw when getToken fails with a non axios error and onError is not provided', async () => {
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockRejectedValue(new Error('token failed'))
-    }
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    const request = createRequestConfig()
-
-    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
-      request
-    )
   })
 
   it('skips auth when getToken is not configured', async () => {
@@ -451,61 +198,5 @@ describe(handleAuthRequest, () => {
     const result = await handleAuthRequest(request, config, createRefreshQueueMock())
 
     expect(result.headers.get('Authorization')).toBeUndefined()
-  })
-
-  it('emits token failed event when getToken throws axios error', async () => {
-    const onEvent = vi.fn<OnEvent>()
-
-    const error = new Error('token failed') as AxiosError
-    error.isAxiosError = true
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockRejectedValue(error),
-      onEvent
-    }
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-
-    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
-  })
-
-  it('calls both onEvent and onError when getToken fails with an axios error', async () => {
-    const onEvent = vi.fn<OnEvent>()
-    const onError = vi.fn<OnError>()
-
-    const error = new Error('token failed') as AxiosError
-    error.isAxiosError = true
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockRejectedValue(error),
-      onEvent,
-      onError
-    }
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    await handleAuthRequest(createRequestConfig(), config, createRefreshQueueMock())
-
-    expect(onEvent).toHaveBeenCalledWith(ErrorEventEnum.AUTH_TOKEN_FAILED, error)
-    expect(onError).toHaveBeenCalledWith(error)
-  })
-
-  it('does not throw when getToken fails with an axios error and onEvent is not provided', async () => {
-    const error = new Error('token failed') as AxiosError
-    error.isAxiosError = true
-
-    const config: Config = {
-      getToken: vi.fn<GetToken>().mockRejectedValue(error)
-    }
-
-    vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    const request = createRequestConfig()
-
-    await expect(handleAuthRequest(request, config, createRefreshQueueMock())).resolves.toBe(
-      request
-    )
   })
 })

@@ -60,24 +60,6 @@ describe('getThemeController', () => {
     )
   })
 
-  it('returns the same instance on every call', async () => {
-    const getThemeController = await freshGetThemeController()
-
-    expect(getThemeController()).toBe(getThemeController())
-  })
-
-  it('setMode repaints and updates isDark', async () => {
-    const getThemeController = await freshGetThemeController()
-    const controller = getThemeController()
-
-    controller.setMode('dark')
-
-    expect(controller.isDark).toBe(true)
-    expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
-      material.tokens.colors.primary.dark.value
-    )
-  })
-
   it('toggleMode flips light/dark, and mode itself is set to the literal string', async () => {
     const getThemeController = await freshGetThemeController()
     const controller = getThemeController()

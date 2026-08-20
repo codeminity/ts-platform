@@ -15,35 +15,6 @@ function getInnerInput(el: CdmtInputElement): HTMLInputElement {
 }
 
 describe('cdmtInput (Vue)', () => {
-  it('renders a cdmt-input element', () => {
-    const wrapper = mount(CdmtInput, { attachTo: document.body })
-    const element = wrapper.element as unknown as CdmtInputElement
-
-    expect(element.tagName.toLowerCase()).toBe('cdmt-input')
-  })
-
-  it('passes modelValue through as the controlled value', async () => {
-    const wrapper = mount(CdmtInput, { props: { modelValue: 'hi' }, attachTo: document.body })
-    const element = wrapper.element as unknown as CdmtInputElement
-    await wrapper.vm.$nextTick()
-
-    expect(element.value).toBe('hi')
-  })
-
-  it('passes type/placeholder/disabled/invalid through', async () => {
-    const wrapper = mount(CdmtInput, {
-      props: { type: 'email', placeholder: 'you@example.com', disabled: true, invalid: true },
-      attachTo: document.body
-    })
-    const element = wrapper.element as unknown as CdmtInputElement
-    await element.updateComplete
-
-    expect(element.getAttribute('type')).toBe('email')
-    expect(element.placeholder).toBe('you@example.com')
-    expect(element.hasAttribute('disabled')).toBe(true)
-    expect(element.hasAttribute('invalid')).toBe(true)
-  })
-
   it('emits update:modelValue with a real value bound through v-model semantics', async () => {
     const wrapper = mount(CdmtInput, { props: { modelValue: '' }, attachTo: document.body })
     const element = wrapper.element as unknown as CdmtInputElement

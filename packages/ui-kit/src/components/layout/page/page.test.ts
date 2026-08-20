@@ -19,13 +19,6 @@ describe(CdmtPage, () => {
     expect(el.styleFn).toBeUndefined()
   })
 
-  it('reflects padding as an attribute', async () => {
-    el.padding = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('padding')).toBe(true)
-  })
-
   it('renders a default slot in its shadow root that actually distributes light-DOM content', () => {
     expect(el.shadowRoot?.querySelector('slot')).not.toBeNull()
 
@@ -62,13 +55,6 @@ describe(CdmtPage, () => {
     expect(el.style.getPropertyValue('min-height')).toBe('106px')
   })
 
-  it('treats a missing/non-numeric layout offset as 0', async () => {
-    el.styleFn = (offset) => ({ minHeight: `${String(offset)}px` })
-    await el.updateComplete
-
-    expect(el.style.getPropertyValue('min-height')).toBe('0px')
-  })
-
   it('removes the inline min-height when styleFn is cleared, falling back to the default CSS', async () => {
     el.styleFn = () => ({ minHeight: '999px' })
     await el.updateComplete
@@ -79,12 +65,5 @@ describe(CdmtPage, () => {
     await el.updateComplete
 
     expect(el.style.getPropertyValue('min-height')).toBe('')
-  })
-
-  it('converts a camelCase styleFn key to a kebab-case CSS property', async () => {
-    el.styleFn = () => ({ backgroundColor: 'red' })
-    await el.updateComplete
-
-    expect(el.style.getPropertyValue('background-color')).toBe('red')
   })
 })

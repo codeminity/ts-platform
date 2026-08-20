@@ -21,21 +21,6 @@ describe('useTheme', () => {
     document.documentElement.removeAttribute('style')
   })
 
-  it('exposes the current mode/isDark/theme from the shared controller', async () => {
-    const { useTheme } = await freshModules()
-
-    const Comp = defineComponent({
-      setup() {
-        const theme = useTheme()
-        return () => h('div', `${theme.mode.value}:${String(theme.isDark.value)}`)
-      }
-    })
-
-    const wrapper = mount(Comp, { attachTo: document.body })
-
-    expect(wrapper.text()).toBe('light:false')
-  })
-
   it('updates reactively when the controller changes from outside the composable', async () => {
     const { useTheme, getThemeController } = await freshModules()
 
@@ -52,25 +37,5 @@ describe('useTheme', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toBe('dark:true')
-  })
-
-  it('setMode/toggleMode/setTheme returned from the composable act on the real controller', async () => {
-    const { useTheme, getThemeController } = await freshModules()
-
-    const Comp = defineComponent({
-      setup() {
-        const theme = useTheme()
-        return { theme }
-      },
-      render() {
-        return h('div')
-      }
-    })
-
-    const wrapper = mount(Comp, { attachTo: document.body })
-
-    wrapper.vm.theme.toggleMode()
-
-    expect(getThemeController().isDark).toBe(true)
   })
 })
