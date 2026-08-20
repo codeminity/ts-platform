@@ -3,8 +3,8 @@ import path from 'node:path'
 
 import { globby } from 'globby'
 
-import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
-import { loadRuntimeModule } from './lib/load-runtime-module'
+import { extractExportsFromSource, hasTypeExport } from '../lib/api-exports'
+import { loadRuntimeModule } from '../lib/load-runtime-module'
 
 // A cheap, textual sanity check — does every export named in src/ actually
 // show up in the built dist/*.js and dist/*.d.ts? It does NOT run API

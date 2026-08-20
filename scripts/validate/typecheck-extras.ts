@@ -1,6 +1,6 @@
 import { globby } from 'globby'
 
-import { runCommand } from './lib/run-command'
+import { runCommand } from '../lib/run-command'
 
 // Areas that always exist, regardless of how many packages there are.
 const FIXED_TSCONFIGS = ['scripts/tsconfig.json', 'e2e/tsconfig.json', 'tsconfig.tooling.json']

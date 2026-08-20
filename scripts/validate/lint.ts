@@ -1,5 +1,5 @@
-import { getAffectedScope } from './lib/affected-scope'
-import { runCommand } from './lib/run-command'
+import { getAffectedScope } from '../lib/affected-scope'
+import { runCommand } from '../lib/run-command'
 
 // `signal`, when given, is forwarded to every process this spawns — see
 // full-check.ts's own `run:` comment on the Lint step for why this runs

@@ -5,12 +5,12 @@ import path from 'node:path'
 
 import * as esbuild from 'esbuild'
 
-import { buildLocalOverrides, toWorkspaceOverridesYaml } from './lib/local-overrides'
-import { packPackage } from './lib/pack-package'
-import { readPackageJson } from './lib/read-package-json'
-import { runApiExtractor } from './lib/run-api-extractor'
-import { runCommand } from './lib/run-command'
-import { runPublint } from './lib/run-publint'
+import { buildLocalOverrides, toWorkspaceOverridesYaml } from '../lib/local-overrides'
+import { packPackage } from '../lib/pack-package'
+import { readPackageJson } from '../lib/read-package-json'
+import { runApiExtractor } from '../lib/run-api-extractor'
+import { runCommand } from '../lib/run-command'
+import { runPublint } from '../lib/run-publint'
 
 export interface VerifyPackageOptions {
   packagePath: string

@@ -2,9 +2,10 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import { packPackage } from './lib/pack-package'
-import { readPackageJson } from './lib/read-package-json'
-import { findWorkspacePackages } from './package-discovery'
+import { packPackage } from '../lib/pack-package'
+import { findWorkspacePackages } from '../lib/package-discovery'
+import { readPackageJson } from '../lib/read-package-json'
+
 import { verifyPackage } from './verify-package'
 
 async function packWorkspacePackages(

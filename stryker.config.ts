@@ -88,7 +88,7 @@ export default {
   // that would independently kill it — confirmed directly: a genuinely
   // essential test can end up with an empty `killedBy` purely because some
   // unrelated test happened to run first and already failed. Without this,
-  // `scripts/find-redundant-tests.ts` (run nightly right after mutation
+  // `scripts/test/find-redundant-tests.ts` (run nightly right after mutation
   // testing) would misidentify load-bearing tests as redundant.
   //
   // Does change the real running time, though — a mutant covered by many
@@ -123,7 +123,7 @@ export default {
     // runtime-tracked `perTest` coverage analysis, unaffected by this.
     related: false
   },
-  // 'json' feeds `scripts/find-redundant-tests.ts`, run nightly right after
+  // 'json' feeds `scripts/test/find-redundant-tests.ts`, run nightly right after
   // this — it needs the report's per-mutant killedBy/coveredBy test
   // attribution, which only the json reporter (not html/clear-text/
   // progress) writes to disk.

@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { extractChangelogSection } from './lib/changelog-section'
-import { readPackageJson } from './lib/read-package-json'
-import { findWorkspacePackages } from './package-discovery'
+import { extractChangelogSection } from '../lib/changelog-section'
+import { findWorkspacePackages } from '../lib/package-discovery'
+import { readPackageJson } from '../lib/read-package-json'
 
 function findPackageDirByName(name: string, packagesDir: string): string | null {
   for (const packageDir of findWorkspacePackages(packagesDir)) {

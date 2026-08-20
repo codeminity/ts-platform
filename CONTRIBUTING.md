@@ -24,7 +24,7 @@ To reset back to a fresh-clone state:
 pnpm run clean
 ```
 
-Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.eslintcache`, `.prettiercache`, every `*.tsbuildinfo` file, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/clean.ts`, not `git clean`, so it can never reach further than intended.
+Deletes exactly `node_modules`, every package's `dist`/`node_modules`/`.turbo`/`temp`, `coverage`, `.turbo`, `.eslintcache`, `.prettiercache`, every `*.tsbuildinfo` file, `.husky/_`, and the various generated reports (`reports`, `test-results`, `playwright-report`, `blob-report`, `.stryker-tmp`, `sbom`, `results.sarif`, `bench-baseline.json`) — an explicit allowlist in `scripts/maintenance/clean.ts`, not `git clean`, so it can never reach further than intended.
 
 ---
 
@@ -188,7 +188,7 @@ To cut a release: run `pnpm version-packages` on a branch named exactly `release
 
 Publishing authenticates via **npm Trusted Publisher** (OIDC) — each package is configured on npmjs.com to trust this exact repo and workflow, so the workflow requests a short-lived token from GitHub's OIDC provider instead of using a stored `NPM_TOKEN` secret. There is no long-lived npm token anywhere in this repo, and none should be added; see [SECURITY.md](./SECURITY.md#release--supply-chain-security) for why. Every published package also carries npm provenance, attesting the tarball back to the exact commit and workflow run that built it.
 
-If a publish succeeds on npm but the tag/GitHub Release don't appear, `release.yml` has a `workflow_dispatch` recovery path (comma-separated `<name>@<version>` tags input) that re-creates them without re-publishing. It only works if the published commit is **still the default branch's current tip** — `GITHUB_TOKEN` cannot push a tag pointing at an older commit whose `.github/workflows/*` content differs from the current tip (a hard GitHub restriction, not fixable via `permissions:`). If main has moved on since, push the tag yourself instead (`git tag <name>@<version> <sha> && git push origin <name>@<version>`, then `gh release create <name>@<version> --title <name>@<version> --notes "$(npx tsx scripts/release-notes-run.ts <name>@<version>)"`) — a human's own push isn't subject to this restriction. See the comment above `workflow_dispatch` in [`release.yml`](./.github/workflows/release.yml) for the full story.
+If a publish succeeds on npm but the tag/GitHub Release don't appear, `release.yml` has a `workflow_dispatch` recovery path (comma-separated `<name>@<version>` tags input) that re-creates them without re-publishing. It only works if the published commit is **still the default branch's current tip** — `GITHUB_TOKEN` cannot push a tag pointing at an older commit whose `.github/workflows/*` content differs from the current tip (a hard GitHub restriction, not fixable via `permissions:`). If main has moved on since, push the tag yourself instead (`git tag <name>@<version> <sha> && git push origin <name>@<version>`, then `gh release create <name>@<version> --title <name>@<version> --notes "$(npx tsx scripts/release/release-notes-run.ts <name>@<version>)"`) — a human's own push isn't subject to this restriction. See the comment above `workflow_dispatch` in [`release.yml`](./.github/workflows/release.yml) for the full story.
 
 ### Renovate is dashboard-only here
 

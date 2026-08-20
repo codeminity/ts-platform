@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CommandCancelledError, runCommand } from './lib/run-command'
+import { CommandCancelledError, runCommand } from '../lib/run-command'
 
 import type { CheckStep, RunFullCheckOptions } from './full-check'
-import type * as RunCommandModule from './lib/run-command'
-import type { runIfRelevant as RunIfRelevant } from './lib/run-if-relevant'
 import type { runScopedLint as RunScopedLint } from './lint'
 import type { runScopedTypecheck as RunScopedTypecheck } from './typecheck'
+import type * as RunCommandModule from '../lib/run-command'
+import type { runIfRelevant as RunIfRelevant } from '../lib/run-if-relevant'
 
-vi.mock(import('./lib/run-command'), async (importOriginal) => {
+vi.mock(import('../lib/run-command'), async (importOriginal) => {
   const actual = await importOriginal<typeof RunCommandModule>()
   return {
     // CommandCancelledError is a plain, side-effect-free class — reusing
@@ -28,12 +28,12 @@ vi.mock(import('./lib/run-command'), async (importOriginal) => {
 // side effect of running the unit test.
 vi.mock(import('./lint'), () => ({ runScopedLint: vi.fn<typeof RunScopedLint>() }))
 vi.mock(import('./typecheck'), () => ({ runScopedTypecheck: vi.fn<typeof RunScopedTypecheck>() }))
-vi.mock(import('./lib/run-if-relevant'), () => ({ runIfRelevant: vi.fn<typeof RunIfRelevant>() }))
+vi.mock(import('../lib/run-if-relevant'), () => ({ runIfRelevant: vi.fn<typeof RunIfRelevant>() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
 const { runScopedLint } = await import('./lint')
 const { runScopedTypecheck } = await import('./typecheck')
-const { runIfRelevant } = await import('./lib/run-if-relevant')
+const { runIfRelevant } = await import('../lib/run-if-relevant')
 
 const mockedRunCommand = vi.mocked(runCommand)
 const mockedRunScopedLint = vi.mocked(runScopedLint)
