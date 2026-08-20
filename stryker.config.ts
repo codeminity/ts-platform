@@ -36,7 +36,11 @@ export default {
     // traced back past a red-herring batch of `Timeout` mutants (Timeout
     // counts as *detected* in that same formula — harmless to the score,
     // despite looking alarming in the log) to this file specifically.
-    '!packages/**/src/**/dependencies.ts'
+    // The exact path, not `**/dependencies.ts` — this is a one-off file
+    // for this one seam, not a repo-wide naming convention like
+    // `test-utils.ts`/`index.ts` above; a broad pattern would silently
+    // exempt any unrelated future file that happens to share the name.
+    '!packages/request/core/src/auth/dependencies.ts'
   ],
   // See DECISIONS.md#adr-011-static-mutants-ignored-in-mutation-testing —
   // also means a purely static file (e.g. theme/tokens.ts) will show 0
