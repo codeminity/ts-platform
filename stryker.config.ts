@@ -70,10 +70,25 @@ export default {
   // essential test can end up with an empty `killedBy` purely because some
   // unrelated test happened to run first and already failed. Without this,
   // `scripts/find-redundant-tests.ts` (run nightly right after mutation
-  // testing) would misidentify load-bearing tests as redundant. Doesn't
-  // change the mutation score itself (Killed/Survived status is identical
-  // either way) — only the per-test attribution detail.
+  // testing) would misidentify load-bearing tests as redundant.
+  //
+  // Does change the real running time, though — a mutant covered by many
+  // tests (e.g. one exercised by every test in an *.integration.test.ts
+  // file) must now run every one of them to completion instead of
+  // stopping at the first failure. Confirmed directly on GitHub Actions'
+  // slower/shared runners: the default timeout budget (timeoutFactor 1.5,
+  // timeoutMS 5000) wasn't enough headroom for that extra work, producing
+  // 14 real Timeouts (not Survived — just genuinely too slow under the new
+  // budget) and a 99.93% score that had nothing to do with an actual
+  // regression. See timeoutFactor/timeoutMS below.
   disableBail: true,
+  // Bumped from Stryker's defaults (1.5 / 5000) specifically to give
+  // disableBail's extra per-mutant work enough room on a slower CI runner
+  // — see disableBail's own comment above for the false-timeout incident
+  // this fixes. Nightly-only and not time-critical, so generous headroom
+  // costs nothing real.
+  timeoutFactor: 4,
+  timeoutMS: 30_000,
   testRunner: 'vitest',
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: {
