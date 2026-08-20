@@ -64,6 +64,16 @@ export default {
   // thresholds in vitest.config.ts) — confirmed missing, not a deliberate
   // gap.
   thresholds: { high: 100, low: 100, break: 100 },
+  // Stryker's default bails a mutant's test run at the first failing test,
+  // so `killedBy` normally reflects one arbitrary test, not every test
+  // that would independently kill it — confirmed directly: a genuinely
+  // essential test can end up with an empty `killedBy` purely because some
+  // unrelated test happened to run first and already failed. Without this,
+  // `scripts/find-redundant-tests.ts` (run nightly right after mutation
+  // testing) would misidentify load-bearing tests as redundant. Doesn't
+  // change the mutation score itself (Killed/Survived status is identical
+  // either way) — only the per-test attribution detail.
+  disableBail: true,
   testRunner: 'vitest',
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: {
@@ -79,5 +89,9 @@ export default {
     // runtime-tracked `perTest` coverage analysis, unaffected by this.
     related: false
   },
-  reporters: ['html', 'clear-text', 'progress']
+  // 'json' feeds `scripts/find-redundant-tests.ts`, run nightly right after
+  // this — it needs the report's per-mutant killedBy/coveredBy test
+  // attribution, which only the json reporter (not html/clear-text/
+  // progress) writes to disk.
+  reporters: ['html', 'clear-text', 'progress', 'json']
 } satisfies PartialStrykerOptions

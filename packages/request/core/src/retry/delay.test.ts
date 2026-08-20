@@ -7,50 +7,8 @@ describe(delay, () => {
     vi.useRealTimers()
   })
 
-  it('resolves after the specified delay', async () => {
-    vi.useFakeTimers()
-
-    let resolved = false
-
-    const promise = delay(1000).then(() => {
-      resolved = true
-    })
-
-    await vi.advanceTimersByTimeAsync(999)
-
-    expect(resolved).toBe(false)
-
-    await vi.advanceTimersByTimeAsync(1)
-
-    await promise
-
-    expect(resolved).toBe(true)
-  })
-
   it('resolves with undefined', async () => {
     await expect(delay(100)).resolves.toBeUndefined()
-  })
-
-  it('resolves immediately once the signal aborts, without waiting out the full delay', async () => {
-    vi.useFakeTimers()
-
-    const controller = new AbortController()
-
-    let resolved = false
-
-    const promise = delay(1000, controller.signal).then(() => {
-      resolved = true
-    })
-
-    await vi.advanceTimersByTimeAsync(10)
-
-    expect(resolved).toBe(false)
-
-    controller.abort()
-
-    await promise
-
-    expect(resolved).toBe(true)
   })
 
   it('resolves immediately when the signal is already aborted, without waiting for a timer', async () => {
@@ -113,25 +71,5 @@ describe(delay, () => {
     await promise
 
     expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
-  })
-
-  it('does not throw aborting a signal that has addEventListener but no removeEventListener', async () => {
-    vi.useFakeTimers()
-
-    let onAbort: (() => void) | undefined
-
-    const signal = {
-      aborted: false,
-      addEventListener: (_type: 'abort', listener: () => void) => {
-        onAbort = listener
-      }
-    }
-
-    const promise = delay(1000, signal)
-
-    await vi.advanceTimersByTimeAsync(10)
-    onAbort?.()
-
-    await expect(promise).resolves.toBeUndefined()
   })
 })

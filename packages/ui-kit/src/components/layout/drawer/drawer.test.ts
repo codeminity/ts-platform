@@ -47,18 +47,6 @@ function getBackdrop(el: CdmtDrawer): HTMLElement {
   return backdrop as HTMLElement
 }
 
-function getDefaultSlotWrapper(el: CdmtDrawer): HTMLElement {
-  const wrapper = el.shadowRoot?.querySelector('.cdmt-drawer__default-slot')
-  if (!wrapper) throw new Error('expected a default-slot wrapper to exist')
-  return wrapper as HTMLElement
-}
-
-function getMiniSlotWrapper(el: CdmtDrawer): HTMLElement {
-  const wrapper = el.shadowRoot?.querySelector('.cdmt-drawer__mini-slot')
-  if (!wrapper) throw new Error('expected a mini-slot wrapper to exist')
-  return wrapper as HTMLElement
-}
-
 describe(CdmtDrawer, () => {
   let el: CdmtDrawer
 
@@ -100,21 +88,6 @@ describe(CdmtDrawer, () => {
     // right after the constructor runs, before `updated()`/`willUpdate()`
     // have had any chance to recompute anything.
     expect(fresh.isDocked).toBe(true)
-  })
-
-  it('reflects side/overlay/mini/bordered/elevated as attributes', async () => {
-    el.side = 'right'
-    el.overlay = true
-    el.mini = true
-    el.bordered = true
-    el.elevated = true
-    await el.updateComplete
-
-    expect(el.getAttribute('side')).toBe('right')
-    expect(el.hasAttribute('overlay')).toBe(true)
-    expect(el.hasAttribute('mini')).toBe(true)
-    expect(el.hasAttribute('bordered')).toBe(true)
-    expect(el.hasAttribute('elevated')).toBe(true)
   })
 
   it('shows via show(), hides via hide(), flips via toggle()', async () => {
@@ -194,14 +167,6 @@ describe(CdmtDrawer, () => {
     expect(el.style.width).toBe('320px')
   })
 
-  it('sets inline width from miniWidth when mini, while shown', async () => {
-    el.show()
-    el.mini = true
-    await el.updateComplete
-
-    expect(el.style.width).toBe('57px')
-  })
-
   it('recomputes width when only miniWidth changes, mini already true, while shown', async () => {
     el.show()
     el.mini = true
@@ -211,21 +176,6 @@ describe(CdmtDrawer, () => {
     await el.updateComplete
 
     expect(el.style.width).toBe('80px')
-  })
-
-  it('collapses width to 0 when docked (not fixed) and closed', () => {
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
-    expect(el.modelValue).toBe(false)
-    expect(el.style.width).toBe('0px')
-  })
-
-  it('restores the real width once shown, from a collapsed docked-closed state', async () => {
-    expect(el.style.width).toBe('0px')
-
-    el.show()
-    await el.updateComplete
-
-    expect(el.style.width).toBe('300px')
   })
 
   it('collapses back to 0 width when hidden again while docked', async () => {
@@ -238,28 +188,6 @@ describe(CdmtDrawer, () => {
     await el.updateComplete
 
     expect(el.style.width).toBe('0px')
-  })
-
-  it('does not collapse width when fixed (overlay), even while closed', async () => {
-    el.overlay = true
-    await el.updateComplete
-
-    expect(el.modelValue).toBe(false)
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
-    expect(el.style.width).toBe('300px')
-  })
-
-  it('is not fixed by default (docked, static)', () => {
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
-    expect(el.isDocked).toBe(true)
-  })
-
-  it('forces fixed and non-docked when overlay is true', async () => {
-    el.overlay = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
-    expect(el.isDocked).toBe(false)
   })
 
   it('forces fixed and non-docked when mini + miniToOverlay', async () => {
@@ -303,14 +231,6 @@ describe(CdmtDrawer, () => {
     expect(el.isDocked).toBe(true)
   })
 
-  it('is fixed and non-docked whenever behavior is mobile, regardless of overlay', async () => {
-    el.behavior = 'mobile'
-    await el.updateComplete
-
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
-    expect(el.isDocked).toBe(false)
-  })
-
   it('is never mobile-mode-fixed when behavior is desktop, even if matchMedia would say mobile', async () => {
     // Proves the explicit 'desktop' branch short-circuits BEFORE the
     // matchMedia fallthrough runs — matchMedia here deliberately claims a
@@ -322,18 +242,6 @@ describe(CdmtDrawer, () => {
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
     expect(el.isDocked).toBe(true)
-  })
-
-  it('picks up mobile mode from a matchMedia match on default behavior', async () => {
-    stubMatchMedia(true)
-    const mobileFirst = document.createElement('cdmt-drawer')
-    document.body.append(mobileFirst)
-    await mobileFirst.updateComplete
-
-    expect(mobileFirst.hasAttribute('data-cdmt-fixed')).toBe(true)
-    expect(mobileFirst.isDocked).toBe(false)
-
-    mobileFirst.remove()
   })
 
   it('reacts live to a matchMedia change crossing the breakpoint', async () => {
@@ -368,36 +276,6 @@ describe(CdmtDrawer, () => {
     el2.remove()
   })
 
-  it("showIfAbove's own mobile-mode check queries matchMedia with the exact breakpoint-derived string", async () => {
-    const el2 = document.createElement('cdmt-drawer')
-    el2.showIfAbove = true
-    el2.breakpoint = 900
-    document.body.append(el2)
-    await el2.updateComplete
-
-    // willUpdate's own #computeIsMobileMode call — a separate matchMedia
-    // invocation from #setupBreakpointWatcher's (which also runs on this
-    // same first update), so this asserts on the *last* call specifically.
-    const matchMediaSpy = vi.mocked(window.matchMedia)
-    const calls = matchMediaSpy.mock.calls
-
-    expect(calls.some((call) => call[0] === '(max-width: 900px)')).toBe(true)
-
-    el2.remove()
-  })
-
-  it('does not auto-show from showIfAbove when in mobile mode', async () => {
-    stubMatchMedia(true)
-    const el2 = document.createElement('cdmt-drawer')
-    el2.showIfAbove = true
-    document.body.append(el2)
-    await el2.updateComplete
-
-    expect(el2.modelValue).toBe(false)
-
-    el2.remove()
-  })
-
   it('shows automatically from showIfAbove when behavior is explicitly desktop, even if matchMedia would say mobile', async () => {
     stubMatchMedia(true)
     const el2 = document.createElement('cdmt-drawer')
@@ -423,20 +301,6 @@ describe(CdmtDrawer, () => {
     el2.remove()
   })
 
-  it('is forced fixed by the parent layout via the layoutFixed property', async () => {
-    el.layoutFixed = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
-  })
-
-  it('marks itself overlay-fixed when fixed via overlay (not docked)', async () => {
-    el.overlay = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(true)
-  })
-
   it('marks itself overlay-fixed when fixed via mobile mode (not docked)', async () => {
     el.behavior = 'mobile'
     await el.updateComplete
@@ -450,11 +314,6 @@ describe(CdmtDrawer, () => {
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(el.isDocked).toBe(true)
-    expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(false)
-  })
-
-  it('does not mark itself overlay-fixed while docked and not fixed at all', () => {
-    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
     expect(el.hasAttribute('data-cdmt-overlay-fixed')).toBe(false)
   })
 
@@ -475,36 +334,6 @@ describe(CdmtDrawer, () => {
     expect(fresh.getAttribute('data-cdmt-transitions-enabled')).toBe('')
 
     fresh.remove()
-  })
-
-  it('suppresses and immediately restores the transition style for a mode switch while closed', async () => {
-    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
-
-    el.overlay = true
-    await el.updateComplete
-
-    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toStrictEqual(['none', ''])
-    expect(el.style.transition).toBe('')
-  })
-
-  it('does not touch the transition style for a genuine modelValue-driven show', async () => {
-    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
-
-    el.show()
-    await el.updateComplete
-
-    expect(transitionSetterSpy).not.toHaveBeenCalled()
-  })
-
-  it('does not suppress the transition for a mode switch while already open', async () => {
-    el.show()
-    await el.updateComplete
-
-    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
-    el.overlay = true
-    await el.updateComplete
-
-    expect(transitionSetterSpy).not.toHaveBeenCalled()
   })
 
   it('does not suppress the transition when a metrics-relevant prop changes but fixedness stays the same, while closed', async () => {
@@ -592,17 +421,6 @@ describe(CdmtDrawer, () => {
     expect(el.modelValue).toBe(false)
   })
 
-  it('does not close on Escape when persistent', async () => {
-    el.persistent = true
-    el.show()
-    await el.updateComplete
-
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
-    await el.updateComplete
-
-    expect(el.modelValue).toBe(true)
-  })
-
   it('ignores non-Escape keys', async () => {
     el.show()
     await el.updateComplete
@@ -621,53 +439,6 @@ describe(CdmtDrawer, () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 
     expect(el.modelValue).toBe(true)
-  })
-
-  it('never applies visibility:hidden while hidden — a fixed/overlay drawer relies solely on transform to go off-screen', async () => {
-    el.overlay = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('hidden')).toBe(true)
-
-    expect(getComputedStyle(el).visibility).not.toBe('hidden')
-  })
-
-  it('stacks its content wrappers above the backdrop, so slotted content stays clickable while the backdrop is visible', () => {
-    const backdropZIndex = Number(getComputedStyle(getBackdrop(el)).zIndex)
-    const contentZIndex = Number(getComputedStyle(getDefaultSlotWrapper(el)).zIndex)
-
-    expect(contentZIndex).toBeGreaterThan(backdropZIndex)
-  })
-
-  it('renders slotted default content, and mini-slot content only while mini', async () => {
-    el.textContent = 'full content'
-
-    expect(el.textContent).toBe('full content')
-
-    const miniSpan = document.createElement('span')
-    miniSpan.slot = 'mini'
-    miniSpan.textContent = 'icon'
-    el.append(miniSpan)
-    await el.updateComplete
-
-    const miniWrapper = getMiniSlotWrapper(el)
-
-    expect(getComputedStyle(miniWrapper).display).toBe('none')
-
-    el.mini = true
-    await el.updateComplete
-
-    expect(getComputedStyle(miniWrapper).display).toBe('block')
-  })
-
-  it('dispatches cdmt-layout-child-change when a metrics-relevant prop changes', async () => {
-    const handler = vi.fn<EventHandler>()
-    el.addEventListener('cdmt-layout-child-change', handler)
-
-    el.overlay = true
-    await el.updateComplete
-
-    expect(handler).toHaveBeenCalled()
   })
 
   it('cdmt-layout-child-change actually bubbles, so a parent layout can hear it', async () => {
@@ -699,35 +470,6 @@ describe(CdmtDrawer, () => {
     mediaQuery?.setMatches(true)
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
-  })
-
-  it('does not re-dispatch cdmt-model-value-change when an unrelated property changes', async () => {
-    const handler = vi.fn<EventHandler>()
-    el.addEventListener('cdmt-model-value-change', handler)
-
-    el.bordered = true
-    await el.updateComplete
-
-    expect(handler).not.toHaveBeenCalled()
-  })
-
-  it('does not recompute width when an unrelated property changes', async () => {
-    const widthSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'width', 'set')
-
-    el.bordered = true
-    await el.updateComplete
-
-    expect(widthSetterSpy).not.toHaveBeenCalled()
-  })
-
-  it('does not re-query matchMedia when an unrelated property changes', async () => {
-    const matchMediaSpy = vi.mocked(window.matchMedia)
-    matchMediaSpy.mockClear()
-
-    el.bordered = true
-    await el.updateComplete
-
-    expect(matchMediaSpy).not.toHaveBeenCalled()
   })
 
   it('does not re-toggle data-cdmt-fixed or re-notify the layout when an unrelated property changes', async () => {

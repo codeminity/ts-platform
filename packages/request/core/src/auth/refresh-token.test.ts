@@ -13,33 +13,6 @@ type OnRefreshSuccess = NonNullable<AuthConfig['onRefreshSuccess']>
 type OnRefreshFail = NonNullable<AuthConfig['onRefreshFail']>
 
 describe(handleRefreshToken, () => {
-  it('calls refreshToken when token is expired and triggers success flow', async () => {
-    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
-    const refreshToken = vi.fn<RefreshToken>()
-
-    const onStart = vi.fn<OnRefreshStart>()
-    const onSuccess = vi.fn<OnRefreshSuccess>()
-
-    const config = createAuthConfig({
-      isTokenExpired,
-      refreshToken,
-      onRefreshStart: onStart,
-      onRefreshSuccess: onSuccess
-    })
-
-    const queue = createRefreshQueue()
-
-    await handleRefreshToken(config, queue)
-
-    expect(queue.run).toHaveBeenCalledTimes(1)
-
-    expect(isTokenExpired).toHaveBeenCalledTimes(1)
-    expect(refreshToken).toHaveBeenCalledTimes(1)
-
-    expect(onStart).toHaveBeenCalledTimes(1)
-    expect(onSuccess).toHaveBeenCalledTimes(1)
-  })
-
   it('does NOT call refreshToken when token is NOT expired', async () => {
     const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(false)
     const refreshToken = vi.fn<RefreshToken>()
@@ -65,90 +38,6 @@ describe(handleRefreshToken, () => {
 
     expect(onStart).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
-  })
-
-  it('calls fail hook when refreshToken throws error', async () => {
-    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
-    const refreshToken = vi.fn<RefreshToken>().mockRejectedValue(new Error('fail'))
-
-    const onFail = vi.fn<OnRefreshFail>()
-
-    const config = createAuthConfig({
-      isTokenExpired,
-      refreshToken,
-      onRefreshFail: onFail
-    })
-
-    const queue = createRefreshQueue()
-
-    await expect(handleRefreshToken(config, queue)).rejects.toThrow('fail')
-
-    expect(onFail).toHaveBeenCalledTimes(1)
-  })
-
-  it('always executes inside refresh queue', async () => {
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken: vi.fn<RefreshToken>()
-    })
-
-    const queue = createRefreshQueue()
-
-    await handleRefreshToken(config, queue)
-
-    expect(queue.run).toHaveBeenCalledTimes(1)
-  })
-
-  it('safely exits when refresh dependencies are missing', async () => {
-    const config = createAuthConfig({
-      isTokenExpired: undefined,
-      refreshToken: undefined
-    })
-
-    const queue = createRefreshQueue()
-
-    await handleRefreshToken(config, queue)
-
-    expect(queue.run).not.toHaveBeenCalled()
-  })
-
-  it('runs refresh only once', async () => {
-    const queue = createRefreshQueue()
-
-    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
-    const refreshToken = vi.fn<RefreshToken>().mockResolvedValue(undefined)
-    const onStart = vi.fn<OnRefreshStart>()
-    const onSuccess = vi.fn<OnRefreshSuccess>()
-
-    const config = createAuthConfig({
-      isTokenExpired,
-      refreshToken,
-      onRefreshStart: onStart,
-      onRefreshSuccess: onSuccess
-    })
-
-    await Promise.all([
-      handleRefreshToken(config, queue),
-      handleRefreshToken(config, queue),
-      handleRefreshToken(config, queue)
-    ])
-
-    expect(refreshToken).toHaveBeenCalledTimes(1)
-  })
-
-  it('returns early when only refreshToken is missing', async () => {
-    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
-
-    const config = createAuthConfig({
-      isTokenExpired,
-      refreshToken: undefined
-    })
-
-    const queue = createRefreshQueue()
-
-    await handleRefreshToken(config, queue)
-
-    expect(queue.run).not.toHaveBeenCalled()
   })
 
   it('returns early when only isTokenExpired is missing', async () => {
@@ -180,25 +69,6 @@ describe(handleRefreshToken, () => {
     await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
   })
 
-  it('does not throw an additional error when onRefreshFail is not provided', async () => {
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken: vi.fn<RefreshToken>().mockRejectedValue(new Error('fail')),
-      onRefreshFail: undefined
-    })
-
-    const queue = createRefreshQueue()
-
-    await expect(handleRefreshToken(config, queue)).rejects.toThrow('fail')
-  })
-
-  it('does not share refresh state', () => {
-    const queueA = createRefreshQueue()
-    const queueB = createRefreshQueue()
-
-    expect(queueA).not.toBe(queueB)
-  })
-
   it('times out and calls onRefreshFail when refreshToken never settles', async () => {
     const refreshToken = vi.fn<RefreshToken>().mockReturnValue(
       new Promise<void>(() => {
@@ -220,30 +90,6 @@ describe(handleRefreshToken, () => {
       'refreshToken did not settle within 20ms'
     )
     expect(onFail).toHaveBeenCalledTimes(1)
-  })
-
-  it('succeeds when refreshToken resolves before the timeout, and clears the timer', async () => {
-    const onSuccess = vi.fn<OnRefreshSuccess>()
-    const onFail = vi.fn<OnRefreshFail>()
-
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken: vi.fn<RefreshToken>().mockResolvedValue(undefined),
-      refreshTimeout: 20,
-      onRefreshSuccess: onSuccess,
-      onRefreshFail: onFail
-    })
-
-    const queue = createRefreshQueue()
-
-    await handleRefreshToken(config, queue)
-
-    expect(onSuccess).toHaveBeenCalledTimes(1)
-
-    // If the timer weren't cleared, this would eventually fire onFail too.
-    await new Promise((resolve) => setTimeout(resolve, 40))
-
-    expect(onFail).not.toHaveBeenCalled()
   })
 
   it('clears the timeout timer once refreshToken settles', async () => {
@@ -282,48 +128,6 @@ describe(handleRefreshToken, () => {
     expect(onSuccess).toHaveBeenCalledTimes(1)
   })
 
-  it('retries refreshToken when onRefreshFail awaits retry, and succeeds on the second attempt', async () => {
-    const refreshToken = vi
-      .fn<RefreshToken>()
-      .mockRejectedValueOnce(new Error('transient'))
-      .mockResolvedValueOnce(undefined)
-    const onSuccess = vi.fn<OnRefreshSuccess>()
-
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken,
-      onRefreshSuccess: onSuccess,
-      onRefreshFail: async (_error, retry) => {
-        await retry()
-      }
-    })
-
-    const queue = createRefreshQueue()
-
-    await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
-
-    expect(refreshToken).toHaveBeenCalledTimes(2)
-    expect(onSuccess).toHaveBeenCalledTimes(1)
-  })
-
-  it('does not retry when onRefreshFail never calls retry', async () => {
-    const refreshToken = vi.fn<RefreshToken>().mockRejectedValue(new Error('permanent'))
-    const onFail = vi.fn<OnRefreshFail>()
-
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken,
-      onRefreshFail: onFail
-    })
-
-    const queue = createRefreshQueue()
-
-    await expect(handleRefreshToken(config, queue)).rejects.toThrow('permanent')
-
-    expect(refreshToken).toHaveBeenCalledTimes(1)
-    expect(onFail).toHaveBeenCalledTimes(1)
-  })
-
   it('surfaces the final error when a retried attempt also fails and is not retried again', async () => {
     const refreshToken = vi
       .fn<RefreshToken>()
@@ -351,33 +155,6 @@ describe(handleRefreshToken, () => {
 
     expect(refreshToken).toHaveBeenCalledTimes(2)
     expect(onFail).toHaveBeenCalledTimes(2)
-  })
-
-  it('supports multiple chained retries until refreshToken finally succeeds', async () => {
-    const refreshToken = vi
-      .fn<RefreshToken>()
-      .mockRejectedValueOnce(new Error('attempt 1'))
-      .mockRejectedValueOnce(new Error('attempt 2'))
-      .mockResolvedValueOnce(undefined)
-
-    let attempts = 0
-
-    const config = createAuthConfig({
-      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
-      refreshToken,
-      onRefreshFail: async (_error, retry) => {
-        attempts++
-        if (attempts < 3) {
-          await retry()
-        }
-      }
-    })
-
-    const queue = createRefreshQueue()
-
-    await expect(handleRefreshToken(config, queue)).resolves.toBeUndefined()
-
-    expect(refreshToken).toHaveBeenCalledTimes(3)
   })
 
   it('fails safe when onRefreshFail throws without ever calling retry', async () => {

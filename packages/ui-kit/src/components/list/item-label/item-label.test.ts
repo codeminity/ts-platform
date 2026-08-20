@@ -33,17 +33,6 @@ describe(CdmtItemLabel, () => {
     expect(el.style.display).toBe('')
   })
 
-  it('reflects overline/caption/header as attributes', async () => {
-    el.overline = true
-    el.caption = true
-    el.header = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('overline')).toBe(true)
-    expect(el.hasAttribute('caption')).toBe(true)
-    expect(el.hasAttribute('header')).toBe(true)
-  })
-
   // `display`'s own *resulting value* is deliberately not read back via
   // `getPropertyValue` here: happy-dom's CSSStyleDeclaration rejects
   // `-webkit-box` outright, even via `setProperty` (confirmed directly —

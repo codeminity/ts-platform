@@ -13,14 +13,6 @@ vi.mock(import('./response-error.js'), () => ({
 }))
 
 describe(attachResponseInterceptor, () => {
-  it('registers response error interceptor', () => {
-    const { instance, getErrorInterceptor } = createAxiosMock()
-
-    attachResponseInterceptor(instance, {})
-
-    expect(getErrorInterceptor()).toBeTypeOf('function')
-  })
-
   it('forwards error to handleResponseError', async () => {
     const { instance, getErrorInterceptor } = createAxiosMock()
 

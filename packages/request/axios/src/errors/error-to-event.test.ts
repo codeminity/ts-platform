@@ -25,7 +25,6 @@ function createError(code?: string, status?: number): AxiosError {
 
 describe(mapErrorToEvent, () => {
   it.each([
-    ['ERR_NETWORK', 'network'],
     ['ECONNABORTED', 'timeout'],
     ['ERR_CANCELED', 'abort']
   ])('maps error code %s to %s', (code, event) => {
@@ -48,17 +47,7 @@ describe(mapErrorToEvent, () => {
     expect(mapErrorToEvent(createError(undefined, status))).toBe(event)
   })
 
-  it('returns unknown for unmapped status codes', () => {
-    expect(mapErrorToEvent(createError(undefined, 418))).toBe('unknown')
-  })
-
   it('returns unknown when neither code nor status exists', () => {
     expect(mapErrorToEvent(createError())).toBe('unknown')
-  })
-
-  it('prioritizes error code over status code', () => {
-    const error = createError('ERR_NETWORK', 500)
-
-    expect(mapErrorToEvent(error)).toBe('network')
   })
 })

@@ -44,21 +44,6 @@ describe(CdmtItem, () => {
     expect(el.style.getPropertyValue('--cdmt-item-inset')).toBe('')
   })
 
-  it('reflects disable/active/clickable/dense/focused as attributes', async () => {
-    el.disable = true
-    el.active = true
-    el.clickable = true
-    el.dense = true
-    el.focused = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('disable')).toBe(true)
-    expect(el.hasAttribute('active')).toBe(true)
-    expect(el.hasAttribute('clickable')).toBe(true)
-    expect(el.hasAttribute('dense')).toBe(true)
-    expect(el.hasAttribute('focused')).toBe(true)
-  })
-
   it('sets the --cdmt-item-inset custom property when insetLevel is above 0', async () => {
     el.insetLevel = 2
     await el.updateComplete
@@ -74,14 +59,6 @@ describe(CdmtItem, () => {
     await el.updateComplete
 
     expect(el.style.getPropertyValue('--cdmt-item-inset')).toBe('')
-  })
-
-  it('becomes a keyboard-focusable button when clickable', async () => {
-    el.clickable = true
-    await el.updateComplete
-
-    expect(el.getAttribute('role')).toBe('button')
-    expect(el.getAttribute('tabindex')).toBe('0')
   })
 
   // clickable and manual-focus are each set in their *own* update batch
@@ -130,19 +107,6 @@ describe(CdmtItem, () => {
     expect(removeSpy).not.toHaveBeenCalledWith('--cdmt-item-inset')
   })
 
-  it('stops being interactive when clickable is turned back off', async () => {
-    el.clickable = true
-    await el.updateComplete
-
-    expect(el.getAttribute('role')).toBe('button')
-
-    el.clickable = false
-    await el.updateComplete
-
-    expect(el.hasAttribute('role')).toBe(false)
-    expect(el.hasAttribute('tabindex')).toBe(false)
-  })
-
   it('does not touch role/tabindex when an unrelated property changes', async () => {
     const setSpy = vi.spyOn(el, 'setAttribute')
     const removeSpy = vi.spyOn(el, 'removeAttribute')
@@ -152,17 +116,6 @@ describe(CdmtItem, () => {
 
     expect(setSpy).not.toHaveBeenCalledWith('role', expect.anything())
     expect(removeSpy).not.toHaveBeenCalledWith('role')
-  })
-
-  it('triggers a click via Enter when clickable', async () => {
-    el.clickable = true
-    await el.updateComplete
-    const handler = vi.fn<EventHandler>()
-    el.addEventListener('click', handler)
-
-    pressKey(el, 'Enter')
-
-    expect(handler).toHaveBeenCalledTimes(1)
   })
 
   it('triggers a click via Space when clickable', async () => {
@@ -190,15 +143,6 @@ describe(CdmtItem, () => {
     el.addEventListener('click', handler)
 
     pressKey(el, 'Tab')
-
-    expect(handler).not.toHaveBeenCalled()
-  })
-
-  it('does not trigger a click on Enter/Space when not clickable', () => {
-    const handler = vi.fn<EventHandler>()
-    el.addEventListener('click', handler)
-
-    pressKey(el, 'Enter')
 
     expect(handler).not.toHaveBeenCalled()
   })

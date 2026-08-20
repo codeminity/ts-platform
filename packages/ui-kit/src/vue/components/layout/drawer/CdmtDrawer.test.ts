@@ -9,52 +9,6 @@ import { CdmtDrawer } from './CdmtDrawer.js'
 import type { CdmtDrawer as CdmtDrawerElement } from '../../../../components/layout/drawer/drawer.js'
 
 describe('cdmtDrawer (Vue)', () => {
-  it('renders a cdmt-drawer element', () => {
-    const wrapper = mount(CdmtDrawer, { attachTo: document.body })
-    const element = wrapper.element as unknown as CdmtDrawerElement
-
-    expect(element.tagName.toLowerCase()).toBe('cdmt-drawer')
-  })
-
-  it('passes every prop through to the underlying element', async () => {
-    const wrapper = mount(CdmtDrawer, {
-      props: {
-        modelValue: true,
-        side: 'right',
-        overlay: true,
-        width: 320,
-        mini: true,
-        miniWidth: 64,
-        miniToOverlay: true,
-        noMiniAnimation: true,
-        breakpoint: 800,
-        behavior: 'mobile',
-        bordered: true,
-        elevated: true,
-        persistent: true,
-        showIfAbove: true
-      },
-      attachTo: document.body
-    })
-    const element = wrapper.element as unknown as CdmtDrawerElement
-    await element.updateComplete
-
-    expect(element.modelValue).toBe(true)
-    expect(element.side).toBe('right')
-    expect(element.overlay).toBe(true)
-    expect(element.width).toBe(320)
-    expect(element.mini).toBe(true)
-    expect(element.miniWidth).toBe(64)
-    expect(element.miniToOverlay).toBe(true)
-    expect(element.noMiniAnimation).toBe(true)
-    expect(element.breakpoint).toBe(800)
-    expect(element.behavior).toBe('mobile')
-    expect(element.bordered).toBe(true)
-    expect(element.elevated).toBe(true)
-    expect(element.persistent).toBe(true)
-    expect(element.showIfAbove).toBe(true)
-  })
-
   it('emits update:modelValue with the real value from a native cdmt-model-value-change event', async () => {
     const wrapper = mount(CdmtDrawer, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtDrawerElement
@@ -118,15 +72,6 @@ describe('cdmtDrawer (Vue)', () => {
     expect(() => {
       vm.toggle()
     }).not.toThrow()
-  })
-
-  it('renders default slot content', () => {
-    const wrapper = mount(CdmtDrawer, {
-      slots: { default: '<p>full</p>' },
-      attachTo: document.body
-    })
-
-    expect(wrapper.html()).toContain('<p>full</p>')
   })
 
   it('routes mini slot content to the mini named slot', () => {

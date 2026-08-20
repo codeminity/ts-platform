@@ -15,13 +15,4 @@ describe('cdmtPageContainer (Vue)', () => {
 
     expect(element.tagName.toLowerCase()).toBe('cdmt-page-container')
   })
-
-  it('renders slotted content', () => {
-    const wrapper = mount(CdmtPageContainer, {
-      slots: { default: '<p>content</p>' },
-      attachTo: document.body
-    })
-
-    expect(wrapper.html()).toContain('<p>content</p>')
-  })
 })

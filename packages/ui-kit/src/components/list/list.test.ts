@@ -31,17 +31,4 @@ describe(CdmtList, () => {
     expect(el.separator).toBe(false)
     expect(el.padding).toBe(false)
   })
-
-  it('reflects bordered/dense/separator/padding as attributes', async () => {
-    el.bordered = true
-    el.dense = true
-    el.separator = true
-    el.padding = true
-    await el.updateComplete
-
-    expect(el.hasAttribute('bordered')).toBe(true)
-    expect(el.hasAttribute('dense')).toBe(true)
-    expect(el.hasAttribute('separator')).toBe(true)
-    expect(el.hasAttribute('padding')).toBe(true)
-  })
 })

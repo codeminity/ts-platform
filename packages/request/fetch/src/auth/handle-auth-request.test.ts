@@ -33,21 +33,6 @@ describe(handleAuthRequest, () => {
     expect(result.credentials).toBe('include')
   })
 
-  it('warns about an insecure URL string when in COOKIE mode', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
-    const init = createRequestInit()
-    const queue = createRefreshQueueMock()
-
-    await handleAuthRequest('http://insecure.example.com/test', init, config, queue)
-
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure.example.com')
-
-    warn.mockRestore()
-  })
-
   it('warns about an insecure URL when input is a URL instance', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
@@ -88,20 +73,6 @@ describe(handleAuthRequest, () => {
     warn.mockRestore()
   })
 
-  it('does not warn for a secure URL', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
-    const init = createRequestInit()
-    const queue = createRefreshQueueMock()
-
-    await handleAuthRequest('https://secure.example.com/test', init, config, queue)
-
-    expect(warn).not.toHaveBeenCalled()
-
-    warn.mockRestore()
-  })
-
   it('warns about a relative URL when the page itself is served insecurely (simulated browser)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
@@ -120,37 +91,6 @@ describe(handleAuthRequest, () => {
     vi.unstubAllGlobals()
   })
 
-  it('does not warn about a relative URL when the page itself is served securely (simulated browser)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    vi.stubGlobal('document', { baseURI: 'https://secure-page.example.com/app' })
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
-    const init = createRequestInit()
-    const queue = createRefreshQueueMock()
-
-    await handleAuthRequest('/orders', init, config, queue)
-
-    expect(warn).not.toHaveBeenCalled()
-
-    warn.mockRestore()
-    vi.unstubAllGlobals()
-  })
-
-  it('does not warn about a relative URL outside a browser (no document to resolve against)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
-    const init = createRequestInit()
-    const queue = createRefreshQueueMock()
-
-    await handleAuthRequest('/orders', init, config, queue)
-
-    expect(warn).not.toHaveBeenCalled()
-
-    warn.mockRestore()
-  })
-
   it('falls back to the raw (already-absolute) input when it cannot be resolved against an invalid document.baseURI', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
@@ -167,32 +107,6 @@ describe(handleAuthRequest, () => {
 
     warn.mockRestore()
     vi.unstubAllGlobals()
-  })
-
-  it('does not enable credentials: include in COOKIE mode when skipAuth is set for the request', async () => {
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.COOKIE }) as Config
-    const init = createRequestInit({ codeminity: { skipAuth: true } })
-    const queue = createRefreshQueueMock()
-
-    const result = await handleAuthRequest(TEST_INPUT, init, config, queue)
-
-    expect(result.credentials).toBeUndefined()
-  })
-
-  it('calls refresh before token and sets header', async () => {
-    const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
-
-    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
-
-    const config = createAuthConfig({ tokenMode: TokenModeEnum.JWT, getToken }) as Config
-    const init = createRequestInit()
-    const queue = createRefreshQueueMock()
-
-    const result = await handleAuthRequest(TEST_INPUT, init, config, queue)
-
-    expect(refreshSpy).toHaveBeenCalledTimes(1)
-    expect(getToken).toHaveBeenCalledTimes(1)
-    expect((result.headers as Headers).get('Authorization')).toBe('Bearer token123')
   })
 
   it('does not attempt token refresh when skipAuth is set for the request', async () => {

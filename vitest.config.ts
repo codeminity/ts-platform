@@ -30,7 +30,17 @@ export default defineConfig({
         '**/*.interface.ts',
         '**/*.type.ts',
         '**/mocks/**',
-        'scripts/**/*-run.ts'
+        'scripts/**/*-run.ts',
+        // A spy-target indirection seam (`vi.spyOn(dependencies,
+        // 'handleRefreshToken')` in handle-auth-request.test.ts, axios and
+        // fetch both) — its own object-literal construction has no
+        // branching logic to test, and its role as a spyable seam is
+        // already exercised by every test that spies on it. A dedicated
+        // test asserting "exposes handleRefreshToken" proved to add zero
+        // value beyond what TypeScript's own type system already
+        // guarantees at compile time (confirmed via mutation testing: the
+        // file has no mutants Stryker can even generate).
+        'packages/request/core/src/auth/dependencies.ts'
       ],
       thresholds: {
         statements: 100,

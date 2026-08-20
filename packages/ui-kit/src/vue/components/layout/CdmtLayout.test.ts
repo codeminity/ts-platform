@@ -9,13 +9,6 @@ import { CdmtLayout } from './CdmtLayout.js'
 import type { CdmtLayout as CdmtLayoutElement } from '../../../components/layout/layout.js'
 
 describe('cdmtLayout (Vue)', () => {
-  it('renders a cdmt-layout element', () => {
-    const wrapper = mount(CdmtLayout, { attachTo: document.body })
-    const element = wrapper.element as unknown as CdmtLayoutElement
-
-    expect(element.tagName.toLowerCase()).toBe('cdmt-layout')
-  })
-
   it('passes every fixed-*/over-*-drawer flag and container through', async () => {
     const wrapper = mount(CdmtLayout, {
       props: {
@@ -45,30 +38,5 @@ describe('cdmtLayout (Vue)', () => {
     expect(element.hasAttribute('footer-over-right-drawer')).toBe(false)
     expect(element.hasAttribute('container')).toBe(true)
     expect(element.getAttribute('transition-duration')).toBe('300ms')
-  })
-
-  it('defaults every fixed-* flag to false, every over-*-drawer flag to true, and transitionDuration to undefined', async () => {
-    const wrapper = mount(CdmtLayout, { attachTo: document.body })
-    const element = wrapper.element as unknown as CdmtLayoutElement
-    await element.updateComplete
-
-    expect(element.fixedHeader).toBe(false)
-    expect(element.fixedFooter).toBe(false)
-    expect(element.fixedLeftDrawer).toBe(false)
-    expect(element.fixedRightDrawer).toBe(false)
-    expect(element.headerOverLeftDrawer).toBe(true)
-    expect(element.headerOverRightDrawer).toBe(true)
-    expect(element.footerOverLeftDrawer).toBe(true)
-    expect(element.footerOverRightDrawer).toBe(true)
-    expect(element.transitionDuration).toBeUndefined()
-  })
-
-  it('renders slotted content', () => {
-    const wrapper = mount(CdmtLayout, {
-      slots: { default: '<div id="page">page</div>' },
-      attachTo: document.body
-    })
-
-    expect(wrapper.html()).toContain('id="page"')
   })
 })

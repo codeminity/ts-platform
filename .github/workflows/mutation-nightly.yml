@@ -43,9 +43,23 @@ jobs:
       - name: Mutation testing
         run: pnpm run test:mutation
 
-      # Uploaded regardless of the step above passing or failing — a failed
-      # run is exactly when the report (which mutant survived, in which
-      # file, at which line) is needed most.
+      # Only meaningful once mutation testing itself is green — a failing
+      # mutation run already means real gaps need fixing first, and its
+      # report reflects a broken state this check shouldn't be reasoning
+      # about. `test:mutation`'s own reporters (including json, which this
+      # reads) already run with disableBail via stryker.config.ts, so the
+      # report's killedBy data is trustworthy per-test attribution, not
+      # just "whichever test Stryker happened to bail on first".
+      - name: Find redundant tests
+        run: pnpm run find-redundant-tests
+
+      # Uploaded regardless of either step above passing or failing — a
+      # failed run is exactly when this is needed most, and it must be
+      # fully readable from the downloaded artifact alone: mutation.html
+      # (which mutant survived, in which file, at which line) plus
+      # redundant-tests.txt (which tests the "Find redundant tests" step
+      # flagged, if it failed) — no need to re-run anything locally just to
+      # see why the job went red.
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
