@@ -4,8 +4,9 @@ import path from 'node:path'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { runCommand } from './lib/run-command'
-import { findWorkspacePackages } from './package-discovery'
+import { findWorkspacePackages } from '../lib/package-discovery'
+import { runCommand } from '../lib/run-command'
+
 import { verifyPackage } from './verify-package'
 import { verifyPackages } from './verify-packages'
 
@@ -23,11 +24,11 @@ import { verifyPackages } from './verify-packages'
 // real packages that happen to exist today (packages/request/axios and
 // packages/request/core). Adding a future package anywhere under
 // packages/** needs zero changes here.
-vi.mock(import('./lib/run-command'), () => ({
+vi.mock(import('../lib/run-command'), () => ({
   runCommand: vi.fn<typeof runCommand>()
 }))
 
-vi.mock(import('./package-discovery'), () => ({
+vi.mock(import('../lib/package-discovery'), () => ({
   findWorkspacePackages: vi.fn<typeof findWorkspacePackages>()
 }))
 

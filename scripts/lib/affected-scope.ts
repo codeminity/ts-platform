@@ -2,8 +2,7 @@ import { exec as defaultExec } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { findWorkspacePackages } from '../package-discovery'
-
+import { findWorkspacePackages } from './package-discovery'
 import { readPackageJson } from './read-package-json'
 
 const execAsync = promisify(defaultExec)

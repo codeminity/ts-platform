@@ -1,5 +1,6 @@
-import { CommandCancelledError, runCommand } from './lib/run-command'
-import { runIfRelevant } from './lib/run-if-relevant'
+import { CommandCancelledError, runCommand } from '../lib/run-command'
+import { runIfRelevant } from '../lib/run-if-relevant'
+
 import { runScopedLint } from './lint'
 import { runScopedTypecheck } from './typecheck'
 

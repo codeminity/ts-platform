@@ -4,8 +4,8 @@ import path from 'node:path'
 
 import { globby } from 'globby'
 
-import { extractTypeScriptBlocks } from './lib/extract-code-blocks'
-import { runCommand } from './lib/run-command'
+import { extractTypeScriptBlocks } from '../lib/extract-code-blocks'
+import { runCommand } from '../lib/run-command'
 
 const DOC_GLOBS = ['**/*.md']
 

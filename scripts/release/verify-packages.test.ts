@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { packPackage } from './lib/pack-package'
-import { readPackageJson } from './lib/read-package-json'
-import { findWorkspacePackages } from './package-discovery'
+import { packPackage } from '../lib/pack-package'
+import { findWorkspacePackages } from '../lib/package-discovery'
+import { readPackageJson } from '../lib/read-package-json'
+
 import { verifyPackage } from './verify-package'
 import { verifyPackages } from './verify-packages'
 
-vi.mock(import('./package-discovery'), () => ({
+vi.mock(import('../lib/package-discovery'), () => ({
   findWorkspacePackages: vi.fn<typeof findWorkspacePackages>()
 }))
 
@@ -14,11 +15,11 @@ vi.mock(import('./verify-package'), () => ({
   verifyPackage: vi.fn<typeof verifyPackage>()
 }))
 
-vi.mock(import('./lib/pack-package'), () => ({
+vi.mock(import('../lib/pack-package'), () => ({
   packPackage: vi.fn<typeof packPackage>()
 }))
 
-vi.mock(import('./lib/read-package-json'), () => ({
+vi.mock(import('../lib/read-package-json'), () => ({
   readPackageJson: vi.fn<typeof readPackageJson>()
 }))
 

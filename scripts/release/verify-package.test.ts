@@ -5,14 +5,15 @@ import path from 'node:path'
 import * as esbuild from 'esbuild'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { runCommand } from './lib/run-command'
+import { runCommand } from '../lib/run-command'
+
 import {
   readVersionFromPackageJson,
   verifyPackage,
   verifyTreeShakenSideEffect
 } from './verify-package'
 
-vi.mock(import('./lib/run-command'), () => ({
+vi.mock(import('../lib/run-command'), () => ({
   runCommand: vi.fn<typeof runCommand>()
 }))
 

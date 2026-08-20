@@ -267,6 +267,6 @@ jobs:
             git tag -s "$tag" -m "$tag"
             git push origin "$tag"
 
-            notes=$(npx tsx scripts/release-notes-run.ts "$tag")
+            notes=$(npx tsx scripts/release/release-notes-run.ts "$tag")
             gh release create "$tag" --title "$tag" --notes "$notes"
           done

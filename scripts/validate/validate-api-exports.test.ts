@@ -2,8 +2,9 @@ import fs from 'node:fs'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
-import { loadRuntimeModule } from './lib/load-runtime-module'
+import { extractExportsFromSource, hasTypeExport } from '../lib/api-exports'
+import { loadRuntimeModule } from '../lib/load-runtime-module'
+
 import { validatePackages } from './validate-api-exports'
 
 import type { globby as Globby } from 'globby'
@@ -40,11 +41,11 @@ vi.mock(import('node:fs'), () => ({
   } as unknown as typeof fs
 }))
 
-vi.mock(import('./lib/load-runtime-module'), () => ({
+vi.mock(import('../lib/load-runtime-module'), () => ({
   loadRuntimeModule: vi.fn<typeof loadRuntimeModule>()
 }))
 
-vi.mock(import('./lib/api-exports'), () => ({
+vi.mock(import('../lib/api-exports'), () => ({
   extractExportsFromSource: vi.fn<typeof extractExportsFromSource>(),
   hasTypeExport: vi.fn<typeof hasTypeExport>()
 }))

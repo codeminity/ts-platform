@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { runCommand } from '../lib/run-command'
+import { stripTests } from '../lib/strip-tests'
+
 import { findRedundantTests } from './find-redundant-tests'
-import { runCommand } from './lib/run-command'
-import { stripTests } from './strip-tests'
 
 import type { MutationReport, RedundantTestCandidate } from './find-redundant-tests'
 

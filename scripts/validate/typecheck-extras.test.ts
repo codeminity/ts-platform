@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { runCommand } from './lib/run-command'
+import { runCommand } from '../lib/run-command'
 
 import type { globby as Globby } from 'globby'
 
@@ -14,7 +14,7 @@ vi.mock(import('globby'), () => ({
   >() as unknown as typeof Globby
 }))
 
-vi.mock(import('./lib/run-command'), () => ({
+vi.mock(import('../lib/run-command'), () => ({
   runCommand: vi.fn<typeof runCommand>()
 }))
 
