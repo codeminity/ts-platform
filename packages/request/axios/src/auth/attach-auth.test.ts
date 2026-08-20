@@ -8,7 +8,7 @@ import { handleAuthRequest } from './handle-auth-request.js'
 import type { Config } from '../shared/config.interface.js'
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
-vi.mock('./handle-auth-request.ts', () => ({
+vi.mock(import('./handle-auth-request.js'), () => ({
   handleAuthRequest: vi.fn()
 }))
 

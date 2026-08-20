@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { runApiExtractor } from './run-api-extractor'
 import { runCommand } from './run-command'
 
-vi.mock('./run-command', () => ({
+vi.mock(import('./run-command'), () => ({
   runCommand: vi.fn()
 }))
 

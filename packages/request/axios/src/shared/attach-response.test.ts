@@ -8,7 +8,7 @@ import { handleResponseError } from './response-error.js'
 import type { Config } from './config.interface.js'
 import type { AxiosResponse } from 'axios'
 
-vi.mock('./response-error.ts', () => ({
+vi.mock(import('./response-error.js'), () => ({
   handleResponseError: vi.fn()
 }))
 

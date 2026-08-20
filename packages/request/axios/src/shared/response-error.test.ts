@@ -12,15 +12,15 @@ import type { Config } from './config.interface.js'
 import type { InternalRequestConfig } from './request-config.interface.js'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 
-vi.mock('@codeminity/request-core', () => ({
+vi.mock(import('@codeminity/request-core'), () => ({
   emitterCallback: vi.fn()
 }))
 
-vi.mock('../retry/retry.ts', () => ({
+vi.mock(import('../retry/retry.js'), () => ({
   handleRetry: vi.fn()
 }))
 
-vi.mock('../errors/error-to-event.ts', () => ({
+vi.mock(import('../errors/error-to-event.js'), () => ({
   mapErrorToEvent: vi.fn()
 }))
 

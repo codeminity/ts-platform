@@ -6,19 +6,19 @@ import { findWorkspacePackages } from './package-discovery'
 import { verifyPackage } from './verify-package'
 import { verifyPackages } from './verify-packages'
 
-vi.mock('./package-discovery', () => ({
+vi.mock(import('./package-discovery'), () => ({
   findWorkspacePackages: vi.fn()
 }))
 
-vi.mock('./verify-package', () => ({
+vi.mock(import('./verify-package'), () => ({
   verifyPackage: vi.fn()
 }))
 
-vi.mock('./lib/pack-package', () => ({
+vi.mock(import('./lib/pack-package'), () => ({
   packPackage: vi.fn()
 }))
 
-vi.mock('./lib/read-package-json', () => ({
+vi.mock(import('./lib/read-package-json'), () => ({
   readPackageJson: vi.fn()
 }))
 

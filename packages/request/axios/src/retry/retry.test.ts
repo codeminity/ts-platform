@@ -8,17 +8,17 @@ const parseRetryAfter = vi.fn()
 const resolveRetryDelay = vi.fn()
 const applyRetryJitter = vi.fn()
 
-vi.mock('@codeminity/request-core', () => ({
+vi.mock(import('@codeminity/request-core'), () => ({
   delay,
   resolveRetryDelay,
   applyRetryJitter
 }))
 
-vi.mock('./should-retry.ts', () => ({
+vi.mock(import('./should-retry.js'), () => ({
   shouldRetry
 }))
 
-vi.mock('./parse-retry-after.ts', () => ({
+vi.mock(import('./parse-retry-after.js'), () => ({
   parseRetryAfter
 }))
 

@@ -4,7 +4,7 @@ import { CommandCancelledError, runCommand } from './lib/run-command'
 
 import type * as RunCommandModule from './lib/run-command'
 
-vi.mock('./lib/run-command', async (importOriginal) => {
+vi.mock(import('./lib/run-command'), async (importOriginal) => {
   const actual = await importOriginal<typeof RunCommandModule>()
   return {
     // CommandCancelledError is a plain, side-effect-free class — reusing
@@ -22,9 +22,9 @@ vi.mock('./lib/run-command', async (importOriginal) => {
 // exercising CHECK_STEPS directly (e.g. "defaults to CHECK_STEPS") would
 // run real getAffectedScope()/hasRelevantChanges() git/turbo commands as a
 // side effect of running the unit test.
-vi.mock('./lint', () => ({ runScopedLint: vi.fn() }))
-vi.mock('./typecheck', () => ({ runScopedTypecheck: vi.fn() }))
-vi.mock('./lib/run-if-relevant', () => ({ runIfRelevant: vi.fn() }))
+vi.mock(import('./lint'), () => ({ runScopedLint: vi.fn() }))
+vi.mock(import('./typecheck'), () => ({ runScopedTypecheck: vi.fn() }))
+vi.mock(import('./lib/run-if-relevant'), () => ({ runIfRelevant: vi.fn() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
 const { runScopedLint } = await import('./lint')

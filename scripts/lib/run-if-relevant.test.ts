@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('./relevant-changes', () => ({ hasRelevantChanges: vi.fn() }))
-vi.mock('./run-command', () => ({ runCommand: vi.fn() }))
+vi.mock(import('./relevant-changes'), () => ({ hasRelevantChanges: vi.fn() }))
+vi.mock(import('./run-command'), () => ({ runCommand: vi.fn() }))
 
 const { hasRelevantChanges } = await import('./relevant-changes')
 const { runCommand } = await import('./run-command')

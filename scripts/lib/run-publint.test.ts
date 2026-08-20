@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { runCommand } from './run-command'
 import { runPublint } from './run-publint'
 
-vi.mock('./run-command', () => ({
+vi.mock(import('./run-command'), () => ({
   runCommand: vi.fn()
 }))
 

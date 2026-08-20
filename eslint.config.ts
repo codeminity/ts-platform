@@ -211,7 +211,12 @@ export default defineConfig(
       // `toStrictEqual` also checks undefined properties and prototype/class
       // identity, which `toEqual` silently ignores — catches real equality
       // bugs `toEqual` would miss, not just a style preference.
-      'vitest/prefer-strict-equal': 'error'
+      'vitest/prefer-strict-equal': 'error',
+
+      // `vi.mock(import('./x'))` over `vi.mock('./x')` — the dynamic import
+      // form gives the mock factory real type information for the module
+      // being mocked, instead of an untyped string path.
+      'vitest/prefer-import-in-mock': 'error'
     }
   },
 

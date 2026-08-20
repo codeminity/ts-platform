@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('./lib/affected-scope', () => ({ getAffectedScope: vi.fn() }))
-vi.mock('./lib/run-command', () => ({ runCommand: vi.fn() }))
+vi.mock(import('./lib/affected-scope'), () => ({ getAffectedScope: vi.fn() }))
+vi.mock(import('./lib/run-command'), () => ({ runCommand: vi.fn() }))
 
 const { getAffectedScope } = await import('./lib/affected-scope')
 const { runCommand } = await import('./lib/run-command')

@@ -3,13 +3,13 @@ import fs from 'node:fs'
 import { globby } from 'globby'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('node:fs', () => ({
-  default: {
-    rmSync: vi.fn()
-  }
+vi.mock(import('node:fs'), () => ({
+  // Only `fs.rmSync` is ever called by the code under test — the rest of
+  // the real `node:fs` shape is deliberately not part of this mock.
+  default: { rmSync: vi.fn() } as unknown as typeof fs
 }))
 
-vi.mock('globby', () => ({
+vi.mock(import('globby'), () => ({
   globby: vi.fn()
 }))
 

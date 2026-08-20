@@ -12,7 +12,7 @@ import {
   verifyTreeShakenSideEffect
 } from './verify-package'
 
-vi.mock('./lib/run-command', () => ({
+vi.mock(import('./lib/run-command'), () => ({
   runCommand: vi.fn()
 }))
 
@@ -22,7 +22,7 @@ vi.mock('./lib/run-command', () => ({
 // restore the real implementation (via `vi.importActual`) specifically
 // because a mocked bundler couldn't prove the real behavior this check
 // exists to verify.
-vi.mock('esbuild', () => ({
+vi.mock(import('esbuild'), () => ({
   build: vi.fn()
 }))
 

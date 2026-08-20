@@ -6,11 +6,14 @@ import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
 import { loadRuntimeModule } from './lib/load-runtime-module'
 import { validatePackages } from './validate-api-exports'
 
-vi.mock('globby', () => ({
+vi.mock(import('globby'), () => ({
   globby: vi.fn().mockResolvedValue(['packages/request/core/package.json'])
 }))
 
-vi.mock('node:fs', () => ({
+vi.mock(import('node:fs'), () => ({
+  // Only `fs.existsSync`/`fs.readFileSync` are ever called by the code under
+  // test — the rest of the real `node:fs` shape is deliberately not part of
+  // this mock.
   default: {
     existsSync: vi.fn(() => true),
 
@@ -26,14 +29,14 @@ vi.mock('node:fs', () => ({
         export type { AuthConfig }
       `
     })
-  }
+  } as unknown as typeof fs
 }))
 
-vi.mock('./lib/load-runtime-module', () => ({
+vi.mock(import('./lib/load-runtime-module'), () => ({
   loadRuntimeModule: vi.fn()
 }))
 
-vi.mock('./lib/api-exports', () => ({
+vi.mock(import('./lib/api-exports'), () => ({
   extractExportsFromSource: vi.fn(),
   hasTypeExport: vi.fn()
 }))

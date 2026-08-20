@@ -23,15 +23,15 @@ import { verifyPackages } from './verify-packages'
 // real packages that happen to exist today (packages/request/axios and
 // packages/request/core). Adding a future package anywhere under
 // packages/** needs zero changes here.
-vi.mock('./lib/run-command', () => ({
+vi.mock(import('./lib/run-command'), () => ({
   runCommand: vi.fn()
 }))
 
-vi.mock('./package-discovery', () => ({
+vi.mock(import('./package-discovery'), () => ({
   findWorkspacePackages: vi.fn()
 }))
 
-vi.mock('./verify-package', () => ({
+vi.mock(import('./verify-package'), () => ({
   verifyPackage: vi.fn()
 }))
 
