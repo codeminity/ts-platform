@@ -63,7 +63,7 @@ describe('runScopedTypecheck', () => {
     )
     expect(mockedRunCommand).toHaveBeenCalledWith(
       'pnpm',
-      ['exec', 'tsx', 'scripts/typecheck-extras-run.ts'],
+      ['exec', 'tsx', 'scripts/validate/typecheck-extras-run.ts'],
       {}
     )
   })
@@ -98,7 +98,7 @@ describe('runScopedTypecheck', () => {
     )
     expect(mockedRunCommand).toHaveBeenCalledWith(
       'pnpm',
-      ['exec', 'tsx', 'scripts/typecheck-extras-run.ts'],
+      ['exec', 'tsx', 'scripts/validate/typecheck-extras-run.ts'],
       { signal: controller.signal }
     )
   })

@@ -38,7 +38,7 @@ export async function runScopedTypecheck(signal?: AbortSignal): Promise<void> {
   // see typecheck-extras.ts.
   await runCommand(
     'pnpm',
-    ['exec', 'tsx', 'scripts/typecheck-extras-run.ts'],
+    ['exec', 'tsx', 'scripts/validate/typecheck-extras-run.ts'],
     signal ? { signal } : {}
   )
 }
