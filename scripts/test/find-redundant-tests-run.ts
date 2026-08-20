@@ -1,12 +1,16 @@
+import { execFile } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { promisify } from 'node:util'
 
-import { runCommand } from '../lib/run-command'
+import { resolveCommand } from '../lib/run-command'
 import { stripTests } from '../lib/strip-tests'
 
 import { findRedundantTests } from './find-redundant-tests'
 
 import type { MutationReport, RedundantTestCandidate } from './find-redundant-tests'
+
+const execFileAsync = promisify(execFile)
 
 const REPORT_PATH = 'reports/mutation/mutation.json'
 // Written alongside mutation.json/mutation.html, inside the same directory
@@ -15,9 +19,25 @@ const REPORT_PATH = 'reports/mutation/mutation.json'
 // re-run anything locally to see what was found.
 const OUTPUT_PATH = 'reports/mutation/redundant-tests.txt'
 
+// Deliberately captured (via `execFile`, not `../lib/run-command`'s
+// `runCommand`, which always inherits stdio) and never printed — this runs
+// once per candidate FILE (see verifyWithCoverage below), and a candidate
+// that turns out to be the last test in its file makes vitest itself
+// legitimately error ("No test found in suite") when it's temporarily
+// stripped. That's an expected, already-handled outcome (the file lands in
+// `coverageRequired`, not `coverageConfirmed`) — streaming vitest's raw
+// output for it every night would just print a real-looking test failure
+// for something that isn't one, confirmed directly: exactly this happened
+// on a real nightly run and needed manual log-archaeology to confirm it
+// wasn't a regression. `resolveCommand` (not a bespoke path) reuses the
+// same win32 pnpm/cmd.exe resolution `runCommand` already relies on.
 async function coveragePasses(): Promise<boolean> {
+  const resolved = resolveCommand('pnpm')
+
   try {
-    await runCommand('pnpm', ['run', 'test:coverage'])
+    await execFileAsync(resolved.command, [...resolved.argsPrefix, 'run', 'test:coverage'], {
+      maxBuffer: 1024 * 1024 * 64
+    })
     return true
   } catch {
     return false
