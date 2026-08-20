@@ -21,7 +21,22 @@ export default {
     '!packages/**/src/**/*.interface.ts',
     '!packages/**/src/**/*.type.ts',
     '!packages/**/src/**/mocks/**',
-    '!packages/**/src/**/test-utils.ts'
+    '!packages/**/src/**/test-utils.ts',
+    // Mirrors vitest.config.ts's own coverage exclusion for this file — a
+    // pure spy-target seam (`vi.spyOn(dependencies, 'handleRefreshToken')`
+    // in handle-auth-request.test.ts, axios and fetch both) with no
+    // branching logic. Confirmed directly this must be excluded from
+    // *both* configs, not just vitest's: its one mutant reports as
+    // `NoCoverage` (nothing exercises it once its own dedicated test is
+    // gone), and per @stryker-mutator/core's own scoring formula
+    // (`calculateMetrics.js`: mutationScore = (killed + timeout) /
+    // (killed + timeout + survived + noCoverage)), a NoCoverage mutant
+    // counts directly against the score — it broke two nightly runs in a
+    // row (99.93%, one `NoCoverage` mutant out of ~1391) before this was
+    // traced back past a red-herring batch of `Timeout` mutants (Timeout
+    // counts as *detected* in that same formula — harmless to the score,
+    // despite looking alarming in the log) to this file specifically.
+    '!packages/**/src/**/dependencies.ts'
   ],
   // See DECISIONS.md#adr-011-static-mutants-ignored-in-mutation-testing —
   // also means a purely static file (e.g. theme/tokens.ts) will show 0
