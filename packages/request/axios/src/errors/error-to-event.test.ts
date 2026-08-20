@@ -23,7 +23,7 @@ function createError(code?: string, status?: number): AxiosError {
   return error
 }
 
-describe('mapErrorToEvent', () => {
+describe(mapErrorToEvent, () => {
   it.each([
     ['ERR_NETWORK', 'network'],
     ['ECONNABORTED', 'timeout'],

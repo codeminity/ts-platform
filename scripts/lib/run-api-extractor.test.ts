@@ -25,16 +25,16 @@ function createTempPackage(configNames: string[]) {
   return tempDir
 }
 
-afterEach(() => {
-  if (tempDir) {
-    fs.rmSync(tempDir, { recursive: true, force: true })
-    tempDir = undefined
-  }
-})
-
-describe('runApiExtractor', () => {
+describe(runApiExtractor, () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+      tempDir = undefined
+    }
   })
 
   it('runs api-extractor once for a single-entry package', async () => {

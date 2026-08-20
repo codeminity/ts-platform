@@ -1,9 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './drawer.js'
-
-import type { CdmtDrawer } from './drawer.js'
+import { CdmtDrawer } from './drawer.js'
 
 type EventHandler = (event: Event) => void
 
@@ -61,7 +59,7 @@ function getMiniSlotWrapper(el: CdmtDrawer): HTMLElement {
   return wrapper as HTMLElement
 }
 
-describe('CdmtDrawer', () => {
+describe(CdmtDrawer, () => {
   let el: CdmtDrawer
 
   beforeEach(async () => {
@@ -97,6 +95,7 @@ describe('CdmtDrawer', () => {
 
   it('reads isDocked correctly synchronously at construction time, before any update has run', () => {
     const fresh = document.createElement('cdmt-drawer')
+
     // No `await updateComplete` here on purpose — this checks the state
     // right after the constructor runs, before `updated()`/`willUpdate()`
     // have had any chance to recompute anything.
@@ -121,20 +120,24 @@ describe('CdmtDrawer', () => {
   it('shows via show(), hides via hide(), flips via toggle()', async () => {
     el.show()
     await el.updateComplete
+
     expect(el.modelValue).toBe(true)
     expect(el.hasAttribute('hidden')).toBe(false)
 
     el.hide()
     await el.updateComplete
+
     expect(el.modelValue).toBe(false)
     expect(el.hasAttribute('hidden')).toBe(true)
 
     el.toggle()
     await el.updateComplete
+
     expect(el.modelValue).toBe(true)
 
     el.toggle()
     await el.updateComplete
+
     expect(el.modelValue).toBe(false)
   })
 
@@ -177,6 +180,7 @@ describe('CdmtDrawer', () => {
     await fresh.updateComplete
 
     expect(handler).not.toHaveBeenCalled()
+
     fresh.remove()
   })
 
@@ -194,6 +198,7 @@ describe('CdmtDrawer', () => {
     el.show()
     el.mini = true
     await el.updateComplete
+
     expect(el.style.width).toBe('57px')
   })
 
@@ -226,6 +231,7 @@ describe('CdmtDrawer', () => {
   it('collapses back to 0 width when hidden again while docked', async () => {
     el.show()
     await el.updateComplete
+
     expect(el.style.width).toBe('300px')
 
     el.hide()
@@ -326,6 +332,7 @@ describe('CdmtDrawer', () => {
 
     expect(mobileFirst.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(mobileFirst.isDocked).toBe(false)
+
     mobileFirst.remove()
   })
 
@@ -357,6 +364,7 @@ describe('CdmtDrawer', () => {
     await el2.updateComplete
 
     expect(el2.modelValue).toBe(true)
+
     el2.remove()
   })
 
@@ -372,7 +380,9 @@ describe('CdmtDrawer', () => {
     // same first update), so this asserts on the *last* call specifically.
     const matchMediaSpy = vi.mocked(window.matchMedia)
     const calls = matchMediaSpy.mock.calls
+
     expect(calls.some((call) => call[0] === '(max-width: 900px)')).toBe(true)
+
     el2.remove()
   })
 
@@ -384,6 +394,7 @@ describe('CdmtDrawer', () => {
     await el2.updateComplete
 
     expect(el2.modelValue).toBe(false)
+
     el2.remove()
   })
 
@@ -396,6 +407,7 @@ describe('CdmtDrawer', () => {
     await el2.updateComplete
 
     expect(el2.modelValue).toBe(true)
+
     el2.remove()
   })
 
@@ -407,6 +419,7 @@ describe('CdmtDrawer', () => {
     await el2.updateComplete
 
     expect(el2.modelValue).toBe(false)
+
     el2.remove()
   })
 
@@ -453,11 +466,14 @@ describe('CdmtDrawer', () => {
     expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(false)
 
     await new Promise((resolve) => requestAnimationFrame(resolve))
+
     expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(false)
 
     await new Promise((resolve) => requestAnimationFrame(resolve))
+
     expect(fresh.hasAttribute('data-cdmt-transitions-enabled')).toBe(true)
     expect(fresh.getAttribute('data-cdmt-transitions-enabled')).toBe('')
+
     fresh.remove()
   })
 
@@ -506,6 +522,7 @@ describe('CdmtDrawer', () => {
   it('detects the mode switch from the real data-cdmt-fixed attribute, not just from #isFixed alone', async () => {
     el.overlay = true
     await el.updateComplete
+
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(el.modelValue).toBe(false)
 
@@ -522,10 +539,12 @@ describe('CdmtDrawer', () => {
   it('shows the backdrop only when open and in a fixed/overlay mode', async () => {
     el.overlay = true
     await el.updateComplete
+
     expect(getBackdrop(el).classList.contains('cdmt-drawer__backdrop--visible')).toBe(false)
 
     el.show()
     await el.updateComplete
+
     expect(getBackdrop(el).classList.contains('cdmt-drawer__backdrop--visible')).toBe(true)
   })
 
@@ -607,6 +626,7 @@ describe('CdmtDrawer', () => {
   it('never applies visibility:hidden while hidden — a fixed/overlay drawer relies solely on transform to go off-screen', async () => {
     el.overlay = true
     await el.updateComplete
+
     expect(el.hasAttribute('hidden')).toBe(true)
 
     expect(getComputedStyle(el).visibility).not.toBe('hidden')
@@ -621,6 +641,7 @@ describe('CdmtDrawer', () => {
 
   it('renders slotted default content, and mini-slot content only while mini', async () => {
     el.textContent = 'full content'
+
     expect(el.textContent).toBe('full content')
 
     const miniSpan = document.createElement('span')
@@ -635,6 +656,7 @@ describe('CdmtDrawer', () => {
 
     el.mini = true
     await el.updateComplete
+
     expect(getComputedStyle(miniWrapper).display).toBe('block')
   })
 
@@ -659,6 +681,7 @@ describe('CdmtDrawer', () => {
     await el.updateComplete
 
     expect(handler).toHaveBeenCalled()
+
     parent.remove()
   })
 
@@ -720,10 +743,12 @@ describe('CdmtDrawer', () => {
   it('toggles data-cdmt-no-mini-animation to match noMiniAnimation, and only when it changes', async () => {
     el.noMiniAnimation = true
     await el.updateComplete
+
     expect(el.hasAttribute('data-cdmt-no-mini-animation')).toBe(true)
 
     el.noMiniAnimation = false
     await el.updateComplete
+
     expect(el.hasAttribute('data-cdmt-no-mini-animation')).toBe(false)
   })
 

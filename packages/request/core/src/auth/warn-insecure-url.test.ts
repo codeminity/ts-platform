@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { isInsecureUrl, warnIfInsecureUrl } from './warn-insecure-url.js'
 
-describe('isInsecureUrl', () => {
+describe(isInsecureUrl, () => {
   it('returns true for a plain http URL', () => {
     expect(isInsecureUrl('http://example.com/path')).toBe(true)
   })
@@ -28,7 +28,7 @@ describe('isInsecureUrl', () => {
   })
 })
 
-describe('warnIfInsecureUrl', () => {
+describe(warnIfInsecureUrl, () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })

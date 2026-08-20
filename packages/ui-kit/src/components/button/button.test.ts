@@ -1,11 +1,9 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import './button.js'
+import { CdmtButton } from './button.js'
 
-import type { CdmtButton } from './button.js'
-
-describe('CdmtButton', () => {
+describe(CdmtButton, () => {
   let el: CdmtButton
 
   beforeEach(async () => {
@@ -38,11 +36,13 @@ describe('CdmtButton', () => {
     await el.updateComplete
 
     const button = el.shadowRoot?.querySelector('button')
+
     expect(button?.disabled).toBe(true)
   })
 
   it('renders slotted content', () => {
     el.textContent = 'Save'
+
     expect(el.textContent).toBe('Save')
   })
 

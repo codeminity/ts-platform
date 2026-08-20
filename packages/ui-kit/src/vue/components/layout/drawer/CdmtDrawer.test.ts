@@ -8,7 +8,7 @@ import { CdmtDrawer } from './CdmtDrawer.js'
 
 import type { CdmtDrawer as CdmtDrawerElement } from '../../../../components/layout/drawer/drawer.js'
 
-describe('CdmtDrawer (Vue)', () => {
+describe('cdmtDrawer (Vue)', () => {
   it('renders a cdmt-drawer element', () => {
     const wrapper = mount(CdmtDrawer, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtDrawerElement
@@ -84,18 +84,22 @@ describe('CdmtDrawer (Vue)', () => {
   it('exposes show/hide/toggle, delegating to the real underlying element', async () => {
     const wrapper = mount(CdmtDrawer, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtDrawerElement
+    const vm = wrapper.vm as unknown as { show: () => void; hide: () => void; toggle: () => void }
     await element.updateComplete
 
-    ;(wrapper.vm as unknown as { show: () => void }).show()
+    vm.show()
     await element.updateComplete
+
     expect(element.modelValue).toBe(true)
 
-    ;(wrapper.vm as unknown as { hide: () => void }).hide()
+    vm.hide()
     await element.updateComplete
+
     expect(element.modelValue).toBe(false)
 
-    ;(wrapper.vm as unknown as { toggle: () => void }).toggle()
+    vm.toggle()
     await element.updateComplete
+
     expect(element.modelValue).toBe(true)
   })
 
@@ -133,6 +137,7 @@ describe('CdmtDrawer (Vue)', () => {
 
     const element = wrapper.element as unknown as CdmtDrawerElement
     const miniContent = element.querySelector('span[slot="mini"]')
+
     expect(miniContent?.textContent).toBe('icon')
   })
 })

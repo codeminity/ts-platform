@@ -15,12 +15,12 @@ const { runScopedLint } = await import('./lint')
 const mockedGetAffectedScope = vi.mocked(getAffectedScope)
 const mockedRunCommand = vi.mocked(runCommand)
 
-beforeEach(() => {
-  mockedGetAffectedScope.mockReset()
-  mockedRunCommand.mockReset()
-})
-
 describe('runScopedLint', () => {
+  beforeEach(() => {
+    mockedGetAffectedScope.mockReset()
+    mockedRunCommand.mockReset()
+  })
+
   it('runs the full lint command when the scope is full', async () => {
     mockedGetAffectedScope.mockResolvedValue({ type: 'full' })
     mockedRunCommand.mockResolvedValue(undefined)
@@ -101,6 +101,7 @@ describe('runScopedLint', () => {
     await runScopedLint()
 
     const options = mockedRunCommand.mock.calls.at(0)?.[2]
+
     expect(options).toBeDefined()
     expect(options && 'signal' in options).toBe(false)
   })

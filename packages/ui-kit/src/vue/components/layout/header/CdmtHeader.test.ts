@@ -8,7 +8,7 @@ import { CdmtHeader } from './CdmtHeader.js'
 
 import type { CdmtHeader as CdmtHeaderElement } from '../../../../components/layout/header/header.js'
 
-describe('CdmtHeader (Vue)', () => {
+describe('cdmtHeader (Vue)', () => {
   it('renders a cdmt-header element', () => {
     const wrapper = mount(CdmtHeader, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtHeaderElement

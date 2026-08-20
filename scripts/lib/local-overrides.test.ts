@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { buildLocalOverrides, toWorkspaceOverridesYaml } from './local-overrides'
 
-describe('buildLocalOverrides', () => {
+describe(buildLocalOverrides, () => {
   it('returns undefined when no local packages are provided', () => {
     expect(buildLocalOverrides('@codeminity/axios')).toBeUndefined()
   })
@@ -36,7 +36,7 @@ describe('buildLocalOverrides', () => {
   })
 })
 
-describe('toWorkspaceOverridesYaml', () => {
+describe(toWorkspaceOverridesYaml, () => {
   it('serializes a single override', () => {
     expect(
       toWorkspaceOverridesYaml({

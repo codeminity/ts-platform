@@ -27,18 +27,18 @@ function createPackage(directory: string) {
   )
 }
 
-afterEach(() => {
-  if (tempDir) {
-    fs.rmSync(tempDir, {
-      recursive: true,
-      force: true
-    })
+describe(findWorkspacePackages, () => {
+  afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, {
+        recursive: true,
+        force: true
+      })
 
-    tempDir = undefined
-  }
-})
+      tempDir = undefined
+    }
+  })
 
-describe('findWorkspacePackages', () => {
   it('finds workspace packages recursively', () => {
     const workspace = createTempWorkspace()
 

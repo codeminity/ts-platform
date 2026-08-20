@@ -8,7 +8,7 @@ import { CdmtButton } from './CdmtButton.js'
 
 import type { CdmtButton as CdmtButtonElement } from '../../../components/button/button.js'
 
-describe('CdmtButton (Vue)', () => {
+describe('cdmtButton (Vue)', () => {
   it('renders a cdmt-button element', () => {
     const wrapper = mount(CdmtButton, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtButtonElement

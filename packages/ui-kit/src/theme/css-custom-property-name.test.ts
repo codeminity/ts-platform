@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { toCssCustomPropertyName } from './css-custom-property-name.js'
 
-describe('toCssCustomPropertyName', () => {
+describe(toCssCustomPropertyName, () => {
   it('converts a single-word key', () => {
     expect(toCssCustomPropertyName('primary')).toBe('--cdmt-primary')
   })

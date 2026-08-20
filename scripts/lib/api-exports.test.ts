@@ -7,7 +7,7 @@ import { extractExportsFromSource, extractExportsFromText, hasTypeExport } from 
 
 const tempDir = join(__dirname, '.tmp-api-exports-test')
 
-describe('extractExportsFromSource', () => {
+describe(extractExportsFromSource, () => {
   afterEach(() => {
     rmSync(tempDir, { recursive: true, force: true })
     vi.restoreAllMocks()
@@ -40,7 +40,7 @@ describe('extractExportsFromSource', () => {
   })
 })
 
-describe('extractExportsFromText', () => {
+describe(extractExportsFromText, () => {
   it('detects exported function/class/const/interface/type/enum declarations', () => {
     const source = `
       export function hello() {}
@@ -136,7 +136,7 @@ describe('extractExportsFromText', () => {
   })
 })
 
-describe('hasTypeExport', () => {
+describe(hasTypeExport, () => {
   it('matches a locally declared interface/type/class/enum', () => {
     const dts = `
       export interface User {}

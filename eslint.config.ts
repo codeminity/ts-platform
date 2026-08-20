@@ -179,6 +179,15 @@ export default defineConfig(
     plugins: {
       vitest
     },
+    // Required for `vitest/valid-title` to accept a function/class reference
+    // (rather than a string) as a describe title — see
+    // `vitest/prefer-describe-function-title`, which converts to exactly
+    // that form.
+    settings: {
+      vitest: {
+        typecheck: true
+      }
+    },
     rules: {
       '@typescript-eslint/unbound-method': 'off',
 
@@ -221,7 +230,19 @@ export default defineConfig(
       // `vi.fn<Signature>()` over a bare `vi.fn()` — an untyped mock is
       // `(...args: any[]) => any`, so a call with the wrong arguments or a
       // wrong `mockReturnValue`/`mockResolvedValue` type goes uncaught.
-      'vitest/require-mock-type-parameters': 'error'
+      'vitest/require-mock-type-parameters': 'error',
+
+      // Cosmetic/organizational consistency rules — no correctness value,
+      // just uniformity across the suite.
+      'vitest/prefer-lowercase-title': 'error',
+      'vitest/require-top-level-describe': 'error',
+      // `padding-around-all` is a meta-rule that already includes
+      // padding-around-expect-groups (and 6 others) — enabling both
+      // separately double-runs the same check and, worse, double-applies
+      // its own autofix (confirmed directly: it duplicated blank lines
+      // across multiple `--fix` passes instead of just inserting one).
+      'vitest/padding-around-all': 'error',
+      'vitest/prefer-describe-function-title': 'error'
     }
   },
 

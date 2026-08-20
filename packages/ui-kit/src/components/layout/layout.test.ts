@@ -5,9 +5,8 @@ import './drawer/drawer.js'
 import './footer/footer.js'
 import './header/header.js'
 import './page-container/page-container.js'
-import './layout.js'
 
-import type { CdmtLayout } from './layout.js'
+import { CdmtLayout } from './layout.js'
 
 function required<T>(value: T | null | undefined, message: string): T {
   if (value == null) throw new Error(message)
@@ -45,7 +44,7 @@ async function mountLayout(innerHTML: string): Promise<CdmtLayout> {
   return el
 }
 
-describe('CdmtLayout', () => {
+describe(CdmtLayout, () => {
   let el: CdmtLayout
 
   beforeEach(async () => {
@@ -139,6 +138,7 @@ describe('CdmtLayout', () => {
     expect(layout.querySelector('cdmt-header')?.slot).toBe('header')
     expect(layout.querySelector('cdmt-page-container')?.slot).toBe('page-container')
     expect(layout.querySelector('cdmt-footer')?.slot).toBe('footer')
+
     layout.remove()
   })
 
@@ -148,8 +148,10 @@ describe('CdmtLayout', () => {
     )
 
     const drawers = [...layout.querySelectorAll('cdmt-drawer')]
+
     expect(drawers.find((d) => d.side === 'left')?.slot).toBe('drawer-left')
     expect(drawers.find((d) => d.side === 'right')?.slot).toBe('drawer-right')
+
     layout.remove()
   })
 
@@ -157,6 +159,7 @@ describe('CdmtLayout', () => {
     const layout = await mountLayout('<div id="misc"></div>')
 
     expect(layout.querySelector('#misc')?.slot).toBe('')
+
     layout.remove()
   })
 
@@ -174,6 +177,7 @@ describe('CdmtLayout', () => {
 
     expect(header.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(footer.hasAttribute('data-cdmt-fixed')).toBe(true)
+
     layout.remove()
   })
 
@@ -191,6 +195,7 @@ describe('CdmtLayout', () => {
 
     expect(leftDrawer?.layoutFixed).toBe(true)
     expect(rightDrawer?.layoutFixed).toBe(true)
+
     layout.remove()
   })
 
@@ -201,6 +206,7 @@ describe('CdmtLayout', () => {
     const drawers = [...layout.querySelectorAll('cdmt-drawer')]
 
     expect(drawers.every((drawer) => !drawer.layoutFixed)).toBe(true)
+
     layout.remove()
   })
 
@@ -231,6 +237,7 @@ describe('CdmtLayout', () => {
     expect(footer.getBoundingClientRect).toHaveBeenCalled()
     expect(pageContainer.style.paddingTop).toBe('64px')
     expect(pageContainer.style.paddingBottom).toBe('48px')
+
     layout.remove()
   })
 
@@ -248,6 +255,7 @@ describe('CdmtLayout', () => {
     // false by default — flexbox alone reserves the space, no offset var
     // measurement needed.
     expect(drawer.getBoundingClientRect).not.toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -268,6 +276,7 @@ describe('CdmtLayout', () => {
     await Promise.resolve()
 
     expect(drawer.getBoundingClientRect).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -328,6 +337,7 @@ describe('CdmtLayout', () => {
     expect(header.style.right).toBe('')
     expect(footer.style.left).toBe('')
     expect(footer.style.right).toBe('')
+
     layout.remove()
   })
 
@@ -368,6 +378,7 @@ describe('CdmtLayout', () => {
     // docked mode uses margin, never left/right (position isn't fixed anyway)
     expect(header.style.left).toBe('')
     expect(footer.style.left).toBe('')
+
     layout.remove()
   })
 
@@ -390,6 +401,7 @@ describe('CdmtLayout', () => {
     // compensates for the fixed header/footer removing themselves from flow.
     expect(drawer.style.marginTop).toBe('64px')
     expect(drawer.style.marginBottom).toBe('48px')
+
     layout.remove()
   })
 
@@ -413,6 +425,7 @@ describe('CdmtLayout', () => {
 
     expect(drawer.style.marginTop).toBe('')
     expect(drawer.style.marginBottom).toBe('')
+
     layout.remove()
   })
 
@@ -436,6 +449,7 @@ describe('CdmtLayout', () => {
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-right-top-inset')).toBe('0px')
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-left-bottom-inset')).toBe('0px')
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-right-bottom-inset')).toBe('44px')
+
     layout.remove()
   })
 
@@ -448,6 +462,7 @@ describe('CdmtLayout', () => {
     await Promise.resolve()
 
     expect(header.slot).toBe('header')
+
     layout.remove()
   })
 
@@ -461,6 +476,7 @@ describe('CdmtLayout', () => {
     await Promise.resolve()
 
     expect(unobserveSpy).toHaveBeenCalledWith(header)
+
     unobserveSpy.mockRestore()
     layout.remove()
   })
@@ -499,6 +515,7 @@ describe('CdmtLayout', () => {
     capturedCallback?.([], {} as ResizeObserver)
 
     expect(header.getBoundingClientRect).toHaveBeenCalled()
+
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -515,6 +532,7 @@ describe('CdmtLayout', () => {
     await Promise.resolve()
 
     expect(header.getBoundingClientRect).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -533,11 +551,13 @@ describe('CdmtLayout', () => {
     layout.append(footer)
     await Promise.resolve()
     await Promise.resolve()
+
     expect(footer.slot).toBe('')
 
     // The event listener should no longer trigger a recompute either.
     header.dispatchEvent(new CustomEvent('cdmt-layout-child-change', { bubbles: true }))
     await Promise.resolve()
+
     expect(header.getBoundingClientRect).not.toHaveBeenCalled()
   })
 
@@ -553,6 +573,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(header.getBoundingClientRect).not.toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -565,6 +586,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(toggleSpy).not.toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -579,6 +601,7 @@ describe('CdmtLayout', () => {
 
     expect(header.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -594,6 +617,7 @@ describe('CdmtLayout', () => {
 
     expect(footer.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -605,6 +629,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(drawer.layoutFixed).toBe(true)
+
     layout.remove()
   })
 
@@ -616,6 +641,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(drawer.layoutFixed).toBe(true)
+
     layout.remove()
   })
 
@@ -633,6 +659,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -646,6 +673,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -659,6 +687,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -672,6 +701,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -685,6 +715,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -698,6 +729,7 @@ describe('CdmtLayout', () => {
     await layout.updateComplete
 
     expect(rectSpy).toHaveBeenCalled()
+
     layout.remove()
   })
 
@@ -721,6 +753,7 @@ describe('CdmtLayout', () => {
     const layout = await mountLayout('<cdmt-header></cdmt-header>')
 
     expect(observeCalls).toHaveLength(1)
+
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -746,6 +779,7 @@ describe('CdmtLayout', () => {
     const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
 
     expect(observeCalls).toStrictEqual([drawer])
+
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -771,6 +805,7 @@ describe('CdmtLayout', () => {
     const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
 
     expect(observeCalls).toStrictEqual([drawer])
+
     layout.remove()
     vi.unstubAllGlobals()
   })
@@ -805,11 +840,13 @@ describe('CdmtLayout', () => {
 
     expect(pageContainer.style.paddingLeft).toBe('240px')
     expect(pageContainer.style.paddingRight).toBe('260px')
+
     layout.remove()
   })
 
   it('renders header/drawer/page-container/footer slots in its shadow root', () => {
     const slots = [...(el.shadowRoot?.querySelectorAll('slot') ?? [])].map((slot) => slot.name)
+
     expect(slots).toStrictEqual([
       'header',
       'drawer-left',

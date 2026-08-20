@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './page.js'
+import { CdmtPage } from './page.js'
 
-import type { CdmtPage, CdmtPageStyleFn } from './page.js'
+import type { CdmtPageStyleFn } from './page.js'
 
-describe('CdmtPage', () => {
+describe(CdmtPage, () => {
   let el: CdmtPage
 
   beforeEach(async () => {
@@ -35,6 +35,7 @@ describe('CdmtPage', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 
@@ -42,6 +43,7 @@ describe('CdmtPage', () => {
     const styleFn = vi.fn<CdmtPageStyleFn>(() => ({ minHeight: '10px' }))
     el.styleFn = styleFn
     await el.updateComplete
+
     expect(styleFn).toHaveBeenCalledTimes(1)
 
     el.padding = true
@@ -70,6 +72,7 @@ describe('CdmtPage', () => {
   it('removes the inline min-height when styleFn is cleared, falling back to the default CSS', async () => {
     el.styleFn = () => ({ minHeight: '999px' })
     await el.updateComplete
+
     expect(el.style.getPropertyValue('min-height')).toBe('999px')
 
     el.styleFn = undefined

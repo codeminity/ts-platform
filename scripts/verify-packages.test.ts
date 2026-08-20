@@ -39,7 +39,7 @@ function mockTarballs(tarballs: Record<string, string>) {
   )
 }
 
-describe('verifyPackages', () => {
+describe(verifyPackages, () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -114,6 +114,7 @@ describe('verifyPackages', () => {
     await vi.waitFor(() => {
       expect(started).toContain('packages/request/axios')
     })
+
     expect(started).toContain('packages/request/core')
 
     resolveCore()
@@ -150,6 +151,7 @@ describe('verifyPackages', () => {
     await vi.waitFor(() => {
       expect(started).toContain('packages/request/axios')
     })
+
     expect(started).toContain('packages/request/core')
 
     resolveCore?.()

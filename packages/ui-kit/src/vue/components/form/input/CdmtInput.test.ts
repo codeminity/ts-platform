@@ -14,7 +14,7 @@ function getInnerInput(el: CdmtInputElement): HTMLInputElement {
   return input
 }
 
-describe('CdmtInput (Vue)', () => {
+describe('cdmtInput (Vue)', () => {
   it('renders a cdmt-input element', () => {
     const wrapper = mount(CdmtInput, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtInputElement

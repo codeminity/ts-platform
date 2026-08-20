@@ -10,7 +10,7 @@ function responseOutcome(status: number): FetchOutcome {
   return createFetchOutcome({ response: new Response(null, { status }) })
 }
 
-describe('classifyOutcome', () => {
+describe(classifyOutcome, () => {
   it.each([
     [400, 'bad_request'],
     [401, 'unauthorized'],
@@ -39,11 +39,13 @@ describe('classifyOutcome', () => {
 
   it('maps an AbortError DOMException to abort', () => {
     const error = new DOMException('The operation was aborted', 'AbortError')
+
     expect(classifyOutcome(createFetchOutcome({ error }))).toBe('abort')
   })
 
   it('maps a TimeoutError DOMException (AbortSignal.timeout) to timeout', () => {
     const error = new DOMException('The operation timed out', 'TimeoutError')
+
     expect(classifyOutcome(createFetchOutcome({ error }))).toBe('timeout')
   })
 
@@ -57,6 +59,7 @@ describe('classifyOutcome', () => {
 
   it('returns unknown for an unrecognized DOMException name', () => {
     const error = new DOMException('Something else', 'SyntaxError')
+
     expect(classifyOutcome(createFetchOutcome({ error }))).toBe('unknown')
   })
 

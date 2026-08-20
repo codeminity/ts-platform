@@ -8,7 +8,7 @@ import { CdmtItemLabel } from './CdmtItemLabel.js'
 
 import type { CdmtItemLabel as CdmtItemLabelElement } from '../../../../components/list/item-label/item-label.js'
 
-describe('CdmtItemLabel (Vue)', () => {
+describe('cdmtItemLabel (Vue)', () => {
   it('renders a cdmt-item-label element', () => {
     const wrapper = mount(CdmtItemLabel, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtItemLabelElement

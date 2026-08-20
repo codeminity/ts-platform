@@ -11,7 +11,7 @@ function mockExec(diff: string, untracked = '') {
   })
 }
 
-describe('hasRelevantChanges', () => {
+describe(hasRelevantChanges, () => {
   it('returns true when a changed (tracked) file falls under the given prefix', async () => {
     const exec = mockExec('packages/ui-kit/src/foo.ts\nDECISIONS.md\n')
 

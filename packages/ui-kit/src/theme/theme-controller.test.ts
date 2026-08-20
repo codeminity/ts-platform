@@ -22,31 +22,31 @@ let matchMediaMatches: boolean
 let matchMediaQueries: string[]
 let matchMediaListenerTypes: string[]
 
-beforeEach(() => {
-  matchMediaListeners = []
-  matchMediaMatches = false
-  matchMediaQueries = []
-  matchMediaListenerTypes = []
-
-  vi.stubGlobal('matchMedia', (query: string) => {
-    matchMediaQueries.push(query)
-    return {
-      matches: matchMediaMatches,
-      media: query,
-      addEventListener: (type: string, listener: (event: MediaQueryListEvent) => void) => {
-        matchMediaListenerTypes.push(type)
-        matchMediaListeners.push(listener)
-      },
-      removeEventListener: vi.fn<RemoveEventListener>()
-    }
-  })
-})
-
-afterEach(() => {
-  vi.unstubAllGlobals()
-})
-
 describe('getThemeController', () => {
+  beforeEach(() => {
+    matchMediaListeners = []
+    matchMediaMatches = false
+    matchMediaQueries = []
+    matchMediaListenerTypes = []
+
+    vi.stubGlobal('matchMedia', (query: string) => {
+      matchMediaQueries.push(query)
+      return {
+        matches: matchMediaMatches,
+        media: query,
+        addEventListener: (type: string, listener: (event: MediaQueryListEvent) => void) => {
+          matchMediaListenerTypes.push(type)
+          matchMediaListeners.push(listener)
+        },
+        removeEventListener: vi.fn<RemoveEventListener>()
+      }
+    })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   it('creates the singleton with material/light applied to document.documentElement by default', async () => {
     const getThemeController = await freshGetThemeController()
 
@@ -83,10 +83,12 @@ describe('getThemeController', () => {
     const controller = getThemeController()
 
     controller.toggleMode()
+
     expect(controller.isDark).toBe(true)
     expect(controller.mode).toBe('dark')
 
     controller.toggleMode()
+
     expect(controller.isDark).toBe(false)
     expect(controller.mode).toBe('light')
   })
@@ -182,10 +184,12 @@ describe('getThemeController', () => {
     const unsubscribe = controller.subscribe(listener)
 
     controller.setMode('dark')
+
     expect(listener).toHaveBeenCalledTimes(1)
 
     unsubscribe()
     controller.toggleMode()
+
     expect(listener).toHaveBeenCalledTimes(1)
   })
 })

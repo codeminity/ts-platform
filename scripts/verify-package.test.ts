@@ -71,7 +71,7 @@ function createTempPackageUnderCategory(category: string) {
   return directory
 }
 
-describe('readVersionFromPackageJson', () => {
+describe(readVersionFromPackageJson, () => {
   let tempDir: string | undefined
 
   afterEach(() => {
@@ -116,7 +116,7 @@ describe('readVersionFromPackageJson', () => {
   })
 })
 
-describe('verifyTreeShakenSideEffect', () => {
+describe(verifyTreeShakenSideEffect, () => {
   let tempDir: string | undefined
 
   beforeEach(async () => {
@@ -178,7 +178,7 @@ describe('verifyTreeShakenSideEffect', () => {
   }, 15000)
 })
 
-describe('verifyPackage', () => {
+describe(verifyPackage, () => {
   beforeEach(() => {
     vi.resetAllMocks()
 

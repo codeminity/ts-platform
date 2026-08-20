@@ -1,9 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import './input.js'
-
-import type { CdmtInput } from './input.js'
+import { CdmtInput } from './input.js'
 
 function getInnerInput(el: CdmtInput): HTMLInputElement {
   const input = el.shadowRoot?.querySelector('input')
@@ -11,7 +9,7 @@ function getInnerInput(el: CdmtInput): HTMLInputElement {
   return input
 }
 
-describe('CdmtInput', () => {
+describe(CdmtInput, () => {
   let el: CdmtInput
 
   beforeEach(async () => {
@@ -33,6 +31,7 @@ describe('CdmtInput', () => {
     await el.updateComplete
 
     const input = el.shadowRoot?.querySelector('input')
+
     expect(input?.placeholder).toBe('Email')
   })
 
@@ -52,6 +51,7 @@ describe('CdmtInput', () => {
     await el.updateComplete
 
     const input = el.shadowRoot?.querySelector('input')
+
     expect(input?.disabled).toBe(true)
   })
 
@@ -69,6 +69,7 @@ describe('CdmtInput', () => {
     await el.updateComplete
 
     const input = el.shadowRoot?.querySelector('input')
+
     expect(input?.value).toBe('preset@example.com')
   })
 })

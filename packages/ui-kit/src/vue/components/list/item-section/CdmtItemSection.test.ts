@@ -8,7 +8,7 @@ import { CdmtItemSection } from './CdmtItemSection.js'
 
 import type { CdmtItemSection as CdmtItemSectionElement } from '../../../../components/list/item-section/item-section.js'
 
-describe('CdmtItemSection (Vue)', () => {
+describe('cdmtItemSection (Vue)', () => {
   it('renders a cdmt-item-section element', () => {
     const wrapper = mount(CdmtItemSection, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtItemSectionElement

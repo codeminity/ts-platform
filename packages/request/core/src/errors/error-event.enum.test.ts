@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ErrorEventEnum } from './error-event.enum.js'
 
-describe('ErrorEventEnum', () => {
+describe('errorEventEnum', () => {
   it('exposes the expected error event kinds', () => {
     expect(ErrorEventEnum).toStrictEqual({
       NETWORK: 'network',

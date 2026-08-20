@@ -8,7 +8,7 @@ import { CdmtList } from './CdmtList.js'
 
 import type { CdmtList as CdmtListElement } from '../../../components/list/list.js'
 
-describe('CdmtList (Vue)', () => {
+describe('cdmtList (Vue)', () => {
   it('renders a cdmt-list element', () => {
     const wrapper = mount(CdmtList, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtListElement

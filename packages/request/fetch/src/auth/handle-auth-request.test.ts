@@ -18,7 +18,7 @@ type OnError = NonNullable<Config['onError']>
 
 const TEST_INPUT = '/test'
 
-describe('handleAuthRequest', () => {
+describe(handleAuthRequest, () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

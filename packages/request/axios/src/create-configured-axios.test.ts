@@ -21,7 +21,7 @@ function fakeAdapter(
   }
 }
 
-describe('configuredAxios', () => {
+describe(configuredAxios, () => {
   it("overrides create with this package's wired create, not axios's own", () => {
     expect(configuredAxios.create).toBe(create)
     expect(configuredAxios.create).not.toBe(axios.create)

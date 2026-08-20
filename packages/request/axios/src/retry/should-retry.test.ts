@@ -25,7 +25,7 @@ function createError(options?: { code?: string; status?: number }): AxiosError {
   return error
 }
 
-describe('shouldRetry', () => {
+describe(shouldRetry, () => {
   it('returns false when attempt exceeds retries', () => {
     const error = createError({ code: 'ERR_NETWORK' })
 

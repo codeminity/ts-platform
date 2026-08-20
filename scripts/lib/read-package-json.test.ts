@@ -16,15 +16,15 @@ function createPackageJson(content: unknown): string {
   return tempDir
 }
 
-afterEach(() => {
-  if (tempDir) {
-    fs.rmSync(tempDir, { recursive: true, force: true })
+describe(readPackageJson, () => {
+  afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
 
-    tempDir = undefined
-  }
-})
+      tempDir = undefined
+    }
+  })
 
-describe('readPackageJson', () => {
   it('returns the package name', () => {
     const directory = createPackageJson({ name: '@codeminity/axios' })
 

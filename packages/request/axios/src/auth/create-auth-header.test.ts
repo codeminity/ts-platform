@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createAuthorizationHeader } from './create-auth-header.js'
 
-describe('createAuthorizationHeader', () => {
+describe(createAuthorizationHeader, () => {
   it('adds authorization header to existing headers', () => {
     const headers = AxiosHeaders.from({
       Accept: 'application/json'

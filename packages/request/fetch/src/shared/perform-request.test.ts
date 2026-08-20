@@ -11,7 +11,7 @@ type RefreshToken = NonNullable<Config['refreshToken']>
 type OnEvent = NonNullable<Config['onEvent']>
 type OnError = NonNullable<Config['onError']>
 
-describe('performRequest', () => {
+describe(performRequest, () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn<typeof fetch>())
   })

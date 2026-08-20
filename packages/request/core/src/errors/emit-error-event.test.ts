@@ -10,7 +10,7 @@ interface Outcome {
 type OnEvent = NonNullable<EventCallbacks<string, Outcome>['onEvent']>
 type OnError = NonNullable<EventCallbacks<string, Outcome>['onError']>
 
-describe('emitterCallback', () => {
+describe(emitterCallback, () => {
   it('calls onEvent and onError when both callbacks are provided', async () => {
     const onEvent = vi.fn<OnEvent>()
     const onError = vi.fn<OnError>()

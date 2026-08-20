@@ -18,7 +18,7 @@ type GetToken = NonNullable<Config['getToken']>
 type OnEvent = NonNullable<Config['onEvent']>
 type OnError = NonNullable<Config['onError']>
 
-describe('handleAuthRequest', () => {
+describe(handleAuthRequest, () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

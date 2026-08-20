@@ -8,7 +8,7 @@ import { CdmtPage } from './CdmtPage.js'
 
 import type { CdmtPage as CdmtPageElement } from '../../../../components/layout/page/page.js'
 
-describe('CdmtPage (Vue)', () => {
+describe('cdmtPage (Vue)', () => {
   it('renders a cdmt-page element', () => {
     const wrapper = mount(CdmtPage, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtPageElement

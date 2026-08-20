@@ -8,7 +8,7 @@ import { CdmtFooter } from './CdmtFooter.js'
 
 import type { CdmtFooter as CdmtFooterElement } from '../../../../components/layout/footer/footer.js'
 
-describe('CdmtFooter (Vue)', () => {
+describe('cdmtFooter (Vue)', () => {
   it('renders a cdmt-footer element', () => {
     const wrapper = mount(CdmtFooter, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtFooterElement

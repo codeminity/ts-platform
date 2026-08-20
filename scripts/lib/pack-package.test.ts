@@ -17,7 +17,7 @@ function createTempDir(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'pack-package-test-'))
 }
 
-describe('findTarball', () => {
+describe(findTarball, () => {
   it('returns the path of the generated tarball', () => {
     const directory = createTempDir()
 
@@ -42,7 +42,7 @@ describe('findTarball', () => {
   })
 })
 
-describe('packPackage', () => {
+describe(packPackage, () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })

@@ -1,11 +1,9 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import './item-section.js'
+import { CdmtItemSection } from './item-section.js'
 
-import type { CdmtItemSection } from './item-section.js'
-
-describe('CdmtItemSection', () => {
+describe(CdmtItemSection, () => {
   let el: CdmtItemSection
 
   beforeEach(async () => {
@@ -23,6 +21,7 @@ describe('CdmtItemSection', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 

@@ -8,7 +8,7 @@ import { CdmtLayout } from './CdmtLayout.js'
 
 import type { CdmtLayout as CdmtLayoutElement } from '../../../components/layout/layout.js'
 
-describe('CdmtLayout (Vue)', () => {
+describe('cdmtLayout (Vue)', () => {
   it('renders a cdmt-layout element', () => {
     const wrapper = mount(CdmtLayout, { attachTo: document.body })
     const element = wrapper.element as unknown as CdmtLayoutElement

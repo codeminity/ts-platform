@@ -30,7 +30,7 @@ function createAxiosInstanceMock() {
   return { instance, getInterceptor: () => interceptor }
 }
 
-describe('attachAuthInterceptor', () => {
+describe(attachAuthInterceptor, () => {
   it('should forward request through handleAuthRequest and return result', async () => {
     const mockedResult = {
       url: '/test'
