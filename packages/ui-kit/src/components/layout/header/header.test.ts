@@ -5,6 +5,8 @@ import './header.js'
 
 import type { CdmtHeader } from './header.js'
 
+type EventHandler = (event: Event) => void
+
 function scrollTo(position: number): void {
   Object.defineProperty(window, 'scrollY', { value: position, configurable: true })
   window.dispatchEvent(new Event('scroll'))
@@ -93,7 +95,7 @@ describe('CdmtHeader', () => {
     scrollTo(400) // delta > 0, past revealOffset -> hidden
     scrollTo(350) // delta < 0, still past revealOffset -> revealed
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(350) // delta === 0, still past revealOffset -> must stay revealed
 
@@ -154,7 +156,7 @@ describe('CdmtHeader', () => {
   it('dispatches cdmt-reveal with the new state on a real reveal-state change', async () => {
     el.reveal = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
 
     scrollTo(400)
@@ -168,7 +170,7 @@ describe('CdmtHeader', () => {
     await el.updateComplete
     scrollTo(400)
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(450)
 

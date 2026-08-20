@@ -8,7 +8,7 @@ import { runApiExtractor } from './run-api-extractor'
 import { runCommand } from './run-command'
 
 vi.mock(import('./run-command'), () => ({
-  runCommand: vi.fn()
+  runCommand: vi.fn<typeof runCommand>()
 }))
 
 const mockedRunCommand = vi.mocked(runCommand)

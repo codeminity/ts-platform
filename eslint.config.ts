@@ -216,7 +216,12 @@ export default defineConfig(
       // `vi.mock(import('./x'))` over `vi.mock('./x')` — the dynamic import
       // form gives the mock factory real type information for the module
       // being mocked, instead of an untyped string path.
-      'vitest/prefer-import-in-mock': 'error'
+      'vitest/prefer-import-in-mock': 'error',
+
+      // `vi.fn<Signature>()` over a bare `vi.fn()` — an untyped mock is
+      // `(...args: any[]) => any`, so a call with the wrong arguments or a
+      // wrong `mockReturnValue`/`mockResolvedValue` type goes uncaught.
+      'vitest/require-mock-type-parameters': 'error'
     }
   },
 

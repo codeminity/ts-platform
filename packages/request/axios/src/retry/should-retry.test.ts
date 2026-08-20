@@ -165,7 +165,7 @@ describe('shouldRetry', () => {
   it('calls custom shouldRetry with correct arguments', () => {
     const error = createError({ status: 500 })
 
-    const custom = vi.fn().mockReturnValue(true)
+    const custom = vi.fn<NonNullable<RetryConfig['shouldRetry']>>().mockReturnValue(true)
 
     expect(
       shouldRetry(error, 2, {

@@ -1,7 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const performRequest = vi.fn()
-const createRefreshQueue = vi.fn(() => ({ run: vi.fn() }))
+import type {
+  AuthConfig,
+  createRefreshQueue as CreateRefreshQueue,
+  RefreshQueue
+} from '@codeminity/request-core'
+
+import type { performRequest as PerformRequest } from './shared/perform-request.js'
+
+type GetToken = NonNullable<AuthConfig['getToken']>
+type Run = RefreshQueue['run']
+
+const performRequest = vi.fn<typeof PerformRequest>()
+const createRefreshQueue = vi.fn<typeof CreateRefreshQueue>(() => ({ run: vi.fn<Run>() }))
 
 vi.mock(import('@codeminity/request-core'), () => ({
   createRefreshQueue
@@ -27,10 +38,10 @@ describe('createFetch', () => {
   it('delegates each call to performRequest with the instance config and refresh queue', async () => {
     const { createFetch } = await import('./create.js')
 
-    const queue = { run: vi.fn() }
+    const queue = { run: vi.fn<Run>() }
     createRefreshQueue.mockReturnValue(queue)
 
-    const config = { getToken: vi.fn() }
+    const config = { getToken: vi.fn<GetToken>() }
     const apiFetch = createFetch(config)
 
     const init = { method: 'GET' }
@@ -62,8 +73,8 @@ describe('createFetch', () => {
   it('gives each instance its own refresh queue (per-instance isolation)', async () => {
     const { createFetch } = await import('./create.js')
 
-    const queueA = { run: vi.fn() }
-    const queueB = { run: vi.fn() }
+    const queueA = { run: vi.fn<Run>() }
+    const queueB = { run: vi.fn<Run>() }
 
     createRefreshQueue.mockReturnValueOnce(queueA)
     createRefreshQueue.mockReturnValueOnce(queueB)

@@ -12,6 +12,10 @@ import { handleAuthRequest } from './handle-auth-request.js'
 
 import type { Config } from '../shared/config.interface.js'
 
+type GetToken = NonNullable<Config['getToken']>
+type OnEvent = NonNullable<Config['onEvent']>
+type OnError = NonNullable<Config['onError']>
+
 const TEST_INPUT = '/test'
 
 describe('handleAuthRequest', () => {
@@ -178,7 +182,7 @@ describe('handleAuthRequest', () => {
   it('calls refresh before token and sets header', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({ tokenMode: TokenModeEnum.JWT, getToken }) as Config
     const init = createRequestInit()
@@ -194,7 +198,7 @@ describe('handleAuthRequest', () => {
   it('does not attempt token refresh when skipAuth is set for the request', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({ tokenMode: TokenModeEnum.JWT, getToken }) as Config
     const init = createRequestInit({ codeminity: { skipAuth: true } })
@@ -209,7 +213,7 @@ describe('handleAuthRequest', () => {
   it('skips auth entirely when the request signal is already aborted', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({ tokenMode: TokenModeEnum.JWT, getToken }) as Config
 
@@ -228,15 +232,15 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits refresh failed event and error, and continues to attach the token', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const error = new Error('refresh failed')
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockRejectedValue(error)
 
     const config: Config = {
-      ...createAuthConfig({ getToken: vi.fn().mockResolvedValue('token') }),
+      ...createAuthConfig({ getToken: vi.fn<GetToken>().mockResolvedValue('token') }),
       onEvent,
       onError
     }
@@ -266,7 +270,9 @@ describe('handleAuthRequest', () => {
   })
 
   it('does not attach Authorization header when token is empty', async () => {
-    const config = createAuthConfig({ getToken: vi.fn().mockResolvedValue(undefined) }) as Config
+    const config = createAuthConfig({
+      getToken: vi.fn<GetToken>().mockResolvedValue(null)
+    }) as Config
 
     const result = await handleAuthRequest(
       TEST_INPUT,
@@ -279,13 +285,13 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits token failed event and error when getToken throws', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const error = new Error('token failed')
 
     const config: Config = {
-      ...createAuthConfig({ getToken: vi.fn().mockRejectedValue(error) }),
+      ...createAuthConfig({ getToken: vi.fn<GetToken>().mockRejectedValue(error) }),
       onEvent,
       onError
     }

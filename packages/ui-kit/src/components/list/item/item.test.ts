@@ -5,6 +5,8 @@ import './item.js'
 
 import type { CdmtItem } from './item.js'
 
+type EventHandler = (event: Event) => void
+
 function pressKey(el: CdmtItem, key: string): boolean {
   return el.dispatchEvent(new KeyboardEvent('keydown', { key, cancelable: true }))
 }
@@ -153,7 +155,7 @@ describe('CdmtItem', () => {
   it('triggers a click via Enter when clickable', async () => {
     el.clickable = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
 
     pressKey(el, 'Enter')
@@ -164,7 +166,7 @@ describe('CdmtItem', () => {
   it('triggers a click via Space when clickable', async () => {
     el.clickable = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
 
     pressKey(el, ' ')
@@ -182,7 +184,7 @@ describe('CdmtItem', () => {
   it('ignores every other key when clickable', async () => {
     el.clickable = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
 
     pressKey(el, 'Tab')
@@ -191,7 +193,7 @@ describe('CdmtItem', () => {
   })
 
   it('does not trigger a click on Enter/Space when not clickable', () => {
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
 
     pressKey(el, 'Enter')
@@ -203,7 +205,7 @@ describe('CdmtItem', () => {
     el.clickable = true
     el.disable = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
 
     pressKey(el, 'Enter')
@@ -216,7 +218,7 @@ describe('CdmtItem', () => {
     await el.updateComplete
     el.remove()
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('click', handler)
     pressKey(el, 'Enter')
 

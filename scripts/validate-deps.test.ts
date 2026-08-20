@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const cruise = vi.fn()
+import type { cruise as Cruise, ICruiseResult } from 'dependency-cruiser'
+
+const cruise = vi.fn<typeof Cruise>()
 
 vi.mock(import('dependency-cruiser'), () => ({
   cruise
@@ -28,7 +30,12 @@ describe('validateDeps', () => {
   })
 
   it('stringifies non-string output when the cruise reports a violation', async () => {
-    cruise.mockResolvedValue({ exitCode: 1, output: { summary: { error: 1 } } })
+    // validateDeps only JSON.stringifies non-string output — the real
+    // ICruiseResult's other required summary fields are irrelevant here.
+    cruise.mockResolvedValue({
+      exitCode: 1,
+      output: { summary: { error: 1 } } as unknown as ICruiseResult
+    })
 
     const { validateDeps } = await import('./validate-deps')
 

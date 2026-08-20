@@ -5,6 +5,9 @@ import { material } from './presets/material.js'
 
 import type { getThemeController as GetThemeController } from './theme-controller.js'
 
+type Listener = () => void
+type RemoveEventListener = (type: string, listener: (event: MediaQueryListEvent) => void) => void
+
 // `getThemeController()` is a module-level singleton — resetting modules and
 // re-importing fresh for every test is what gives each test its own
 // instance, instead of leaking state across tests via the cached module.
@@ -34,7 +37,7 @@ beforeEach(() => {
         matchMediaListenerTypes.push(type)
         matchMediaListeners.push(listener)
       },
-      removeEventListener: vi.fn()
+      removeEventListener: vi.fn<RemoveEventListener>()
     }
   })
 })
@@ -118,7 +121,7 @@ describe('getThemeController', () => {
     const controller = getThemeController()
     controller.setMode('auto')
 
-    const listener = vi.fn()
+    const listener = vi.fn<Listener>()
     controller.subscribe(listener)
 
     matchMediaListeners.forEach((l) => {
@@ -149,7 +152,7 @@ describe('getThemeController', () => {
     controller.setMode('auto')
     controller.setMode('light')
 
-    const listener = vi.fn()
+    const listener = vi.fn<Listener>()
     controller.subscribe(listener)
 
     matchMediaListeners.forEach((l) => {
@@ -175,7 +178,7 @@ describe('getThemeController', () => {
     const getThemeController = await freshGetThemeController()
     const controller = getThemeController()
 
-    const listener = vi.fn()
+    const listener = vi.fn<Listener>()
     const unsubscribe = controller.subscribe(listener)
 
     controller.setMode('dark')

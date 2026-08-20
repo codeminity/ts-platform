@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { getAffectedScope } from './affected-scope'
 
+import type { ExecFn } from './affected-scope'
+
 let tempDir: string | undefined
 
 function createWorkspace(): string {
@@ -26,7 +28,7 @@ function mockExec(responses: {
   untracked?: string
   turbo?: { packages: string[] }
 }) {
-  return vi.fn((command: string) => {
+  return vi.fn<ExecFn>((command: string) => {
     if (command.startsWith('git diff')) {
       return Promise.resolve({ stdout: responses.diff ?? '' })
     }
@@ -135,7 +137,7 @@ describe('getAffectedScope', () => {
   })
 
   it("falls back to full when git diff itself fails (e.g. origin/main isn't a resolvable ref in a shallow CI clone)", async () => {
-    const exec = vi.fn().mockRejectedValue(new Error('fatal: bad revision origin/main'))
+    const exec = vi.fn<ExecFn>().mockRejectedValue(new Error('fatal: bad revision origin/main'))
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* silence expected warning */
     })
@@ -151,7 +153,7 @@ describe('getAffectedScope', () => {
   })
 
   it('falls back to full and stringifies a non-Error rejection', async () => {
-    const exec = vi.fn().mockRejectedValue('a plain string rejection')
+    const exec = vi.fn<ExecFn>().mockRejectedValue('a plain string rejection')
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* silence expected warning */
     })
@@ -167,7 +169,7 @@ describe('getAffectedScope', () => {
   })
 
   it('falls back to full when the turbo dry-run output is not valid JSON', async () => {
-    const exec = vi.fn((command: string) => {
+    const exec = vi.fn<ExecFn>((command: string) => {
       if (command.startsWith('git diff')) {
         return Promise.resolve({ stdout: 'packages/ui-kit/src/foo.ts\n' })
       }

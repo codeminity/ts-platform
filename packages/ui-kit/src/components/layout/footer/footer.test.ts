@@ -5,6 +5,8 @@ import './footer.js'
 
 import type { CdmtFooter } from './footer.js'
 
+type EventHandler = (event: Event) => void
+
 function scrollTo(position: number): void {
   Object.defineProperty(window, 'scrollY', { value: position, configurable: true })
   window.dispatchEvent(new Event('scroll'))
@@ -83,7 +85,7 @@ describe('CdmtFooter', () => {
     scrollTo(100) // delta > 0 -> hidden
     scrollTo(50) // delta < 0 -> revealed
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(50) // delta === 0 -> must stay revealed, not flip to hidden
 
@@ -96,7 +98,7 @@ describe('CdmtFooter', () => {
     await el.updateComplete
     scrollTo(50) // delta > 0 -> hidden
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(50) // delta === 0 -> must stay hidden, not flip to revealed
 
@@ -117,7 +119,7 @@ describe('CdmtFooter', () => {
   it('dispatches cdmt-reveal with the new state on a real reveal-state change', async () => {
     el.reveal = true
     await el.updateComplete
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
 
     scrollTo(50)
@@ -131,7 +133,7 @@ describe('CdmtFooter', () => {
     await el.updateComplete
     scrollTo(50)
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(100)
 
@@ -144,7 +146,7 @@ describe('CdmtFooter', () => {
     scrollTo(100) // delta > 0 -> hidden
     scrollTo(50) // delta < 0 -> revealed
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-reveal', handler)
     scrollTo(0) // delta < 0 again -> still revealed, already was
 
