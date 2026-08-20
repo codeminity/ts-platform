@@ -9,7 +9,7 @@ import type { Config } from '../shared/config.interface.js'
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
 vi.mock(import('./handle-auth-request.js'), () => ({
-  handleAuthRequest: vi.fn()
+  handleAuthRequest: vi.fn<typeof handleAuthRequest>()
 }))
 
 type MockInterceptor = (config: InternalAxiosRequestConfig) => Promise<InternalAxiosRequestConfig>

@@ -6,13 +6,19 @@ import { handleRefreshToken } from './refresh-token.js'
 
 import type { AuthConfig } from './auth-config.interface.js'
 
+type IsTokenExpired = NonNullable<AuthConfig['isTokenExpired']>
+type RefreshToken = NonNullable<AuthConfig['refreshToken']>
+type OnRefreshStart = NonNullable<AuthConfig['onRefreshStart']>
+type OnRefreshSuccess = NonNullable<AuthConfig['onRefreshSuccess']>
+type OnRefreshFail = NonNullable<AuthConfig['onRefreshFail']>
+
 describe('handleRefreshToken', () => {
   it('calls refreshToken when token is expired and triggers success flow', async () => {
-    const isTokenExpired = vi.fn().mockResolvedValue(true)
-    const refreshToken = vi.fn()
+    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
+    const refreshToken = vi.fn<RefreshToken>()
 
-    const onStart = vi.fn()
-    const onSuccess = vi.fn()
+    const onStart = vi.fn<OnRefreshStart>()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
 
     const config = createAuthConfig({
       isTokenExpired,
@@ -35,11 +41,11 @@ describe('handleRefreshToken', () => {
   })
 
   it('does NOT call refreshToken when token is NOT expired', async () => {
-    const isTokenExpired = vi.fn().mockResolvedValue(false)
-    const refreshToken = vi.fn()
+    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(false)
+    const refreshToken = vi.fn<RefreshToken>()
 
-    const onStart = vi.fn()
-    const onSuccess = vi.fn()
+    const onStart = vi.fn<OnRefreshStart>()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
 
     const config = createAuthConfig({
       isTokenExpired,
@@ -62,10 +68,10 @@ describe('handleRefreshToken', () => {
   })
 
   it('calls fail hook when refreshToken throws error', async () => {
-    const isTokenExpired = vi.fn().mockResolvedValue(true)
-    const refreshToken = vi.fn().mockRejectedValue(new Error('fail'))
+    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
+    const refreshToken = vi.fn<RefreshToken>().mockRejectedValue(new Error('fail'))
 
-    const onFail = vi.fn()
+    const onFail = vi.fn<OnRefreshFail>()
 
     const config = createAuthConfig({
       isTokenExpired,
@@ -82,8 +88,8 @@ describe('handleRefreshToken', () => {
 
   it('always executes inside refresh queue', async () => {
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn()
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>()
     })
 
     const queue = createRefreshQueue()
@@ -109,10 +115,10 @@ describe('handleRefreshToken', () => {
   it('runs refresh only once', async () => {
     const queue = createRefreshQueue()
 
-    const isTokenExpired = vi.fn().mockResolvedValue(true)
-    const refreshToken = vi.fn().mockResolvedValue(undefined)
-    const onStart = vi.fn()
-    const onSuccess = vi.fn()
+    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
+    const refreshToken = vi.fn<RefreshToken>().mockResolvedValue(undefined)
+    const onStart = vi.fn<OnRefreshStart>()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
 
     const config = createAuthConfig({
       isTokenExpired,
@@ -131,7 +137,7 @@ describe('handleRefreshToken', () => {
   })
 
   it('returns early when only refreshToken is missing', async () => {
-    const isTokenExpired = vi.fn().mockResolvedValue(true)
+    const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
 
     const config = createAuthConfig({
       isTokenExpired,
@@ -146,7 +152,7 @@ describe('handleRefreshToken', () => {
   })
 
   it('returns early when only isTokenExpired is missing', async () => {
-    const refreshToken = vi.fn()
+    const refreshToken = vi.fn<RefreshToken>()
 
     const config = createAuthConfig({
       isTokenExpired: undefined,
@@ -163,8 +169,8 @@ describe('handleRefreshToken', () => {
 
   it('does not throw when onRefreshStart and onRefreshSuccess are not provided', async () => {
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn(),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>(),
       onRefreshStart: undefined,
       onRefreshSuccess: undefined
     })
@@ -176,8 +182,8 @@ describe('handleRefreshToken', () => {
 
   it('does not throw an additional error when onRefreshFail is not provided', async () => {
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn().mockRejectedValue(new Error('fail')),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>().mockRejectedValue(new Error('fail')),
       onRefreshFail: undefined
     })
 
@@ -194,15 +200,15 @@ describe('handleRefreshToken', () => {
   })
 
   it('times out and calls onRefreshFail when refreshToken never settles', async () => {
-    const refreshToken = vi.fn().mockReturnValue(
+    const refreshToken = vi.fn<RefreshToken>().mockReturnValue(
       new Promise<void>(() => {
         /* never settles */
       })
     )
-    const onFail = vi.fn()
+    const onFail = vi.fn<OnRefreshFail>()
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       refreshTimeout: 20,
       onRefreshFail: onFail
@@ -217,12 +223,12 @@ describe('handleRefreshToken', () => {
   })
 
   it('succeeds when refreshToken resolves before the timeout, and clears the timer', async () => {
-    const onSuccess = vi.fn()
-    const onFail = vi.fn()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
+    const onFail = vi.fn<OnRefreshFail>()
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn().mockResolvedValue(undefined),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>().mockResolvedValue(undefined),
       refreshTimeout: 20,
       onRefreshSuccess: onSuccess,
       onRefreshFail: onFail
@@ -244,8 +250,8 @@ describe('handleRefreshToken', () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn().mockResolvedValue(undefined),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>().mockResolvedValue(undefined),
       refreshTimeout: 20
     })
 
@@ -259,11 +265,13 @@ describe('handleRefreshToken', () => {
   })
 
   it('does not apply a timeout when refreshTimeout is not configured', async () => {
-    const onSuccess = vi.fn()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
-      refreshToken: vi.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 10))),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
+      refreshToken: vi.fn<RefreshToken>(
+        () => new Promise<void>((resolve) => setTimeout(resolve, 10))
+      ),
       onRefreshSuccess: onSuccess
     })
 
@@ -276,13 +284,13 @@ describe('handleRefreshToken', () => {
 
   it('retries refreshToken when onRefreshFail awaits retry, and succeeds on the second attempt', async () => {
     const refreshToken = vi
-      .fn()
+      .fn<RefreshToken>()
       .mockRejectedValueOnce(new Error('transient'))
       .mockResolvedValueOnce(undefined)
-    const onSuccess = vi.fn()
+    const onSuccess = vi.fn<OnRefreshSuccess>()
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshSuccess: onSuccess,
       onRefreshFail: async (_error, retry) => {
@@ -299,11 +307,11 @@ describe('handleRefreshToken', () => {
   })
 
   it('does not retry when onRefreshFail never calls retry', async () => {
-    const refreshToken = vi.fn().mockRejectedValue(new Error('permanent'))
-    const onFail = vi.fn()
+    const refreshToken = vi.fn<RefreshToken>().mockRejectedValue(new Error('permanent'))
+    const onFail = vi.fn<OnRefreshFail>()
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshFail: onFail
     })
@@ -318,7 +326,7 @@ describe('handleRefreshToken', () => {
 
   it('surfaces the final error when a retried attempt also fails and is not retried again', async () => {
     const refreshToken = vi
-      .fn()
+      .fn<RefreshToken>()
       .mockRejectedValueOnce(new Error('first failure'))
       .mockRejectedValueOnce(new Error('second failure'))
 
@@ -332,7 +340,7 @@ describe('handleRefreshToken', () => {
       })
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshFail: onFail
     })
@@ -347,7 +355,7 @@ describe('handleRefreshToken', () => {
 
   it('supports multiple chained retries until refreshToken finally succeeds', async () => {
     const refreshToken = vi
-      .fn()
+      .fn<RefreshToken>()
       .mockRejectedValueOnce(new Error('attempt 1'))
       .mockRejectedValueOnce(new Error('attempt 2'))
       .mockResolvedValueOnce(undefined)
@@ -355,7 +363,7 @@ describe('handleRefreshToken', () => {
     let attempts = 0
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshFail: async (_error, retry) => {
         attempts++
@@ -373,10 +381,10 @@ describe('handleRefreshToken', () => {
   })
 
   it('fails safe when onRefreshFail throws without ever calling retry', async () => {
-    const refreshToken = vi.fn().mockRejectedValue(new Error('original failure'))
+    const refreshToken = vi.fn<RefreshToken>().mockRejectedValue(new Error('original failure'))
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshFail: () => {
         throw new Error('broken onRefreshFail')
@@ -393,7 +401,7 @@ describe('handleRefreshToken', () => {
     let resolveSecondAttempt!: () => void
 
     const refreshToken = vi
-      .fn()
+      .fn<RefreshToken>()
       .mockRejectedValueOnce(new Error('first failure'))
       .mockImplementationOnce(
         () =>
@@ -403,7 +411,7 @@ describe('handleRefreshToken', () => {
       )
 
     const config = createAuthConfig({
-      isTokenExpired: vi.fn().mockResolvedValue(true),
+      isTokenExpired: vi.fn<IsTokenExpired>().mockResolvedValue(true),
       refreshToken,
       onRefreshFail: (_error, retry) => {
         // Deliberate misuse: fire-and-forget, never awaited or returned —

@@ -3,14 +3,22 @@ import fs from 'node:fs'
 import { globby } from 'globby'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { globby as Globby } from 'globby'
+
 vi.mock(import('node:fs'), () => ({
   // Only `fs.rmSync` is ever called by the code under test — the rest of
   // the real `node:fs` shape is deliberately not part of this mock.
-  default: { rmSync: vi.fn() } as unknown as typeof fs
+  default: { rmSync: vi.fn<typeof fs.rmSync>() } as unknown as typeof fs
 }))
 
 vi.mock(import('globby'), () => ({
-  globby: vi.fn()
+  // `globby` is overloaded (an `objectMode`/`stats` options shape resolves
+  // to `GlobEntry[]` instead) — only the plain string-array overload is
+  // ever used here, so the mock is typed to just that one signature and
+  // cast back to the full real type.
+  globby: vi.fn<
+    (pattern: string | readonly string[], options: unknown) => Promise<string[]>
+  >() as unknown as typeof Globby
 }))
 
 const { CLEAN_GLOBS, clean } = await import('./clean')

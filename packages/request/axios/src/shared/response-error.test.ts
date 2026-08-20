@@ -12,26 +12,32 @@ import type { Config } from './config.interface.js'
 import type { InternalRequestConfig } from './request-config.interface.js'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 
+type Request = AxiosInstance['request']
+
 vi.mock(import('@codeminity/request-core'), () => ({
-  emitterCallback: vi.fn()
+  // `emitterCallback` is generic — Vitest's `Mock<>` wrapper can't preserve
+  // that, so it's typed against one concrete instantiation and cast back.
+  emitterCallback: vi.fn<
+    (event: string, outcome: unknown, callbacks: unknown) => Promise<void>
+  >() as unknown as typeof emitterCallback
 }))
 
 vi.mock(import('../retry/retry.js'), () => ({
-  handleRetry: vi.fn()
+  handleRetry: vi.fn<typeof handleRetry>()
 }))
 
 vi.mock(import('../errors/error-to-event.js'), () => ({
-  mapErrorToEvent: vi.fn()
+  mapErrorToEvent: vi.fn<typeof mapErrorToEvent>()
 }))
 
 describe('handleResponseError', () => {
   let instance: AxiosInstance
-  let request: ReturnType<typeof vi.fn>
+  let request: ReturnType<typeof vi.fn<Request>>
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    request = vi.fn()
+    request = vi.fn<Request>()
 
     instance = {
       request

@@ -2,10 +2,14 @@ import { describe, it, expect, vi } from 'vitest'
 
 import { createRefreshQueue } from './create-refresh-queue.js'
 
+import type { RefreshQueue } from './refresh-queue.interface.js'
+
+type Task = Parameters<RefreshQueue['run']>[0]
+
 describe('createRefreshQueue', () => {
   it('runs the task', async () => {
     const queue = createRefreshQueue()
-    const task = vi.fn()
+    const task = vi.fn<Task>()
 
     await queue.run(task)
 
@@ -15,7 +19,7 @@ describe('createRefreshQueue', () => {
   it('returns the same promise while a task is running', async () => {
     const queue = createRefreshQueue()
 
-    const task = vi.fn(
+    const task = vi.fn<Task>(
       () =>
         new Promise<void>((resolve) => {
           setTimeout(resolve, 10)
@@ -35,7 +39,7 @@ describe('createRefreshQueue', () => {
   it('creates a new promise after the previous task is finished', async () => {
     const queue = createRefreshQueue()
 
-    const task = vi.fn()
+    const task = vi.fn<Task>()
 
     const first = queue.run(task)
 
@@ -56,7 +60,7 @@ describe('createRefreshQueue', () => {
 
     await expect(queue.run(async () => Promise.reject(error))).rejects.toThrow(error)
 
-    const task = vi.fn()
+    const task = vi.fn<Task>()
 
     await queue.run(task)
 

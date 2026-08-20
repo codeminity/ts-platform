@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CommandCancelledError, runCommand } from './lib/run-command'
 
+import type { CheckStep, RunFullCheckOptions } from './full-check'
 import type * as RunCommandModule from './lib/run-command'
+import type { runIfRelevant as RunIfRelevant } from './lib/run-if-relevant'
+import type { runScopedLint as RunScopedLint } from './lint'
+import type { runScopedTypecheck as RunScopedTypecheck } from './typecheck'
 
 vi.mock(import('./lib/run-command'), async (importOriginal) => {
   const actual = await importOriginal<typeof RunCommandModule>()
@@ -12,7 +16,7 @@ vi.mock(import('./lib/run-command'), async (importOriginal) => {
     // in full-check.ts working against this mock the same as they would
     // against the real module.
     CommandCancelledError: actual.CommandCancelledError,
-    runCommand: vi.fn()
+    runCommand: vi.fn<typeof runCommand>()
   }
 })
 
@@ -22,9 +26,9 @@ vi.mock(import('./lib/run-command'), async (importOriginal) => {
 // exercising CHECK_STEPS directly (e.g. "defaults to CHECK_STEPS") would
 // run real getAffectedScope()/hasRelevantChanges() git/turbo commands as a
 // side effect of running the unit test.
-vi.mock(import('./lint'), () => ({ runScopedLint: vi.fn() }))
-vi.mock(import('./typecheck'), () => ({ runScopedTypecheck: vi.fn() }))
-vi.mock(import('./lib/run-if-relevant'), () => ({ runIfRelevant: vi.fn() }))
+vi.mock(import('./lint'), () => ({ runScopedLint: vi.fn<typeof RunScopedLint>() }))
+vi.mock(import('./typecheck'), () => ({ runScopedTypecheck: vi.fn<typeof RunScopedTypecheck>() }))
+vi.mock(import('./lib/run-if-relevant'), () => ({ runIfRelevant: vi.fn<typeof RunIfRelevant>() }))
 
 const { CHECK_STEPS, hasFailures, runFullCheck } = await import('./full-check')
 const { runScopedLint } = await import('./lint')
@@ -80,8 +84,8 @@ describe('runFullCheck', () => {
 
   it('invokes onStepStart and onStepComplete for each step', async () => {
     mockedRunCommand.mockResolvedValue(undefined)
-    const onStepStart = vi.fn()
-    const onStepComplete = vi.fn()
+    const onStepStart = vi.fn<NonNullable<RunFullCheckOptions['onStepStart']>>()
+    const onStepComplete = vi.fn<NonNullable<RunFullCheckOptions['onStepComplete']>>()
 
     await runFullCheck(steps, { onStepStart, onStepComplete })
 
@@ -368,7 +372,7 @@ describe('runFullCheck', () => {
 
   describe('a step with a custom run() instead of args', () => {
     it('calls run() instead of runCommand, passing the scheduler signal', async () => {
-      const run = vi.fn().mockResolvedValue(undefined)
+      const run = vi.fn<NonNullable<CheckStep['run']>>().mockResolvedValue(undefined)
       const customSteps = [
         { name: 'Install', args: ['install'] },
         { name: 'Custom', args: ['run', 'unused'], run }
@@ -386,7 +390,7 @@ describe('runFullCheck', () => {
     })
 
     it('reports the step as passed when run() resolves', async () => {
-      const run = vi.fn().mockResolvedValue(undefined)
+      const run = vi.fn<NonNullable<CheckStep['run']>>().mockResolvedValue(undefined)
       const customSteps = [
         { name: 'Install', args: ['install'] },
         { name: 'Custom', args: [], run }
@@ -400,7 +404,9 @@ describe('runFullCheck', () => {
     })
 
     it('triggers a repo-wide stop when run() throws a genuine (non-cancelled) error', async () => {
-      const run = vi.fn().mockRejectedValue(new Error('mutation score below threshold'))
+      const run = vi
+        .fn<NonNullable<CheckStep['run']>>()
+        .mockRejectedValue(new Error('mutation score below threshold'))
       const customSteps = [
         { name: 'Install', args: ['install'] },
         { name: 'Custom', args: [], run },
@@ -439,7 +445,9 @@ describe('runFullCheck', () => {
     })
 
     it('reports run() throwing CommandCancelledError as cancelled, not a genuine failure', async () => {
-      const run = vi.fn().mockRejectedValue(new CommandCancelledError('cancelled'))
+      const run = vi
+        .fn<NonNullable<CheckStep['run']>>()
+        .mockRejectedValue(new CommandCancelledError('cancelled'))
       const customSteps = [
         { name: 'Install', args: ['install'] },
         { name: 'Custom', args: [], run }

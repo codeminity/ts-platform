@@ -5,6 +5,8 @@ import './drawer.js'
 
 import type { CdmtDrawer } from './drawer.js'
 
+type EventHandler = (event: Event) => void
+
 class FakeMediaQueryList extends EventTarget {
   matches: boolean
   media: string
@@ -169,7 +171,7 @@ describe('CdmtDrawer', () => {
 
   it('does not dispatch any show/hide events on initial connect', async () => {
     const fresh = document.createElement('cdmt-drawer')
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     fresh.addEventListener('cdmt-model-value-change', handler)
     document.body.append(fresh)
     await fresh.updateComplete
@@ -264,7 +266,7 @@ describe('CdmtDrawer', () => {
   })
 
   it('re-syncs fixed/layout state when mini changes alone (isolated from miniToOverlay)', async () => {
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-layout-child-change', handler)
 
     el.mini = true
@@ -277,7 +279,7 @@ describe('CdmtDrawer', () => {
     el.mini = true
     await el.updateComplete
 
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-layout-child-change', handler)
 
     el.miniToOverlay = true
@@ -637,7 +639,7 @@ describe('CdmtDrawer', () => {
   })
 
   it('dispatches cdmt-layout-child-change when a metrics-relevant prop changes', async () => {
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-layout-child-change', handler)
 
     el.overlay = true
@@ -650,7 +652,7 @@ describe('CdmtDrawer', () => {
     const parent = document.createElement('div')
     document.body.append(parent)
     parent.append(el)
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     parent.addEventListener('cdmt-layout-child-change', handler)
 
     el.overlay = true
@@ -677,7 +679,7 @@ describe('CdmtDrawer', () => {
   })
 
   it('does not re-dispatch cdmt-model-value-change when an unrelated property changes', async () => {
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-model-value-change', handler)
 
     el.bordered = true
@@ -706,7 +708,7 @@ describe('CdmtDrawer', () => {
   })
 
   it('does not re-toggle data-cdmt-fixed or re-notify the layout when an unrelated property changes', async () => {
-    const handler = vi.fn()
+    const handler = vi.fn<EventHandler>()
     el.addEventListener('cdmt-layout-child-change', handler)
 
     el.persistent = true

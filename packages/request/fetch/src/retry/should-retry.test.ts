@@ -90,7 +90,7 @@ describe('shouldRetry', () => {
 
   it('calls custom shouldRetry with correct arguments', () => {
     const outcome = statusOutcome(500)
-    const custom = vi.fn().mockReturnValue(true)
+    const custom = vi.fn<NonNullable<RetryConfig['shouldRetry']>>().mockReturnValue(true)
 
     expect(shouldRetry(outcome, 2, { retries: 3, shouldRetry: custom })).toBe(true)
     expect(custom).toHaveBeenCalledWith(outcome, 2)

@@ -1,14 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type {
+  delay as Delay,
+  resolveRetryDelay as ResolveRetryDelay,
+  applyRetryJitter as ApplyRetryJitter
+} from '@codeminity/request-core'
+
 import { createFetchOutcome } from '../shared/mocks/create-fetch-outcome.js'
 
+import type { parseRetryAfter as ParseRetryAfter } from './parse-retry-after.js'
+import type { RetryConfig } from './retry-config.interface.js'
+import type { shouldRetry as ShouldRetry } from './should-retry.js'
 import type { FetchOutcome } from '../errors/fetch-outcome.interface.js'
 
-const delay = vi.fn()
-const shouldRetry = vi.fn()
-const parseRetryAfter = vi.fn()
-const resolveRetryDelay = vi.fn()
-const applyRetryJitter = vi.fn()
+type GetRetryDelay = NonNullable<RetryConfig['getRetryDelay']>
+
+const delay = vi.fn<typeof Delay>()
+const shouldRetry = vi.fn<typeof ShouldRetry>()
+const parseRetryAfter = vi.fn<typeof ParseRetryAfter>()
+const resolveRetryDelay = vi.fn<typeof ResolveRetryDelay>()
+const applyRetryJitter = vi.fn<typeof ApplyRetryJitter>()
 
 vi.mock(import('@codeminity/request-core'), () => ({
   delay,
@@ -72,7 +83,7 @@ describe('handleRetry', () => {
   it('prefers getRetryDelay over retryDelay', async () => {
     shouldRetry.mockReturnValue(true)
 
-    const getRetryDelay = vi.fn().mockReturnValue(1000)
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockReturnValue(1000)
 
     const { handleRetry } = await import('./retry.js')
 
@@ -88,9 +99,16 @@ describe('handleRetry', () => {
 
     const { handleRetry } = await import('./retry.js')
 
-    const getRetryDelay = vi.fn().mockReturnValue(undefined)
+    // Deliberately loosened return type — this test exercises the runtime
+    // fallback for a `getRetryDelay` that violates its own declared contract.
+    const getRetryDelay = vi
+      .fn<(...args: Parameters<GetRetryDelay>) => number | undefined>()
+      .mockReturnValue(undefined)
 
-    const result = await handleRetry(outcome, 2, { retryDelay: 300, getRetryDelay })
+    const result = await handleRetry(outcome, 2, {
+      retryDelay: 300,
+      getRetryDelay: getRetryDelay as GetRetryDelay
+    })
 
     expect(result).toBe(true)
     expect(getRetryDelay).toHaveBeenCalledWith(2, outcome)
@@ -124,9 +142,16 @@ describe('handleRetry', () => {
 
     const { handleRetry } = await import('./retry.js')
 
-    const getRetryDelay = vi.fn().mockReturnValue(null)
+    // Deliberately loosened return type — this test exercises the runtime
+    // fallback for a `getRetryDelay` that violates its own declared contract.
+    const getRetryDelay = vi
+      .fn<(...args: Parameters<GetRetryDelay>) => number | null>()
+      .mockReturnValue(null)
 
-    const result = await handleRetry(outcome, 1, { retryDelay: 200, getRetryDelay })
+    const result = await handleRetry(outcome, 1, {
+      retryDelay: 200,
+      getRetryDelay: getRetryDelay as GetRetryDelay
+    })
 
     expect(result).toBe(true)
     expect(delay).toHaveBeenCalledWith(200, undefined)
@@ -150,7 +175,7 @@ describe('handleRetry', () => {
 
     const { handleRetry } = await import('./retry.js')
 
-    const getRetryDelay = vi.fn().mockImplementation(() => {
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockImplementation(() => {
       throw new Error('broken getRetryDelay')
     })
 
@@ -165,7 +190,7 @@ describe('handleRetry', () => {
 
     const { handleRetry } = await import('./retry.js')
 
-    const getRetryDelay = vi.fn().mockImplementation(() => {
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockImplementation(() => {
       throw new Error('broken getRetryDelay')
     })
 
@@ -252,7 +277,7 @@ describe('handleRetry', () => {
     shouldRetry.mockReturnValue(true)
     parseRetryAfter.mockReturnValue(5000)
 
-    const getRetryDelay = vi.fn().mockReturnValue(1000)
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockReturnValue(1000)
 
     const { handleRetry } = await import('./retry.js')
 
@@ -266,7 +291,7 @@ describe('handleRetry', () => {
     shouldRetry.mockReturnValue(true)
     parseRetryAfter.mockReturnValue(900)
 
-    const getRetryDelay = vi.fn().mockImplementation(() => {
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockImplementation(() => {
       throw new Error('broken getRetryDelay')
     })
 
@@ -295,7 +320,7 @@ describe('handleRetry', () => {
     shouldRetry.mockReturnValue(true)
     applyRetryJitter.mockReturnValue(250)
 
-    const getRetryDelay = vi.fn().mockReturnValue(1000)
+    const getRetryDelay = vi.fn<GetRetryDelay>().mockReturnValue(1000)
 
     const { handleRetry } = await import('./retry.js')
 

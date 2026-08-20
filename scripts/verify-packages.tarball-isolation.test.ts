@@ -24,15 +24,15 @@ import { verifyPackages } from './verify-packages'
 // packages/request/core). Adding a future package anywhere under
 // packages/** needs zero changes here.
 vi.mock(import('./lib/run-command'), () => ({
-  runCommand: vi.fn()
+  runCommand: vi.fn<typeof runCommand>()
 }))
 
 vi.mock(import('./package-discovery'), () => ({
-  findWorkspacePackages: vi.fn()
+  findWorkspacePackages: vi.fn<typeof findWorkspacePackages>()
 }))
 
 vi.mock(import('./verify-package'), () => ({
-  verifyPackage: vi.fn()
+  verifyPackage: vi.fn<typeof verifyPackage>()
 }))
 
 const mockedRunCommand = vi.mocked(runCommand)

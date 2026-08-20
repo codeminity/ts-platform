@@ -9,7 +9,7 @@ import type { Config } from './config.interface.js'
 import type { AxiosResponse } from 'axios'
 
 vi.mock(import('./response-error.js'), () => ({
-  handleResponseError: vi.fn()
+  handleResponseError: vi.fn<typeof handleResponseError>()
 }))
 
 describe('attachResponseInterceptor', () => {

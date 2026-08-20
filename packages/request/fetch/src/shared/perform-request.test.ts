@@ -7,9 +7,13 @@ import { performRequest } from './perform-request.js'
 import type { Config } from './config.interface.js'
 import type { FetchRequestInit } from './request-config.interface.js'
 
+type RefreshToken = NonNullable<Config['refreshToken']>
+type OnEvent = NonNullable<Config['onEvent']>
+type OnError = NonNullable<Config['onError']>
+
 describe('performRequest', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>())
   })
 
   afterEach(() => {
@@ -90,7 +94,7 @@ describe('performRequest', () => {
     vi.useFakeTimers()
 
     const controller = new AbortController()
-    const refreshToken = vi.fn().mockResolvedValue(undefined)
+    const refreshToken = vi.fn<RefreshToken>().mockResolvedValue(undefined)
 
     vi.mocked(fetch)
       .mockResolvedValueOnce(new Response(null, { status: 500 }))
@@ -143,8 +147,8 @@ describe('performRequest', () => {
   })
 
   it('emits the classified event and error on final failure', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const notFound = new Response(null, { status: 404 })
 
@@ -161,7 +165,7 @@ describe('performRequest', () => {
   })
 
   it('does not emit callbacks when retrying (only on the final outcome)', async () => {
-    const onEvent = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
 
     vi.mocked(fetch)
       .mockResolvedValueOnce(new Response(null, { status: 500 }))

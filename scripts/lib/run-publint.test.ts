@@ -4,7 +4,7 @@ import { runCommand } from './run-command'
 import { runPublint } from './run-publint'
 
 vi.mock(import('./run-command'), () => ({
-  runCommand: vi.fn()
+  runCommand: vi.fn<typeof runCommand>()
 }))
 
 const mockedRunCommand = vi.mocked(runCommand)

@@ -16,6 +16,8 @@ function required<T>(value: T | null | undefined, message: string): T {
   return value
 }
 
+type Exec = (command: string) => Promise<{ stdout: string; stderr: string }>
+
 function createChild(): SpawnedProcess & EventEmitter {
   return new EventEmitter() as SpawnedProcess & EventEmitter
 }
@@ -344,7 +346,7 @@ describe('CommandCancelledError', () => {
 
 describe('killProcessTree', () => {
   it('runs taskkill against the whole process tree on win32', async () => {
-    const exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' })
+    const exec = vi.fn<Exec>().mockResolvedValue({ stdout: '', stderr: '' })
 
     await killProcessTree(1234, 'win32', exec as never)
 
@@ -352,7 +354,7 @@ describe('killProcessTree', () => {
   })
 
   it('swallows a taskkill failure (process already gone) on win32', async () => {
-    const exec = vi.fn().mockRejectedValue(new Error('not found'))
+    const exec = vi.fn<Exec>().mockRejectedValue(new Error('not found'))
 
     await expect(killProcessTree(1234, 'win32', exec as never)).resolves.toBeUndefined()
   })

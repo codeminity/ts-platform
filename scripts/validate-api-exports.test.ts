@@ -6,8 +6,16 @@ import { extractExportsFromSource, hasTypeExport } from './lib/api-exports'
 import { loadRuntimeModule } from './lib/load-runtime-module'
 import { validatePackages } from './validate-api-exports'
 
+import type { globby as Globby } from 'globby'
+
 vi.mock(import('globby'), () => ({
-  globby: vi.fn().mockResolvedValue(['packages/request/core/package.json'])
+  // `globby` is overloaded (an `objectMode`/`stats` options shape resolves
+  // to `GlobEntry[]` instead) — only the plain string-array overload is
+  // ever used here, so the mock is typed to just that one signature and
+  // cast back to the full real type.
+  globby: vi
+    .fn<(patterns: string | readonly string[]) => Promise<string[]>>()
+    .mockResolvedValue(['packages/request/core/package.json']) as unknown as typeof Globby
 }))
 
 vi.mock(import('node:fs'), () => ({
@@ -15,9 +23,9 @@ vi.mock(import('node:fs'), () => ({
   // test — the rest of the real `node:fs` shape is deliberately not part of
   // this mock.
   default: {
-    existsSync: vi.fn(() => true),
+    existsSync: vi.fn<typeof fs.existsSync>(() => true),
 
-    readFileSync: vi.fn((file) => {
+    readFileSync: vi.fn<(file: fs.PathOrFileDescriptor) => string>((file) => {
       if (String(file).endsWith('package.json')) {
         return JSON.stringify({
           name: '@codeminity/request-core'
@@ -33,12 +41,12 @@ vi.mock(import('node:fs'), () => ({
 }))
 
 vi.mock(import('./lib/load-runtime-module'), () => ({
-  loadRuntimeModule: vi.fn()
+  loadRuntimeModule: vi.fn<typeof loadRuntimeModule>()
 }))
 
 vi.mock(import('./lib/api-exports'), () => ({
-  extractExportsFromSource: vi.fn(),
-  hasTypeExport: vi.fn()
+  extractExportsFromSource: vi.fn<typeof extractExportsFromSource>(),
+  hasTypeExport: vi.fn<typeof hasTypeExport>()
 }))
 
 describe('validate-api-exports', () => {
@@ -60,7 +68,7 @@ describe('validate-api-exports', () => {
     })
 
     vi.mocked(loadRuntimeModule).mockResolvedValue({
-      delay: vi.fn()
+      delay: vi.fn<() => unknown>()
     })
 
     vi.mocked(extractExportsFromSource).mockReturnValue({
@@ -83,7 +91,7 @@ describe('validate-api-exports', () => {
 
   it('fails when runtime export is missing', async () => {
     vi.mocked(loadRuntimeModule).mockResolvedValue({
-      another: vi.fn()
+      another: vi.fn<() => unknown>()
     })
 
     vi.mocked(extractExportsFromSource).mockReturnValue({
@@ -140,8 +148,8 @@ describe('validate-api-exports', () => {
     })
 
     vi.mocked(loadRuntimeModule).mockResolvedValue({
-      delay: vi.fn(),
-      second: vi.fn()
+      delay: vi.fn<() => unknown>(),
+      second: vi.fn<() => unknown>()
     })
 
     await expect(validatePackages()).resolves.not.toThrow()

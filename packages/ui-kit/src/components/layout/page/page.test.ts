@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import './page.js'
 
-import type { CdmtPage } from './page.js'
+import type { CdmtPage, CdmtPageStyleFn } from './page.js'
 
 describe('CdmtPage', () => {
   let el: CdmtPage
@@ -39,7 +39,7 @@ describe('CdmtPage', () => {
   })
 
   it('does not recompute styleFn when an unrelated property changes', async () => {
-    const styleFn = vi.fn(() => ({ minHeight: '10px' }))
+    const styleFn = vi.fn<CdmtPageStyleFn>(() => ({ minHeight: '10px' }))
     el.styleFn = styleFn
     await el.updateComplete
     expect(styleFn).toHaveBeenCalledTimes(1)

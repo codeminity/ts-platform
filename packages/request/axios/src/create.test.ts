@@ -1,13 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { AuthConfig } from '@codeminity/request-core'
+
+import type { attachAuthInterceptor as AttachAuthInterceptor } from './auth/attach-auth.js'
+import type { attachResponseInterceptor as AttachResponseInterceptor } from './shared/attach-response.js'
 import type { AxiosInstance, AxiosStatic } from 'axios'
+
+type GetToken = NonNullable<AuthConfig['getToken']>
 
 const instance = {} as AxiosInstance
 
-const createMock = vi.fn(() => instance)
+const createMock = vi.fn<AxiosStatic['create']>(() => instance)
 
-const attachAuthInterceptor = vi.fn()
-const attachResponseInterceptor = vi.fn()
+const attachAuthInterceptor = vi.fn<typeof AttachAuthInterceptor>()
+const attachResponseInterceptor = vi.fn<typeof AttachResponseInterceptor>()
 
 vi.mock(import('axios'), () => ({
   // Only `axios.create()` is ever called by the code under test — the rest
@@ -36,7 +42,7 @@ describe('create', () => {
       baseURL: 'https://api.example.com',
       timeout: 5000,
       codeminity: {
-        getToken: vi.fn()
+        getToken: vi.fn<GetToken>()
       }
     }
 
@@ -54,7 +60,7 @@ describe('create', () => {
     const { create } = await import('./create.js')
 
     const codeminity = {
-      getToken: vi.fn()
+      getToken: vi.fn<GetToken>()
     }
 
     create({ codeminity })
@@ -80,8 +86,8 @@ describe('create', () => {
   it('gives each axios instance its own refresh queue (per-instance isolation, ADR-004)', async () => {
     const { create } = await import('./create.js')
 
-    create({ codeminity: { getToken: vi.fn() } })
-    create({ codeminity: { getToken: vi.fn() } })
+    create({ codeminity: { getToken: vi.fn<GetToken>() } })
+    create({ codeminity: { getToken: vi.fn<GetToken>() } })
 
     const firstCallQueue = attachAuthInterceptor.mock.calls[0]?.[2] as unknown
     const secondCallQueue = attachAuthInterceptor.mock.calls[1]?.[2] as unknown

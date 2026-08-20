@@ -5,12 +5,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { runCommand } from './lib/run-command'
 import { validateDocs } from './validate-docs'
 
+import type { globby as Globby } from 'globby'
+
 vi.mock(import('globby'), () => ({
-  globby: vi.fn()
+  // `globby` is overloaded (an `objectMode`/`stats` options shape resolves
+  // to `GlobEntry[]` instead) — only the plain string-array overload is
+  // ever used here, so the mock is typed to just that one signature and
+  // cast back to the full real type.
+  globby: vi.fn<
+    (pattern: string | readonly string[], options?: unknown) => Promise<string[]>
+  >() as unknown as typeof Globby
 }))
 
 vi.mock(import('./lib/run-command'), () => ({
-  runCommand: vi.fn()
+  runCommand: vi.fn<typeof runCommand>()
 }))
 
 const { globby } = await import('globby')

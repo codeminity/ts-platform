@@ -2,8 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { hasRelevantChanges } from './relevant-changes'
 
+import type { ExecFn } from './relevant-changes'
+
 function mockExec(diff: string, untracked = '') {
-  return vi.fn((command: string) => {
+  return vi.fn<ExecFn>((command: string) => {
     if (command.startsWith('git diff')) return Promise.resolve({ stdout: diff })
     return Promise.resolve({ stdout: untracked })
   })
@@ -35,7 +37,7 @@ describe('hasRelevantChanges', () => {
   })
 
   it('returns true (never silently skips) when determining changed files fails', async () => {
-    const exec = vi.fn().mockRejectedValue(new Error('fatal: bad revision origin/main'))
+    const exec = vi.fn<ExecFn>().mockRejectedValue(new Error('fatal: bad revision origin/main'))
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* silence expected warning */
     })
@@ -49,7 +51,7 @@ describe('hasRelevantChanges', () => {
   })
 
   it('stringifies a non-Error rejection', async () => {
-    const exec = vi.fn().mockRejectedValue('a plain string rejection')
+    const exec = vi.fn<ExecFn>().mockRejectedValue('a plain string rejection')
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* silence expected warning */
     })

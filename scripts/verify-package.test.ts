@@ -13,7 +13,7 @@ import {
 } from './verify-package'
 
 vi.mock(import('./lib/run-command'), () => ({
-  runCommand: vi.fn()
+  runCommand: vi.fn<typeof runCommand>()
 }))
 
 // Mocked here because `verifyPackage`'s own tests below mock `runCommand`
@@ -23,7 +23,7 @@ vi.mock(import('./lib/run-command'), () => ({
 // because a mocked bundler couldn't prove the real behavior this check
 // exists to verify.
 vi.mock(import('esbuild'), () => ({
-  build: vi.fn()
+  build: vi.fn<typeof esbuild.build>()
 }))
 
 const mockedRunCommand = vi.mocked(runCommand)

@@ -7,19 +7,19 @@ import { verifyPackage } from './verify-package'
 import { verifyPackages } from './verify-packages'
 
 vi.mock(import('./package-discovery'), () => ({
-  findWorkspacePackages: vi.fn()
+  findWorkspacePackages: vi.fn<typeof findWorkspacePackages>()
 }))
 
 vi.mock(import('./verify-package'), () => ({
-  verifyPackage: vi.fn()
+  verifyPackage: vi.fn<typeof verifyPackage>()
 }))
 
 vi.mock(import('./lib/pack-package'), () => ({
-  packPackage: vi.fn()
+  packPackage: vi.fn<typeof packPackage>()
 }))
 
 vi.mock(import('./lib/read-package-json'), () => ({
-  readPackageJson: vi.fn()
+  readPackageJson: vi.fn<typeof readPackageJson>()
 }))
 
 const mockedFindPackages = vi.mocked(findWorkspacePackages)

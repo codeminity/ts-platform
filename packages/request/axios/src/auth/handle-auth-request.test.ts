@@ -14,6 +14,10 @@ import { handleAuthRequest } from './handle-auth-request.js'
 
 import type { Config } from '../shared/config.interface.js'
 
+type GetToken = NonNullable<Config['getToken']>
+type OnEvent = NonNullable<Config['onEvent']>
+type OnError = NonNullable<Config['onError']>
+
 describe('handleAuthRequest', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -189,7 +193,7 @@ describe('handleAuthRequest', () => {
   it('calls refresh before token and sets header', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({
       tokenMode: TokenModeEnum.JWT,
@@ -209,7 +213,7 @@ describe('handleAuthRequest', () => {
   it('does not attempt token refresh when skipAuth is set for the request', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({
       tokenMode: TokenModeEnum.JWT,
@@ -228,7 +232,7 @@ describe('handleAuthRequest', () => {
   it('skips auth entirely when the request signal is already aborted', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 
-    const getToken = vi.fn().mockResolvedValue('token123')
+    const getToken = vi.fn<GetToken>().mockResolvedValue('token123')
 
     const config = createAuthConfig({
       tokenMode: TokenModeEnum.JWT,
@@ -250,10 +254,10 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits refresh failed event and continues request after refresh failure', async () => {
-    const onEvent = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
 
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token'),
+      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
       onEvent
     }
 
@@ -274,11 +278,11 @@ describe('handleAuthRequest', () => {
   })
 
   it('calls both onEvent and onError when refresh fails with an axios error', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token'),
+      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
       onEvent,
       onError
     }
@@ -297,7 +301,7 @@ describe('handleAuthRequest', () => {
 
   it('does not throw when refresh fails with an axios error and onEvent is not provided', async () => {
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token')
+      getToken: vi.fn<GetToken>().mockResolvedValue('token')
     }
 
     const error = new Error('refresh failed') as AxiosError
@@ -314,13 +318,13 @@ describe('handleAuthRequest', () => {
   })
 
   it('still calls onError when onEvent throws', async () => {
-    const onEvent = vi.fn().mockImplementation(() => {
+    const onEvent = vi.fn<OnEvent>().mockImplementation(() => {
       throw new Error('broken onEvent')
     })
-    const onError = vi.fn()
+    const onError = vi.fn<OnError>()
 
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token'),
+      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
       onEvent,
       onError
     }
@@ -342,12 +346,12 @@ describe('handleAuthRequest', () => {
   })
 
   it('does not throw when onError itself throws', async () => {
-    const onError = vi.fn().mockImplementation(() => {
+    const onError = vi.fn<OnError>().mockImplementation(() => {
       throw new Error('broken onError')
     })
 
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token'),
+      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
       onError
     }
 
@@ -367,11 +371,11 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits error callback but not onEvent when refresh fails with a non axios error', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const config: Config = {
-      getToken: vi.fn().mockResolvedValue('token'),
+      getToken: vi.fn<GetToken>().mockResolvedValue('token'),
       onEvent,
       onError
     }
@@ -387,13 +391,13 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits error callback but not onEvent when getToken fails with a non axios error', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const error = new Error('token failed')
 
     const config: Config = {
-      getToken: vi.fn().mockRejectedValue(error),
+      getToken: vi.fn<GetToken>().mockRejectedValue(error),
       onEvent,
       onError
     }
@@ -408,7 +412,7 @@ describe('handleAuthRequest', () => {
 
   it('does not throw when getToken fails with a non axios error and onError is not provided', async () => {
     const config: Config = {
-      getToken: vi.fn().mockRejectedValue(new Error('token failed'))
+      getToken: vi.fn<GetToken>().mockRejectedValue(new Error('token failed'))
     }
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
@@ -439,7 +443,7 @@ describe('handleAuthRequest', () => {
 
   it('does not attach Authorization header when token is empty', async () => {
     const config = createAuthConfig({
-      getToken: vi.fn().mockResolvedValue(undefined)
+      getToken: vi.fn<GetToken>().mockResolvedValue(null)
     })
 
     const request = createRequestConfig()
@@ -450,13 +454,13 @@ describe('handleAuthRequest', () => {
   })
 
   it('emits token failed event when getToken throws axios error', async () => {
-    const onEvent = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
 
     const error = new Error('token failed') as AxiosError
     error.isAxiosError = true
 
     const config: Config = {
-      getToken: vi.fn().mockRejectedValue(error),
+      getToken: vi.fn<GetToken>().mockRejectedValue(error),
       onEvent
     }
 
@@ -468,14 +472,14 @@ describe('handleAuthRequest', () => {
   })
 
   it('calls both onEvent and onError when getToken fails with an axios error', async () => {
-    const onEvent = vi.fn()
-    const onError = vi.fn()
+    const onEvent = vi.fn<OnEvent>()
+    const onError = vi.fn<OnError>()
 
     const error = new Error('token failed') as AxiosError
     error.isAxiosError = true
 
     const config: Config = {
-      getToken: vi.fn().mockRejectedValue(error),
+      getToken: vi.fn<GetToken>().mockRejectedValue(error),
       onEvent,
       onError
     }
@@ -493,7 +497,7 @@ describe('handleAuthRequest', () => {
     error.isAxiosError = true
 
     const config: Config = {
-      getToken: vi.fn().mockRejectedValue(error)
+      getToken: vi.fn<GetToken>().mockRejectedValue(error)
     }
 
     vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
