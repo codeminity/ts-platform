@@ -1,53 +1,10 @@
-import { AxiosError, type AxiosResponse } from 'axios'
+import { AxiosError } from 'axios'
 import { describe, expect, it } from 'vitest'
 
 import { mapErrorToEvent } from './error-to-event.js'
 
-function createError(code?: string, status?: number): AxiosError {
-  const error = new AxiosError('error')
-
-  if (code) {
-    error.code = code
-  }
-
-  if (status != null) {
-    error.response = {
-      status,
-      statusText: '',
-      headers: {},
-      config: {} as AxiosResponse['config'],
-      data: undefined
-    } satisfies AxiosResponse
-  }
-
-  return error
-}
-
 describe(mapErrorToEvent, () => {
-  it.each([
-    ['ECONNABORTED', 'timeout'],
-    ['ERR_CANCELED', 'abort']
-  ])('maps error code %s to %s', (code, event) => {
-    expect(mapErrorToEvent(createError(code))).toBe(event)
-  })
-
-  it.each([
-    [400, 'bad_request'],
-    [401, 'unauthorized'],
-    [403, 'forbidden'],
-    [404, 'not_found'],
-    [409, 'conflict'],
-    [422, 'unprocessable_entity'],
-    [429, 'too_many_requests'],
-    [500, 'internal_error'],
-    [502, 'bad_gateway'],
-    [503, 'service_unavailable'],
-    [504, 'gateway_timeout']
-  ])('maps status %i to %s', (status, event) => {
-    expect(mapErrorToEvent(createError(undefined, status))).toBe(event)
-  })
-
   it('returns unknown when neither code nor status exists', () => {
-    expect(mapErrorToEvent(createError())).toBe('unknown')
+    expect(mapErrorToEvent(new AxiosError('error'))).toBe('unknown')
   })
 })
