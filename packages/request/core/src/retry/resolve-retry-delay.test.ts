@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import { resolveRetryDelay } from './resolve-retry-delay.js'
 
-describe('resolveRetryDelay', () => {
+describe(resolveRetryDelay, () => {
   it('returns the configured delay when no suggested delay is given', () => {
     expect(resolveRetryDelay(500)).toBe(500)
   })

@@ -16,11 +16,11 @@ async function freshModules(): Promise<{
   return { useTheme: useThemeMod.useTheme, getThemeController: controllerMod.getThemeController }
 }
 
-beforeEach(() => {
-  document.documentElement.removeAttribute('style')
-})
-
 describe('useTheme', () => {
+  beforeEach(() => {
+    document.documentElement.removeAttribute('style')
+  })
+
   it('exposes the current mode/isDark/theme from the shared controller', async () => {
     const { useTheme } = await freshModules()
 

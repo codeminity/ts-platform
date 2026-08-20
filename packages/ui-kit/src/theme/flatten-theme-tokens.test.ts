@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { flattenThemeTokens } from './flatten-theme-tokens.js'
 import { material } from './presets/material.js'
 
-describe('flattenThemeTokens', () => {
+describe(flattenThemeTokens, () => {
   it('flattens a color role into value/hover/foreground keys, resolved for light', () => {
     const flat = flattenThemeTokens(material.tokens, 'light')
 

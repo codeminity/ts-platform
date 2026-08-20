@@ -39,14 +39,14 @@ function mockExec(responses: {
   })
 }
 
-afterEach(() => {
-  if (tempDir) {
-    fs.rmSync(tempDir, { recursive: true, force: true })
-    tempDir = undefined
-  }
-})
+describe(getAffectedScope, () => {
+  afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+      tempDir = undefined
+    }
+  })
 
-describe('getAffectedScope', () => {
   it('falls back to full when a changed file sits outside packages/ and apps/', async () => {
     const exec = mockExec({ diff: 'turbo.json\npackages/ui-kit/src/foo.ts\n' })
 

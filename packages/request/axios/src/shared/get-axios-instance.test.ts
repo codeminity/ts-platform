@@ -9,7 +9,7 @@ vi.mock(import('axios'), () => ({
   default: vi.fn<(config: unknown) => unknown>() as unknown as typeof axios
 }))
 
-describe('getAxiosInstance', () => {
+describe(getAxiosInstance, () => {
   it('delegates calls to axios and returns its result', () => {
     const axiosResult = { mocked: true }
 

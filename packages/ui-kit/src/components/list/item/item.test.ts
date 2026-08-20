@@ -1,9 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './item.js'
-
-import type { CdmtItem } from './item.js'
+import { CdmtItem } from './item.js'
 
 type EventHandler = (event: Event) => void
 
@@ -11,7 +9,7 @@ function pressKey(el: CdmtItem, key: string): boolean {
   return el.dispatchEvent(new KeyboardEvent('keydown', { key, cancelable: true }))
 }
 
-describe('CdmtItem', () => {
+describe(CdmtItem, () => {
   let el: CdmtItem
 
   beforeEach(async () => {
@@ -29,6 +27,7 @@ describe('CdmtItem', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 
@@ -93,6 +92,7 @@ describe('CdmtItem', () => {
   it('is not a tab stop when clickable and manual-focus is set, but keeps the button role', async () => {
     el.clickable = true
     await el.updateComplete
+
     expect(el.getAttribute('tabindex')).toBe('0')
 
     el.manualFocus = true
@@ -109,6 +109,7 @@ describe('CdmtItem', () => {
   it('is not interactive when disable is set, even if clickable is also set', async () => {
     el.clickable = true
     await el.updateComplete
+
     expect(el.getAttribute('role')).toBe('button')
 
     el.disable = true
@@ -132,6 +133,7 @@ describe('CdmtItem', () => {
   it('stops being interactive when clickable is turned back off', async () => {
     el.clickable = true
     await el.updateComplete
+
     expect(el.getAttribute('role')).toBe('button')
 
     el.clickable = false

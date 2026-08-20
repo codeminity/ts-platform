@@ -20,11 +20,11 @@ async function freshModules(): Promise<{
   }
 }
 
-beforeEach(() => {
-  document.documentElement.removeAttribute('style')
-})
-
 describe('createUIKit', () => {
+  beforeEach(() => {
+    document.documentElement.removeAttribute('style')
+  })
+
   it('applies material/light by default', async () => {
     const { createUIKit, getThemeController } = await freshModules()
 

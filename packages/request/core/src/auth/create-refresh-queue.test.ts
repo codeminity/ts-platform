@@ -6,7 +6,7 @@ import type { RefreshQueue } from './refresh-queue.interface.js'
 
 type Task = Parameters<RefreshQueue['run']>[0]
 
-describe('createRefreshQueue', () => {
+describe(createRefreshQueue, () => {
   it('runs the task', async () => {
     const queue = createRefreshQueue()
     const task = vi.fn<Task>()

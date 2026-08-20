@@ -23,7 +23,7 @@ function statusOutcome(status: number): FetchOutcome {
   return createFetchOutcome({ response: new Response(null, { status }) })
 }
 
-describe('shouldRetry', () => {
+describe(shouldRetry, () => {
   it('returns false when attempt exceeds retries', () => {
     const config: RetryConfig = { retries: 1 }
 

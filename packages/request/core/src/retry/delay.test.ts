@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 
 import { delay } from './delay.js'
 
-describe('delay', () => {
+describe(delay, () => {
   afterEach(() => {
     vi.useRealTimers()
   })

@@ -1,11 +1,9 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import './page-container.js'
+import { CdmtPageContainer } from './page-container.js'
 
-import type { CdmtPageContainer } from './page-container.js'
-
-describe('CdmtPageContainer', () => {
+describe(CdmtPageContainer, () => {
   let el: CdmtPageContainer
 
   beforeEach(async () => {
@@ -27,6 +25,7 @@ describe('CdmtPageContainer', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 
@@ -47,6 +46,7 @@ describe('CdmtPageContainer', () => {
     await el.updateComplete
 
     const styles = getComputedStyle(el)
+
     expect(styles.paddingTop).toBe('64px')
     expect(styles.paddingLeft).toBe('300px')
   })

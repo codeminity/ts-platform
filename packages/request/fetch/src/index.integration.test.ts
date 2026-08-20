@@ -116,6 +116,7 @@ describe('package entry point (real, unmocked)', () => {
     const statuses = results.map((result) =>
       result.status === 'fulfilled' ? result.value.status : (result.reason as unknown)
     )
+
     expect(statuses).toStrictEqual([401, 401, 401])
   })
 

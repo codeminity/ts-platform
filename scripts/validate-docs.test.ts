@@ -52,7 +52,7 @@ function mockReadFile(markdown: string) {
   })
 }
 
-describe('validateDocs', () => {
+describe(validateDocs, () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)

@@ -4,7 +4,7 @@ import { ErrorEventEnum as CoreErrorEventEnum } from '@codeminity/request-core'
 
 import { ErrorEventEnum } from './error-event.enum.js'
 
-describe('ErrorEventEnum', () => {
+describe('errorEventEnum', () => {
   it('includes all core error events', () => {
     expect(ErrorEventEnum).toMatchObject(CoreErrorEventEnum)
   })

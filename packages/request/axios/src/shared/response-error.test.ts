@@ -30,7 +30,7 @@ vi.mock(import('../errors/error-to-event.js'), () => ({
   mapErrorToEvent: vi.fn<typeof mapErrorToEvent>()
 }))
 
-describe('handleResponseError', () => {
+describe(handleResponseError, () => {
   let instance: AxiosInstance
   let request: ReturnType<typeof vi.fn<Request>>
 

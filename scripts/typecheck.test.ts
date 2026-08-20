@@ -15,12 +15,12 @@ const { runScopedTypecheck } = await import('./typecheck')
 const mockedGetAffectedScope = vi.mocked(getAffectedScope)
 const mockedRunCommand = vi.mocked(runCommand)
 
-beforeEach(() => {
-  mockedGetAffectedScope.mockReset()
-  mockedRunCommand.mockReset()
-})
-
 describe('runScopedTypecheck', () => {
+  beforeEach(() => {
+    mockedGetAffectedScope.mockReset()
+    mockedRunCommand.mockReset()
+  })
+
   it('runs the full typecheck command when the scope is full', async () => {
     mockedGetAffectedScope.mockResolvedValue({ type: 'full' })
     mockedRunCommand.mockResolvedValue(undefined)
@@ -110,6 +110,7 @@ describe('runScopedTypecheck', () => {
     await runScopedTypecheck()
 
     const options = mockedRunCommand.mock.calls.at(0)?.[2]
+
     expect(options).toBeDefined()
     expect(options && 'signal' in options).toBe(false)
   })

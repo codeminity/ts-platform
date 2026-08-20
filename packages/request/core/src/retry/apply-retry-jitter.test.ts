@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 
 import { applyRetryJitter } from './apply-retry-jitter.js'
 
-describe('applyRetryJitter', () => {
+describe(applyRetryJitter, () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
@@ -36,6 +36,7 @@ describe('applyRetryJitter', () => {
   it('stays within [0, delay] for "full" jitter across real randomization', () => {
     for (let i = 0; i < 50; i++) {
       const result = applyRetryJitter(1000, 'full')
+
       expect(result).toBeGreaterThanOrEqual(0)
       expect(result).toBeLessThanOrEqual(1000)
     }
@@ -44,6 +45,7 @@ describe('applyRetryJitter', () => {
   it('stays within [delay/2, delay] for "equal" jitter across real randomization', () => {
     for (let i = 0; i < 50; i++) {
       const result = applyRetryJitter(1000, 'equal')
+
       expect(result).toBeGreaterThanOrEqual(500)
       expect(result).toBeLessThanOrEqual(1000)
     }

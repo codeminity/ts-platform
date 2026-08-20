@@ -9,7 +9,7 @@ vi.mock(import('./run-command'), () => ({
 
 const mockedRunCommand = vi.mocked(runCommand)
 
-describe('runPublint', () => {
+describe(runPublint, () => {
   it('runs publint with package path', async () => {
     mockedRunCommand.mockResolvedValue(undefined)
 

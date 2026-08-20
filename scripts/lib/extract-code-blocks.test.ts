@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { extractTypeScriptBlocks } from './extract-code-blocks'
 
-describe('extractTypeScriptBlocks', () => {
+describe(extractTypeScriptBlocks, () => {
   it('extracts a single ts code block with its starting line', () => {
     const markdown = ['# Title', '', '```ts', 'const a = 1', '```', ''].join('\n')
 

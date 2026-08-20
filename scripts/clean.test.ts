@@ -26,12 +26,12 @@ const { CLEAN_GLOBS, clean } = await import('./clean')
 const mockedGlobby = vi.mocked(globby)
 const mockedRmSync = vi.mocked(fs.rmSync)
 
-beforeEach(() => {
-  mockedGlobby.mockReset()
-  mockedRmSync.mockClear()
-})
-
 describe('clean', () => {
+  beforeEach(() => {
+    mockedGlobby.mockReset()
+    mockedRmSync.mockClear()
+  })
+
   it('globs the allowlist without expanding directories or following .gitignore', async () => {
     mockedGlobby.mockResolvedValue([])
 

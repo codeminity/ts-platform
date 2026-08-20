@@ -17,7 +17,7 @@ const changelog = `# @codeminity/example
 - Add thing A
 `
 
-describe('extractChangelogSection', () => {
+describe(extractChangelogSection, () => {
   it('returns the trimmed content between a version heading and the next one', () => {
     expect(extractChangelogSection(changelog, '0.2.0')).toBe('### Features\n\n- Add thing B')
   })

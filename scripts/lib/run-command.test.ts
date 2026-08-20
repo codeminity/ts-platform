@@ -37,7 +37,7 @@ function createSpawnMock(child: SpawnedProcess) {
   >(() => child)
 }
 
-describe('resolveCommand', () => {
+describe(resolveCommand, () => {
   it('keeps non-windows commands unchanged', () => {
     expect(resolveCommand('node')).toStrictEqual({
       command: 'node',
@@ -65,7 +65,7 @@ describe('resolveCommand', () => {
   })
 })
 
-describe('runCommand', () => {
+describe(runCommand, () => {
   it('resolves when command exits successfully', async () => {
     const child = createChild()
 
@@ -212,6 +212,7 @@ describe('runCommand', () => {
     await promise
 
     const call = spawn.mock.calls.at(0)
+
     expect(call).toBeDefined()
     expect(call?.[2].detached).toBe(true)
   })
@@ -228,6 +229,7 @@ describe('runCommand', () => {
     await promise
 
     const call = spawn.mock.calls.at(0)
+
     expect(call).toBeDefined()
     expect(call?.[2].detached).toBeUndefined()
   })
@@ -249,6 +251,7 @@ describe('runCommand', () => {
     // down — runCommand must wait for that `close` event before settling,
     // not resolve as soon as kill() is called.
     expect(kill).toHaveBeenCalledWith(4242)
+
     await Promise.resolve()
 
     child.emit('close', null)
@@ -335,7 +338,7 @@ describe('runCommand', () => {
   })
 })
 
-describe('CommandCancelledError', () => {
+describe(CommandCancelledError, () => {
   it('is a real Error subclass carrying the given message', () => {
     const error = new CommandCancelledError('cancelled: pnpm build')
 
@@ -344,7 +347,7 @@ describe('CommandCancelledError', () => {
   })
 })
 
-describe('killProcessTree', () => {
+describe(killProcessTree, () => {
   it('runs taskkill against the whole process tree on win32', async () => {
     const exec = vi.fn<Exec>().mockResolvedValue({ stdout: '', stderr: '' })
 
@@ -364,6 +367,7 @@ describe('killProcessTree', () => {
 
     try {
       await killProcessTree(5678, 'linux')
+
       // The negative form targets every process in pid 5678's group, not
       // just that one process — see this function's own comment on why a
       // plain positive-pid SIGTERM isn't enough to reach a real tree.

@@ -1,11 +1,9 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './item-label.js'
+import { CdmtItemLabel } from './item-label.js'
 
-import type { CdmtItemLabel } from './item-label.js'
-
-describe('CdmtItemLabel', () => {
+describe(CdmtItemLabel, () => {
   let el: CdmtItemLabel
 
   beforeEach(async () => {
@@ -23,6 +21,7 @@ describe('CdmtItemLabel', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 

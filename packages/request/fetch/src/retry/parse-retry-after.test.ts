@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 
 import { parseRetryAfter } from './parse-retry-after.js'
 
-describe('parseRetryAfter', () => {
+describe(parseRetryAfter, () => {
   afterEach(() => {
     vi.useRealTimers()
   })

@@ -1,9 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './header.js'
-
-import type { CdmtHeader } from './header.js'
+import { CdmtHeader } from './header.js'
 
 type EventHandler = (event: Event) => void
 
@@ -12,7 +10,7 @@ function scrollTo(position: number): void {
   window.dispatchEvent(new Event('scroll'))
 }
 
-describe('CdmtHeader', () => {
+describe(CdmtHeader, () => {
   let el: CdmtHeader
 
   beforeEach(async () => {
@@ -35,6 +33,7 @@ describe('CdmtHeader', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 
@@ -108,6 +107,7 @@ describe('CdmtHeader', () => {
     await el.updateComplete
 
     scrollTo(200) // < revealOffset -> revealed (the "near top" zone)
+
     expect(el.getAttribute('data-cdmt-revealed')).toBe('true')
 
     // delta = +50 (scrolling down), landing exactly ON revealOffset. If
@@ -115,6 +115,7 @@ describe('CdmtHeader', () => {
     // revealed=true regardless of the downward delta — it must not; the
     // delta>0 fallback should hide it instead.
     scrollTo(250)
+
     expect(el.getAttribute('data-cdmt-revealed')).toBe('false')
   })
 
@@ -138,6 +139,7 @@ describe('CdmtHeader', () => {
     // delta === 0 here — if `delta > 0` were `delta >= 0`, this would
     // incorrectly hide it again.
     scrollTo(350)
+
     expect(el.getAttribute('data-cdmt-revealed')).toBe('true')
   })
 
@@ -150,6 +152,7 @@ describe('CdmtHeader', () => {
     // delta === 0 here — if `delta < 0` were `delta <= 0`, this would
     // incorrectly reveal it.
     scrollTo(400)
+
     expect(el.getAttribute('data-cdmt-revealed')).toBe('false')
   })
 
@@ -181,6 +184,7 @@ describe('CdmtHeader', () => {
     el.reveal = true
     await el.updateComplete
     scrollTo(400)
+
     expect(el.hasAttribute('data-cdmt-revealed')).toBe(true)
 
     el.reveal = false
@@ -190,6 +194,7 @@ describe('CdmtHeader', () => {
 
     scrollTo(0)
     scrollTo(400)
+
     expect(el.hasAttribute('data-cdmt-revealed')).toBe(false)
   })
 
@@ -202,6 +207,7 @@ describe('CdmtHeader', () => {
     scrollTo(400)
 
     expect(preConfigured.getAttribute('data-cdmt-revealed')).toBe('false')
+
     preConfigured.remove()
   })
 
@@ -224,6 +230,7 @@ describe('CdmtHeader', () => {
     await fresh.updateComplete
 
     expect(addSpy).toHaveBeenCalledWith('scroll', expect.anything(), { passive: true })
+
     fresh.remove()
   })
 

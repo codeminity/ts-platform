@@ -15,12 +15,12 @@ const { runIfRelevant } = await import('./run-if-relevant')
 const mockedHasRelevantChanges = vi.mocked(hasRelevantChanges)
 const mockedRunCommand = vi.mocked(runCommand)
 
-beforeEach(() => {
-  mockedHasRelevantChanges.mockReset()
-  mockedRunCommand.mockReset()
-})
-
 describe('runIfRelevant', () => {
+  beforeEach(() => {
+    mockedHasRelevantChanges.mockReset()
+    mockedRunCommand.mockReset()
+  })
+
   it('skips the script entirely when nothing relevant changed', async () => {
     mockedHasRelevantChanges.mockResolvedValue(false)
 
@@ -58,6 +58,7 @@ describe('runIfRelevant', () => {
     await runIfRelevant('Dependency Architecture', 'packages/', 'validate:deps')
 
     const options = mockedRunCommand.mock.calls.at(0)?.[2]
+
     expect(options).toBeDefined()
     expect(options && 'signal' in options).toBe(false)
   })

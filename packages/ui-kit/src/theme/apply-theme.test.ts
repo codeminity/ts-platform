@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { applyTheme, mergeTheme } from './apply-theme.js'
 import { material } from './presets/material.js'
 
-describe('applyTheme', () => {
+describe(applyTheme, () => {
   it('paints every flattened token as a --cdmt-* custom property, defaulting to light', () => {
     const el = document.createElement('div')
 
@@ -32,18 +32,20 @@ describe('applyTheme', () => {
     const el = document.createElement('div')
 
     applyTheme(el, material, 'light')
+
     expect(el.style.getPropertyValue('--cdmt-color-primary')).toBe(
       material.tokens.colors.primary.light.value
     )
 
     applyTheme(el, material, 'dark')
+
     expect(el.style.getPropertyValue('--cdmt-color-primary')).toBe(
       material.tokens.colors.primary.dark.value
     )
   })
 })
 
-describe('mergeTheme', () => {
+describe(mergeTheme, () => {
   it('overrides a single color-role field without touching its siblings', () => {
     const merged = mergeTheme(material, {
       colors: { primary: { light: { value: '#000000' } } }

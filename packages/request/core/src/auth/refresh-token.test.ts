@@ -12,7 +12,7 @@ type OnRefreshStart = NonNullable<AuthConfig['onRefreshStart']>
 type OnRefreshSuccess = NonNullable<AuthConfig['onRefreshSuccess']>
 type OnRefreshFail = NonNullable<AuthConfig['onRefreshFail']>
 
-describe('handleRefreshToken', () => {
+describe(handleRefreshToken, () => {
   it('calls refreshToken when token is expired and triggers success flow', async () => {
     const isTokenExpired = vi.fn<IsTokenExpired>().mockResolvedValue(true)
     const refreshToken = vi.fn<RefreshToken>()

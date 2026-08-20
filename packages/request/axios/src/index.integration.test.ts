@@ -30,6 +30,7 @@ describe('package entry point (real, unmocked)', () => {
     })
 
     const res = await api.get('/ping')
+
     expect(res.data).toStrictEqual({ ok: true })
   })
 
@@ -48,7 +49,9 @@ describe('package entry point (real, unmocked)', () => {
 
     const spy: Mock<() => never> = vi.spyOn(codeminityAxios, 'create' as never)
     create({ adapter: fakeAdapter(() => ({ data: {} })) })
+
     expect(spy).not.toHaveBeenCalled()
+
     spy.mockRestore()
   })
 
@@ -70,6 +73,7 @@ describe('package entry point (real, unmocked)', () => {
     })
 
     await api.get('/secure')
+
     expect(seenAuthHeader).toBe('Bearer real-token')
   })
 

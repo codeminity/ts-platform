@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { loadRuntimeModule } from './load-runtime-module'
 
-describe('loadRuntimeModule', () => {
+describe(loadRuntimeModule, () => {
   it('loads runtime module from file path', async () => {
     const dir = join(tmpdir(), 'validate-api-test')
 

@@ -1,9 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import './footer.js'
-
-import type { CdmtFooter } from './footer.js'
+import { CdmtFooter } from './footer.js'
 
 type EventHandler = (event: Event) => void
 
@@ -12,7 +10,7 @@ function scrollTo(position: number): void {
   window.dispatchEvent(new Event('scroll'))
 }
 
-describe('CdmtFooter', () => {
+describe(CdmtFooter, () => {
   let el: CdmtFooter
 
   beforeEach(async () => {
@@ -35,6 +33,7 @@ describe('CdmtFooter', () => {
       ?.assignedNodes()
       .map((node) => node.textContent)
       .join('')
+
     expect(assigned).toBe('content')
   })
 
@@ -157,6 +156,7 @@ describe('CdmtFooter', () => {
     el.reveal = true
     await el.updateComplete
     scrollTo(50)
+
     expect(el.hasAttribute('data-cdmt-revealed')).toBe(true)
 
     el.reveal = false
@@ -166,6 +166,7 @@ describe('CdmtFooter', () => {
 
     scrollTo(0)
     scrollTo(50)
+
     expect(el.hasAttribute('data-cdmt-revealed')).toBe(false)
   })
 
@@ -178,6 +179,7 @@ describe('CdmtFooter', () => {
     scrollTo(50)
 
     expect(preConfigured.getAttribute('data-cdmt-revealed')).toBe('false')
+
     preConfigured.remove()
   })
 
@@ -200,6 +202,7 @@ describe('CdmtFooter', () => {
     await fresh.updateComplete
 
     expect(addSpy).toHaveBeenCalledWith('scroll', expect.anything(), { passive: true })
+
     fresh.remove()
   })
 
