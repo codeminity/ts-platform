@@ -45,7 +45,8 @@ export class CdmtDrawer extends LitElement {
     showIfAbove: { type: Boolean, attribute: 'show-if-above' },
     // Set by the parent <cdmt-layout> from its own fixed-left-drawer/
     // fixed-right-drawer attribute — not a public prop consumers set
-    // themselves, hence no attribute.
+    // themselves, hence no attribute. See the `@internal` field declaration
+    // below.
     layoutFixed: { attribute: false }
   }
 
@@ -65,6 +66,14 @@ export class CdmtDrawer extends LitElement {
   declare elevated: boolean
   declare persistent: boolean
   declare showIfAbove: boolean
+  /**
+   * Set by the parent `<cdmt-layout>` from its own `fixed-left-drawer`/
+   * `fixed-right-drawer` attribute — not part of this element's supported
+   * consumer-facing contract (the Vue wrapper deliberately omits it from
+   * its own `props`).
+   *
+   * @internal
+   */
   declare layoutFixed: boolean
 
   #isMobileMode = false

@@ -58,7 +58,7 @@ export class CdmtDrawer extends LitElement {
     // (undocumented)
     hide(): void;
     get isDocked(): boolean;
-    // (undocumented)
+    // @internal
     layoutFixed: boolean;
     // (undocumented)
     mini: boolean;
