@@ -124,8 +124,20 @@ export class CdmtLayout extends LitElement {
   }
 
   override disconnectedCallback(): void {
+    // Stryker disable next-line CallExpression: equivalent mutant — no
+    // component in this package registers a Lit ReactiveController via
+    // `addController`, so `LitElement`'s base `disconnectedCallback` has no
+    // observable effect here.
     super.disconnectedCallback()
     this.#resizeObserver.disconnect()
+    // Stryker disable next-line CallExpression: equivalent mutant —
+    // `#observeChildren` (run on every reconnect, via connectedCallback's
+    // own `#handleChildrenChanged` call) unconditionally clears this same
+    // set itself before repopulating it, so a stale set left behind by a
+    // skipped clear here is always overwritten before anything reads it
+    // again; the only difference is holding onto DOM references for longer
+    // if the element is never reconnected, which is a memory-retention
+    // concern, not a functional one.
     this.#observedElements.clear()
     this.#mutationObserver.disconnect()
     this.removeEventListener('cdmt-layout-child-change', this.#handleChildChange)
@@ -210,6 +222,12 @@ export class CdmtLayout extends LitElement {
 
   #observeChildren(): void {
     for (const element of this.#observedElements) this.#resizeObserver.unobserve(element)
+    // Stryker disable next-line CallExpression: equivalent mutant — every
+    // element still in this set was just unobserved above (a repeat
+    // `unobserve` on an untracked element is a documented no-op), and every
+    // element added back below goes through `Set.add`, which is already a
+    // no-op for an entry still present — so a skipped clear here changes
+    // nothing observable, only how long stale DOM references are retained.
     this.#observedElements.clear()
 
     const targets = [this.#header, this.#footer, this.#drawer('left'), this.#drawer('right')]

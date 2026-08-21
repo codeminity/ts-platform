@@ -68,11 +68,17 @@ describe('getThemeController', () => {
 
     expect(controller.isDark).toBe(true)
     expect(controller.mode).toBe('dark')
+    expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
+      material.tokens.colors.primary.dark.value
+    )
 
     controller.toggleMode()
 
     expect(controller.isDark).toBe(false)
     expect(controller.mode).toBe('light')
+    expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
+      material.tokens.colors.primary.light.value
+    )
   })
 
   it("mode 'auto' resolves isDark from prefers-color-scheme, querying the real media feature", async () => {
@@ -114,6 +120,9 @@ describe('getThemeController', () => {
 
     expect(controller.isDark).toBe(true)
     expect(listener).toHaveBeenCalledTimes(1)
+    expect(document.documentElement.style.getPropertyValue('--cdmt-color-primary')).toBe(
+      material.tokens.colors.primary.dark.value
+    )
   })
 
   it("setting mode to 'auto' twice only subscribes to matchMedia once", async () => {
@@ -152,10 +161,14 @@ describe('getThemeController', () => {
     const controller = getThemeController()
 
     const customTheme = { tokens: { ...material.tokens, radiusMd: '2px' } }
+    const listener = vi.fn<Listener>()
+    controller.subscribe(listener)
+
     controller.setTheme(customTheme)
 
     expect(controller.theme).toBe(customTheme)
     expect(document.documentElement.style.getPropertyValue('--cdmt-radius-md')).toBe('2px')
+    expect(listener).toHaveBeenCalledTimes(1)
   })
 
   it('subscribe notifies on setMode/toggleMode/setTheme, and the returned unsubscribe stops further calls', async () => {

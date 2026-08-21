@@ -277,6 +277,27 @@ describe(CdmtLayout, () => {
     layout.remove()
   })
 
+  it("sets a docked (non-fixed) RIGHT drawer's margin-top/margin-bottom from the header/footer fixed height", async () => {
+    const layout = await mountLayout(
+      '<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer><cdmt-drawer side="right"></cdmt-drawer>'
+    )
+    const header = required(layout.querySelector('cdmt-header'), 'expected a header')
+    const footer = required(layout.querySelector('cdmt-footer'), 'expected a footer')
+    const drawer = required(layout.querySelector('cdmt-drawer'), 'expected a drawer')
+    stubRect(header, 64)
+    stubRect(footer, 48)
+
+    layout.fixedHeader = true
+    layout.fixedFooter = true
+    await layout.updateComplete
+    await Promise.resolve()
+
+    expect(drawer.style.marginTop).toBe('64px')
+    expect(drawer.style.marginBottom).toBe('48px')
+
+    layout.remove()
+  })
+
   it("clears a fixed drawer's margin-top/margin-bottom (its own stylesheet already insets it)", async () => {
     const layout = await mountLayout(
       '<cdmt-header></cdmt-header><cdmt-footer></cdmt-footer><cdmt-drawer side="left"></cdmt-drawer>'
@@ -321,6 +342,24 @@ describe(CdmtLayout, () => {
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-right-top-inset')).toBe('0px')
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-left-bottom-inset')).toBe('0px')
     expect(layout.style.getPropertyValue('--cdmt-layout-drawer-right-bottom-inset')).toBe('44px')
+
+    layout.remove()
+  })
+
+  it('applies fixed state and recomputes offsets for a child added after mount (children-changed path, not a property change)', async () => {
+    const layout = await mountLayout('')
+    layout.fixedHeader = true
+    await layout.updateComplete
+
+    const header = document.createElement('cdmt-header')
+    const rectSpy = vi.spyOn(header, 'getBoundingClientRect')
+
+    layout.append(header)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(header.hasAttribute('data-cdmt-fixed')).toBe(true)
+    expect(rectSpy).toHaveBeenCalled()
 
     layout.remove()
   })
@@ -377,6 +416,17 @@ describe(CdmtLayout, () => {
 
     layout.remove()
     vi.unstubAllGlobals()
+  })
+
+  it('disconnects its own ResizeObserver when removed from the DOM', async () => {
+    const layout = await mountLayout('<cdmt-header></cdmt-header>')
+    const disconnectSpy = vi.spyOn(ResizeObserver.prototype, 'disconnect')
+
+    layout.remove()
+
+    expect(disconnectSpy).toHaveBeenCalled()
+
+    disconnectSpy.mockRestore()
   })
 
   it('stops reacting to new children and to cdmt-layout-child-change after being disconnected', async () => {
