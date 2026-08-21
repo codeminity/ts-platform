@@ -198,13 +198,13 @@ If a publish succeeds on npm but the tag/GitHub Release don't appear, `release.y
 
 ## Full Local Check
 
-`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — in the same order as [ci.yml](./.github/workflows/ci.yml)'s `Test / Build / Lint` job (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus browser e2e tests (otherwise a separate job there). Mutation testing is deliberately not included — it runs nightly in its own CI workflow instead, see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow):
+`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — covering what [ci.yml](./.github/workflows/ci.yml)'s `Build`/`Static Analysis`/`Test` jobs run (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus browser e2e tests (otherwise a separate job there). Mutation testing is deliberately not included — it runs nightly in its own CI workflow instead, see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow):
 
 ```bash
 pnpm run full-check
 ```
 
-It does not stop at the first failure — every check runs regardless, and a summary at the end shows what passed and what didn't, so one run surfaces everything wrong instead of one problem at a time. This is slow (e2e is included); reach for the individual `pnpm run validate:*` / `pnpm test` scripts during normal development, and run the full thing before opening a PR.
+Steps run concurrently, not one after another, per the DAG described in [DECISIONS.md](./DECISIONS.md#adr-012-full-check-runs-concurrently-and-fails-fast) — and it fails fast: the first genuine failure aborts every other step, a step already running gets killed outright, and a step that hasn't started yet is skipped and reported as cancelled rather than run. This is slow (e2e is included); reach for the individual `pnpm run validate:*` / `pnpm test` scripts during normal development, and run the full thing before opening a PR.
 
 ---
 

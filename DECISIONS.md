@@ -40,7 +40,7 @@ This document records significant design decisions for the monorepo as a whole �
 
 **Decision:** Every package ships `"type": "module"` with a single `import` condition in `exports`. There is no CommonJS build, and none is planned — this is a permanent design choice, not a temporary gap.
 
-**Consequences:** Simpler bundling, better tree-shaking, and one build target per package instead of two. The tradeoff, made deliberately: `require('@codeminity/axios')` does not work — CommonJS consumers need a dynamic `import()`, documented in each package's [COMPATIBILITY.md](./COMPATIBILITY.md#module-system).
+**Consequences:** Simpler bundling, better tree-shaking, and one build target per package instead of two. The tradeoff, made deliberately: `require('@codeminity/axios')` does not work — CommonJS consumers need a dynamic `import()`.
 
 ## ADR-003: Independently versioned and published packages
 
@@ -72,7 +72,7 @@ This document records significant design decisions for the monorepo as a whole �
 
 **Decision:** Browser-dependent behavior is verified with Playwright against a real Chromium browser (`e2e/browser/`), not a simulated DOM.
 
-**Consequences:** Tests prove actual cross-origin credentialed behavior, not just that code ran without throwing. This is slower than a simulated-DOM unit test and requires a real browser in CI, which is why it's kept as its own `e2e/` suite alongside — not a replacement for — the fast unit-test layer. Firefox/WebKit coverage is a real, tracked gap (see [COMPATIBILITY.md](./COMPATIBILITY.md#browsers)), not a claim that this decision covers every engine already.
+**Consequences:** Tests prove actual cross-origin credentialed behavior, not just that code ran without throwing. This is slower than a simulated-DOM unit test and requires a real browser in CI, which is why it's kept as its own `e2e/` suite alongside — not a replacement for — the fast unit-test layer. Firefox/WebKit coverage is a real, tracked gap, not a claim that this decision covers every engine already — add a project to [`playwright.config.ts`](./e2e/browser/playwright.config.ts) and that changes, not before.
 
 ## ADR-007: Mutation testing scope
 
