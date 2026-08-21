@@ -86,4 +86,4 @@ Packages are published to npm exclusively via [`.github/workflows/release.yml`](
 
 ## Software Bill of Materials
 
-Every release generates a [CycloneDX](https://cyclonedx.org/) SBOM per package (`pnpm run sbom`, production dependencies only — devDependencies aren't part of what a consumer installs), uploaded as a workflow artifact on the `Release` run. Consumers who need to verify exactly what's inside a given version of `@codeminity/axios`, `@codeminity/fetch`, or `@codeminity/request-core` can download it from that run instead of reconstructing the dependency tree themselves.
+Every release generates a [CycloneDX](https://cyclonedx.org/) SBOM per package (`pnpm run sbom`, production dependencies only — devDependencies aren't part of what a consumer installs), uploaded as a workflow artifact on the `Release` run. Consumers who need to verify exactly what's inside a given version of any published `@codeminity/*` package can download it from that run instead of reconstructing the dependency tree themselves.
