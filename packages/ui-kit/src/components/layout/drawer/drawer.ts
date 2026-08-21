@@ -106,6 +106,11 @@ export class CdmtDrawer extends LitElement {
   }
 
   override disconnectedCallback(): void {
+    // Stryker disable next-line CallExpression: equivalent mutant — no
+    // component in this package registers a Lit ReactiveController via
+    // `addController`, so `LitElement`'s base `disconnectedCallback` has no
+    // observable effect here (nothing a test can see beyond what the
+    // explicit cleanup below already does).
     super.disconnectedCallback()
     this.#mediaQuery?.removeEventListener('change', this.#handleBreakpointChange)
     document.removeEventListener('keydown', this.#handleKeydown)
@@ -289,6 +294,13 @@ export class CdmtDrawer extends LitElement {
   #applyModelValue({ initial }: { initial: boolean }): void {
     if (initial) {
       this.toggleAttribute('hidden', !this.modelValue)
+      // Stryker disable next-line CallExpression: equivalent mutant — every
+      // reactive property (declared with a constructor default, like every
+      // property on this element) counts as "changed" on the very first
+      // update, so `updated()`'s own width/mini/layoutFixed gate and
+      // `#setupBreakpointWatcher`'s own branch both also call this
+      // unconditionally on that same first render — this call is always
+      // redundant with one of those, and never runs on any later render.
       this.#syncFixedAndNotifyLayout()
       return
     }

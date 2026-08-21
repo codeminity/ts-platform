@@ -109,6 +109,29 @@ describe(handleAuthRequest, () => {
     vi.unstubAllGlobals()
   })
 
+  it('warns about an insecure URL when attaching a JWT token', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const config = createAuthConfig({
+      getToken: vi.fn<GetToken>().mockResolvedValue('token123')
+    }) as Config
+
+    const init = createRequestInit()
+    const queue = createRefreshQueueMock()
+
+    await handleAuthRequest(
+      'http://insecure-jwt-token-fetch.example.com/orders',
+      init,
+      config,
+      queue
+    )
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('http://insecure-jwt-token-fetch.example.com')
+
+    warn.mockRestore()
+  })
+
   it('does not attempt token refresh when skipAuth is set for the request', async () => {
     const refreshSpy = vi.spyOn(dependencies, 'handleRefreshToken').mockResolvedValue(undefined)
 

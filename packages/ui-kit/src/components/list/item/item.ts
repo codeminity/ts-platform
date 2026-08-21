@@ -55,6 +55,9 @@ export class CdmtItem extends LitElement {
   }
 
   override disconnectedCallback(): void {
+    // Stryker disable next-line CallExpression: equivalent mutant — see
+    // drawer.ts's identical disconnectedCallback comment: no component here
+    // registers a Lit ReactiveController, so this has no observable effect.
     super.disconnectedCallback()
     this.removeEventListener('keydown', this.#handleKeydown)
   }

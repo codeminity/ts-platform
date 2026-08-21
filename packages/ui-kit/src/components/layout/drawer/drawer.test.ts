@@ -244,6 +244,43 @@ describe(CdmtDrawer, () => {
     expect(el.isDocked).toBe(true)
   })
 
+  it('recomputes fixed state via the desktop branch when switching directly from mobile behavior', async () => {
+    el.behavior = 'mobile'
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
+
+    el.behavior = 'desktop'
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
+  })
+
+  it('recomputes fixed state via the default matchMedia branch when switching behavior back from desktop', async () => {
+    el.behavior = 'desktop'
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
+
+    stubMatchMedia(true)
+    el.behavior = 'default'
+    await el.updateComplete
+
+    expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
+  })
+
+  it('re-renders the backdrop visibility when a breakpoint change flips mobile mode (private state needs an explicit requestUpdate)', async () => {
+    el.show()
+    await el.updateComplete
+
+    expect(getBackdrop(el).classList.contains('cdmt-drawer__backdrop--visible')).toBe(false)
+
+    currentMediaQuery?.setMatches(true)
+    await el.updateComplete
+
+    expect(getBackdrop(el).classList.contains('cdmt-drawer__backdrop--visible')).toBe(true)
+  })
+
   it('reacts live to a matchMedia change crossing the breakpoint', async () => {
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
 

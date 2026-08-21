@@ -55,6 +55,9 @@ export class CdmtHeader extends LitElement {
   // copy of this same logic would only be redundant, unobservable code.
 
   override disconnectedCallback(): void {
+    // Stryker disable next-line CallExpression: equivalent mutant — see
+    // drawer.ts's identical disconnectedCallback comment: no component here
+    // registers a Lit ReactiveController, so this has no observable effect.
     super.disconnectedCallback()
     window.removeEventListener('scroll', this.#handleScroll)
   }

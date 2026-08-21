@@ -72,4 +72,19 @@ describe(delay, () => {
 
     expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function))
   })
+
+  it('clears the pending timer once the signal aborts', async () => {
+    vi.useFakeTimers()
+
+    const controller = new AbortController()
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+
+    const promise = delay(1000, controller.signal)
+
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+    await promise
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+  })
 })

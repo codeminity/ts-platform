@@ -38,4 +38,33 @@ describe('useTheme', () => {
 
     expect(wrapper.text()).toBe('dark:true')
   })
+
+  it('unsubscribes from the controller when the component unmounts', async () => {
+    const { useTheme, getThemeController } = await freshModules()
+    const controller = getThemeController()
+
+    const realSubscribe = controller.subscribe.bind(controller)
+    const unsubscribeSpy = vi.fn<() => void>()
+
+    vi.spyOn(controller, 'subscribe').mockImplementation((callback: () => void) => {
+      const realUnsubscribe = realSubscribe(callback)
+      return () => {
+        unsubscribeSpy()
+        realUnsubscribe()
+      }
+    })
+
+    const Comp = defineComponent({
+      setup() {
+        useTheme()
+        return () => h('div')
+      }
+    })
+
+    const wrapper = mount(Comp, { attachTo: document.body })
+
+    wrapper.unmount()
+
+    expect(unsubscribeSpy).toHaveBeenCalledTimes(1)
+  })
 })
