@@ -123,7 +123,9 @@ pnpm run bench:baseline   # writes bench-baseline.json (gitignored, machine-spec
 pnpm run bench:compare    # shows each result next to the baseline, e.g. "[0.85x] ⇓"
 ```
 
-`--compare` is visual only — it annotates results, it does **not** fail the command on a regression, and neither `bench` nor `bench:compare` is wired into CI: shared runners are too noisy for benchmark numbers to be a meaningful pass/fail gate. Judge a regression by eye and mention the numbers in the PR if something meaningful moved.
+`--compare` is visual only — it annotates results, it does **not** fail the command on a regression, and neither `bench` nor `bench:compare` is wired into CI: shared runners are too noisy for a single-run, single-baseline comparison to be a meaningful pass/fail gate. Judge a regression by eye and mention the numbers in the PR if something meaningful moved.
+
+Separately, `pnpm run bench:nightly` (`.github/workflows/bench-nightly.yml`, scheduled — see its own comment for why nightly rather than in CI) compares every benchmarked package against that package's own most recently published tag, not a stored baseline — both runs happen back-to-back in the same job on the same runner, which cancels out most of the noise a day-over-day or machine-to-machine comparison can't. It flags anything **50% or more** slower than that tag (deliberately wide, for the same noise reason) and writes `reports/bench/summary.txt`, uploaded as a workflow artifact — but it never fails the job either, for the same reason `bench:compare` doesn't: a flagged regression is something to go look at, not something that should block anything. A package with no published tag yet (e.g. before its first release) is skipped, not compared against nothing.
 
 ---
 
