@@ -1,0 +1,64 @@
+name: Nightly Benchmark Comparison
+
+# Compares each benchmarked package's current performance against that
+# package's own most recently published tag — not against a stored
+# historical baseline, and not day-over-day — see CONTRIBUTING.md's
+# Benchmarks section and DECISIONS.md for why. Runs on a schedule instead of
+# in CI/full-check: it needs a full git history plus a second install+build
+# at a past tag (via a git worktree) for every benchmarked package, which is
+# too slow to put in front of every PR. workflow_dispatch lets this be
+# triggered on demand too.
+on:
+  schedule:
+    - cron: '0 3 * * *'
+      timezone: 'Asia/Tehran'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    name: Benchmark Comparison
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Full history, not the default shallow clone — `git worktree add
+          # <tag>` and resolving each package's own latest tag both need
+          # every commit and tag to actually be present locally, not just
+          # the tip of the current branch.
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        run: corepack install -g pnpm@11.22.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Nightly benchmark comparison
+        run: pnpm run bench:nightly
+
+      # Uploaded regardless of the step above's outcome — this check never
+      # fails on a regression by design (see bench-nightly-run.ts), but a
+      # genuine infrastructure failure (a worktree build breaking) still
+      # exits non-zero, and the partial report up to that point is exactly
+      # what's needed to see where it broke.
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: bench-report
+          path: reports/bench
+          retention-days: 14

@@ -54,6 +54,7 @@
     "bench": "vitest bench --run",
     "bench:baseline": "vitest bench --run --outputJson bench-baseline.json",
     "bench:compare": "vitest bench --run --compare bench-baseline.json",
+    "bench:nightly": "tsx scripts/bench/bench-nightly-run.ts",
     "full-check": "tsx scripts/validate/full-check-run.ts",
     "clean": "node --import tsx scripts/maintenance/clean-run.ts"
   },
