@@ -32,16 +32,34 @@ interface FlatBenchmark {
   mean: number
 }
 
+// `group.fullName` is Vitest's own `"<relative-file-path> > <describe name>"`
+// string — relative to wherever Vitest was invoked from, so it's identical
+// whether that invocation was the main checkout or a `git worktree` at a
+// past tag, as long as the two mirror the same repo layout (which a full
+// worktree checkout always does). `file.filepath`, by contrast, is an
+// *absolute* path baked in by Vitest — different on every run purely
+// because the worktree and the main checkout live at different absolute
+// locations on disk. Keying on `filepath` (an earlier version of this
+// function did) meant baseline and current entries for the exact same
+// benchmark never matched at all — confirmed directly against a real
+// nightly run, where every single benchmark showed up as both "removed"
+// and "newly added" and nothing was ever actually compared.
+function relativeFile(fullName: string): string {
+  const separatorIndex = fullName.indexOf(' > ')
+
+  return separatorIndex === -1 ? fullName : fullName.slice(0, separatorIndex)
+}
+
 function flatten(report: VitestBenchReport): Map<string, FlatBenchmark> {
   const flat = new Map<string, FlatBenchmark>()
 
   for (const file of report.files) {
     for (const group of file.groups) {
       for (const benchmark of group.benchmarks) {
-        const key = `${file.filepath}::${group.fullName}::${benchmark.name}`
+        const key = `${group.fullName}::${benchmark.name}`
 
         flat.set(key, {
-          file: file.filepath,
+          file: relativeFile(group.fullName),
           group: group.fullName,
           name: benchmark.name,
           mean: benchmark.mean

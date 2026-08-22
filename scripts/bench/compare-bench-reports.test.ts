@@ -4,20 +4,35 @@ import { compareBenchReports } from './compare-bench-reports'
 
 import type { VitestBenchReport } from './vitest-bench-report.type'
 
+// Mirrors real Vitest bench JSON: `fullName` is `"<relative file> > <describe
+// block>"`, relative to wherever Vitest was invoked from — `filepath` is a
+// separate, *absolute* path Vitest also reports, which this helper lets
+// tests set independently of `fullName` specifically to reproduce the real
+// bug this module was fixed for (see compare-bench-reports.ts's own
+// comment): two runs of the identical benchmark from two different
+// absolute working directories (a `git worktree` vs. the main checkout).
 function report(
-  entries: { file?: string; group?: string; name: string; mean: number }[]
+  entries: {
+    filepath?: string
+    file?: string
+    group?: string
+    name: string
+    mean: number
+  }[]
 ): VitestBenchReport {
   const files = new Map<string, Map<string, { name: string; mean: number }[]>>()
 
   for (const entry of entries) {
-    const file = entry.file ?? 'default.bench.ts'
+    const filepath = entry.filepath ?? '/abs/path/default.bench.ts'
+    const relativeFile = entry.file ?? 'default.bench.ts'
     const group = entry.group ?? 'default group'
+    const fullName = `${relativeFile} > ${group}`
 
-    const groups = files.get(file) ?? new Map<string, { name: string; mean: number }[]>()
-    files.set(file, groups)
+    const groups = files.get(filepath) ?? new Map<string, { name: string; mean: number }[]>()
+    files.set(filepath, groups)
 
-    const benchmarks = groups.get(group) ?? []
-    groups.set(group, benchmarks)
+    const benchmarks = groups.get(fullName) ?? []
+    groups.set(fullName, benchmarks)
 
     benchmarks.push({ name: entry.name, mean: entry.mean })
   }
@@ -41,13 +56,42 @@ describe(compareBenchReports, () => {
     expect(result.withinThreshold).toStrictEqual([
       {
         file: 'default.bench.ts',
-        group: 'default group',
+        group: 'default.bench.ts > default group',
         name: 'a',
         baselineMeanNs: 100,
         currentMeanNs: 120,
         percentSlower: 20
       }
     ])
+  })
+
+  it('matches the same benchmark even when its absolute filepath differs between runs', () => {
+    // The exact real-world bug: a `git worktree` baseline run and the main
+    // checkout's current run report the identical benchmark under two
+    // different absolute paths, since Vitest resolves `filepath` against
+    // wherever it was actually invoked from. Only `fullName` (already
+    // relative) and the benchmark name should matter for matching.
+    const baseline = report([
+      {
+        filepath: '/tmp/bench-nightly-worktree-abc123/packages/request/core/bench/f.bench.ts',
+        name: 'a',
+        mean: 100
+      }
+    ])
+    const current = report([
+      {
+        filepath:
+          '/home/runner/work/ts-platform/ts-platform/packages/request/core/bench/f.bench.ts',
+        name: 'a',
+        mean: 120
+      }
+    ])
+
+    const result = compareBenchReports(baseline, current, 50)
+
+    expect(result.baselineOnly).toStrictEqual([])
+    expect(result.currentOnly).toStrictEqual([])
+    expect(result.withinThreshold).toStrictEqual([expect.objectContaining({ percentSlower: 20 })])
   })
 
   it('buckets a matched benchmark past the threshold as a regression', () => {
@@ -60,7 +104,7 @@ describe(compareBenchReports, () => {
     expect(result.regressions).toStrictEqual([
       {
         file: 'default.bench.ts',
-        group: 'default group',
+        group: 'default.bench.ts > default group',
         name: 'a',
         baselineMeanNs: 100,
         currentMeanNs: 200,
@@ -95,7 +139,7 @@ describe(compareBenchReports, () => {
 
     const result = compareBenchReports(baseline, current, 50)
 
-    expect(result.baselineOnly).toStrictEqual(['default.bench.ts::default group::removed'])
+    expect(result.baselineOnly).toStrictEqual(['default.bench.ts > default group::removed'])
     expect(result.currentOnly).toStrictEqual([])
     expect(result.regressions).toStrictEqual([])
     expect(result.withinThreshold).toStrictEqual([])
@@ -107,11 +151,11 @@ describe(compareBenchReports, () => {
 
     const result = compareBenchReports(baseline, current, 50)
 
-    expect(result.currentOnly).toStrictEqual(['default.bench.ts::default group::added'])
+    expect(result.currentOnly).toStrictEqual(['default.bench.ts > default group::added'])
     expect(result.baselineOnly).toStrictEqual([])
   })
 
-  it('matches benchmarks by file+group+name identity, not by array position', () => {
+  it('matches benchmarks by group+name identity, not by array position', () => {
     const baseline = report([
       { file: 'a.bench.ts', group: 'g1', name: 'x', mean: 100 },
       { file: 'b.bench.ts', group: 'g2', name: 'x', mean: 200 }
@@ -126,10 +170,27 @@ describe(compareBenchReports, () => {
     const result = compareBenchReports(baseline, current, 50)
 
     expect(result.regressions).toStrictEqual([
-      expect.objectContaining({ file: 'b.bench.ts', group: 'g2', percentSlower: 50 })
+      expect.objectContaining({ file: 'b.bench.ts', percentSlower: 50 })
     ])
     expect(result.withinThreshold).toStrictEqual([
-      expect.objectContaining({ file: 'a.bench.ts', group: 'g1', percentSlower: 10 })
+      expect.objectContaining({ file: 'a.bench.ts', percentSlower: 10 })
+    ])
+  })
+
+  it('uses the whole fullName as the displayed file when it has no " > " group separator', () => {
+    const files: VitestBenchReport = {
+      files: [
+        {
+          filepath: '/abs/whatever.bench.ts',
+          groups: [{ fullName: 'no-separator-name', benchmarks: [{ name: 'a', mean: 100 }] }]
+        }
+      ]
+    }
+
+    const result = compareBenchReports(files, files, 50)
+
+    expect(result.withinThreshold).toStrictEqual([
+      expect.objectContaining({ file: 'no-separator-name', group: 'no-separator-name' })
     ])
   })
 })
