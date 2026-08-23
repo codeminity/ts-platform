@@ -50,6 +50,17 @@ function relativeFile(fullName: string): string {
   return separatorIndex === -1 ? fullName : fullName.slice(0, separatorIndex)
 }
 
+// Below this absolute mean, a benchmark is measuring something so close to
+// a no-op (a synchronous early-return, a single property check) that GC
+// pauses, JIT state, and ordinary OS scheduler jitter dominate the
+// measurement far more than any real behavior change could. At that scale a
+// percentage is meaningless noise, not a signal — confirmed by a real
+// nightly run flagging a "96.6% slower" regression where both the baseline
+// and current mean rounded to 0.000ms; the actual values were well under a
+// microsecond apart; a genuine regression in code this fast wouldn't move
+// the needle on any real caller either.
+const MIN_MEASURABLE_MEAN_NS = 10_000
+
 function flatten(report: VitestBenchReport): Map<string, FlatBenchmark> {
   const flat = new Map<string, FlatBenchmark>()
 
@@ -78,7 +89,9 @@ function flatten(report: VitestBenchReport): Map<string, FlatBenchmark> {
  * regression or not based on `thresholdPercent`. A deliberately wide
  * threshold (this project uses 50%) absorbs ordinary shared-CI-runner
  * timing noise — see `bench-nightly-run.ts`'s own comment for why a tight
- * threshold isn't meaningful on that infrastructure.
+ * threshold isn't meaningful on that infrastructure. Below
+ * `MIN_MEASURABLE_MEAN_NS`, a match is never classified as a regression
+ * regardless of `percentSlower` — see that constant's own comment.
  *
  * @public
  */
@@ -113,7 +126,10 @@ export function compareBenchReports(
       percentSlower
     }
 
-    if (percentSlower >= thresholdPercent) {
+    const isRegression =
+      percentSlower >= thresholdPercent && baselineEntry.mean >= MIN_MEASURABLE_MEAN_NS
+
+    if (isRegression) {
       regressions.push(comparison)
     } else {
       withinThreshold.push(comparison)
