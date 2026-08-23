@@ -13,7 +13,7 @@ packages, each consumed as a dependency inside a caller's own application.
 
 **Assets to protect.**
 
-- Authentication credentials (tokens) that pass through a package at
+- Authentication credentials that pass through a package at
   runtime, supplied by the consuming application.
 - The DOM a UI-rendering package produces — attacker-influenced input must
   never be interpreted as markup, styles, or script.
@@ -24,21 +24,21 @@ packages, each consumed as a dependency inside a caller's own application.
 
 **Threats considered.**
 
-| #   | Threat                                                                                              | Where it's addressed                                                                                  |
-| --- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| T1  | A compromised or malicious dependency injects code into a published package                         | §4 (minimal dependency surface), [SECURITY.md#continuous-scanning](./SECURITY.md#continuous-scanning) |
-| T2  | The CI/CD pipeline is tricked into publishing an unauthorized or tampered version                   | §3 (least privilege, OIDC, no static publish token)                                                   |
-| T3  | A PR's own (potentially malicious) build script runs with publish permission                        | §3 ("Dangerous workflow" fix — see `release.yml`)                                                     |
-| T4  | Authentication tokens are leaked (logged, sent over an insecure channel, or exposed cross-origin)   | §4 (no credential logging, no credential persistence, TLS verification never bypassed)                |
-| T5  | Malformed or unexpected network responses cause a type-confusion bug or crash                       | §4 (allowlist-based classification)                                                                   |
-| T6  | A supply-chain compromise of a third-party GitHub Action used in CI                                 | §4 (SHA-pinned actions)                                                                               |
-| T7  | Untrusted or attacker-influenced input reaches a UI component and is interpreted as markup or style | §4 (rendering-library default escaping, `unsafeCSS` restricted to internal theme tokens)              |
+| #   | Threat                                                                                                 | Where it's addressed                                                                                  |
+| --- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| T1  | A compromised or malicious dependency injects code into a published package                            | §4 (minimal dependency surface), [SECURITY.md#continuous-scanning](./SECURITY.md#continuous-scanning) |
+| T2  | The CI/CD pipeline is tricked into publishing an unauthorized or tampered version                      | §3 (least privilege, OIDC, no static publish token)                                                   |
+| T3  | A PR's own (potentially malicious) build script runs with publish permission                           | §3 ("Dangerous workflow" fix — see `release.yml`)                                                     |
+| T4  | Authentication credentials are leaked (logged, sent over an insecure channel, or exposed cross-origin) | §4 (no credential logging, no credential persistence, TLS verification never bypassed)                |
+| T5  | Malformed or unexpected network responses cause a type-confusion bug or crash                          | §4 (allowlist-based classification)                                                                   |
+| T6  | A supply-chain compromise of a third-party GitHub Action used in CI                                    | §4 (SHA-pinned actions)                                                                               |
+| T7  | Untrusted or attacker-influenced input reaches a UI component and is interpreted as markup or style    | §4 (rendering-library default escaping, `unsafeCSS` restricted to internal style tokens)              |
 
 ## 2. Trust Boundaries
 
 - **Consumer ↔ library.** The consuming application supplies config
-  (including how to obtain/refresh a token) and, for UI packages, attributes/
-  slotted content/theme values, all through a typed public API. This input is
+  (including how to obtain or renew credentials) and, for UI packages, other
+  configuration and content, all through a typed public API. This input is
   trusted at the type level but the library must never misuse or leak what
   it's given — see T4 — nor render it as unescaped markup/style — see T7.
 - **Library ↔ remote HTTP server.** Response status codes, error names, and
@@ -82,8 +82,8 @@ write` only on the release job, only to push the tag it just published).
   the artifact CI already produced (see `release.yml`'s "Dangerous
   workflow" comment for the specific risk this avoids).
 - **No hidden global state.** Explicit control flow, deterministic
-  execution, and no hidden mutable state, with one documented exception (see
-  [ARCHITECTURE.md#state-rule](./ARCHITECTURE.md#state-rule)).
+  execution, and no hidden mutable state, except the documented exceptions
+  listed in [ARCHITECTURE.md#state-rule](./ARCHITECTURE.md#state-rule).
 - **Minimal attack surface.** Every package depends only on the minimum its
   own job requires — nothing beyond what's fundamental to what it does
   (e.g. a third-party client it wraps, a rendering library, with a
@@ -101,7 +101,7 @@ Function`, or any other dynamic code execution exists anywhere in the
   templating auto-escapes every dynamic value by default; the one
   intentional bypass (`unsafeCSS`, needed for CSS custom-property syntax the
   default template tag can't express) is used only with values sourced from
-  a closed, compile-time-checked set of internal theme-token keys — never a
+  a closed, compile-time-checked set of internal style-token keys — never a
   consumer-, attribute-, or network-supplied string (verified by
   repository-wide search of every `unsafeCSS` call site, re-checked as part
   of this assessment). No template in the codebase uses `unsafeHTML` or any
@@ -125,11 +125,11 @@ false`, `NODE_TLS_REJECT_UNAUTHORIZED`, or any other certificate
   (Socket.dev, Dependabot alerts), and every published package carries a
   signed npm provenance attestation back to the exact commit and workflow
   run that built it.
-- **Unsafe concurrency.** Concurrent token-refresh requests are coalesced
-  through a dedicated refresh queue (`createRefreshQueue`) instead of each
-  caller independently racing to refresh — covered by both example-based and
+- **Unsafe concurrency.** Concurrent credential-renewal requests are
+  coalesced through a dedicated queue instead of each caller independently
+  racing to renew — covered by both example-based and
   property-based tests (see
-  [DECISIONS.md#property-based-testing-scope](./DECISIONS.md#property-based-testing-scope)).
+  [DECISIONS.md#adr-008-property-based-testing-scope](./DECISIONS.md#adr-008-property-based-testing-scope)).
 
 ## Keeping This Current
 

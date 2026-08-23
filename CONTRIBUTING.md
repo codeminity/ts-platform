@@ -86,6 +86,7 @@ The `core → adapter` direction and circular dependencies aren't just documente
   _rule_ doesn't hold, not that the test infrastructure is unreliable —
   `fast-check` shrinks every failure to a minimal, reproducible
   counterexample
+- `pnpm run find-redundant-tests` (`scripts/test/find-redundant-tests.ts`) runs automatically right after mutation testing in the same nightly workflow, reading that same run's `mutation.json` to flag tests that add no unique mutation-kill or real-coverage value beyond another test in the same source file. A `confirmed` finding was checked against a real `pnpm run test:coverage` run with the test physically removed and genuinely doesn't affect coverage — it's safe to delete. An `unverifiable` finding is usually a row inside `it.each([...])` the script can't safely auto-remove; review and consolidate by hand. Neither failing this check nor the underlying mutation run itself blocks a PR — see the ADRs above for why this is nightly/advisory, not a merge gate.
 
 ---
 
@@ -103,13 +104,13 @@ pnpm run verify:packages
 
 ## Bundle Size
 
-Every published entry point has a brotli size limit enforced in CI (`pnpm run validate:size`, via [size-limit](https://github.com/ai/size-limit)), configured in [`.size-limit.json`](./.size-limit.json). This exists because it's already bitten this project once: an unexternalized `vitest` import once grew `request-core`'s `test-utils` build from ~1KB to 554KB with nobody noticing until a manual audit. If a change legitimately needs a bigger budget, raise the relevant `limit` in `.size-limit.json` as part of the same PR — don't raise it reflexively just to make the check pass.
+Every published entry point has a brotli size limit enforced in CI (`pnpm run validate:size`, via [size-limit](https://github.com/ai/size-limit)), configured in [`.size-limit.json`](./.size-limit.json). This exists because it's already bitten this project once: an unexternalized `vitest` import once grew a package's `test-utils` build from ~1KB to 554KB with nobody noticing until a manual audit. If a change legitimately needs a bigger budget, raise the relevant `limit` in `.size-limit.json` as part of the same PR — don't raise it reflexively just to make the check pass.
 
 ---
 
 ## Benchmarks
 
-Performance-sensitive code (refresh queue concurrency, auth-attach overhead, retry decisions and orchestration, error classification, event dispatch) has [Vitest's built-in `bench()`](https://vitest.dev/guide/features.html#benchmarking) benchmarks colocated in each package's `bench/` folder, named `<file>.bench.ts` (Vitest's benchmarking runs on [tinybench](https://github.com/tinylibs/tinybench) under the hood — no separate benchmarking dependency or custom runner needed). Run all of them with:
+Performance-sensitive code (queue concurrency, credential-handling overhead, decision and orchestration logic, error classification, event dispatch) has [Vitest's built-in `bench()`](https://vitest.dev/guide/features.html#benchmarking) benchmarks colocated in each package's `bench/` folder, named `<file>.bench.ts` (Vitest's benchmarking runs on [tinybench](https://github.com/tinylibs/tinybench) under the hood — no separate benchmarking dependency or custom runner needed). Run all of them with:
 
 ```bash
 pnpm run bench
@@ -133,7 +134,7 @@ Separately, `pnpm run bench:nightly` (`.github/workflows/bench-nightly.yml`, sch
 
 Use conventional commits:
 
-- feat: add retry strategy
+- feat: add input validation
 - fix: resolve race condition in queue
 - refactor: simplify async pipeline
 - chore: update tooling
@@ -157,7 +158,7 @@ otherwise have the right to submit it under the project's license, per the
 Sign off every commit to confirm this:
 
 ```bash
-git commit -s -m "feat: add retry strategy"
+git commit -s -m "feat: add input validation"
 ```
 
 `-s` appends a `Signed-off-by: Your Name <your.email@example.com>` trailer
@@ -182,7 +183,7 @@ This is enforced in CI (`pnpm run validate:changeset`, i.e. `changeset status --
 
 Skip this only for changes that can't affect a published package: docs-only edits, CI/tooling config, internal test-only changes with no behavior implication. When unsure, add one — an unnecessary changeset is a much smaller problem than a shipped fix nobody ever gets.
 
-Versioning (`pnpm version-packages`) and publishing (`pnpm release`) are run separately, outside individual PRs, by [`.github/workflows/release.yml`](./.github/workflows/release.yml) on every push to `main`.
+Versioning (`pnpm version-packages`) is run manually, on a dedicated release branch — see below. Publishing (`pnpm release`) is automated: [`.github/workflows/release.yml`](./.github/workflows/release.yml) runs once CI succeeds on `main` (triggered by CI's own completion, not directly by the push itself — see the workflow's own trigger comment for why publishing must never race an unvalidated commit).
 
 To cut a release: run `pnpm version-packages` on a branch named exactly `release/version-packages`, review the version bumps and hand-curate each changed `CHANGELOG.md` entry (the auto-generated text only covers changes that happened to carry a changeset — cross-check `git log` since the last release for anything else worth summarizing, e.g. CI/tooling/docs work that never needed one), commit as `chore(release): version packages for vX.Y.Z`, and open a PR. `changeset version` deletes every changeset it consumes in that same commit, so this PR always legitimately shows package changes with no changeset left to find — [`.github/workflows/changesets.yml`](./.github/workflows/changesets.yml) exempts the `release/version-packages` branch specifically from the `Changeset Required` check for exactly this reason.
 
@@ -200,7 +201,7 @@ If a publish succeeds on npm but the tag/GitHub Release don't appear, `release.y
 
 ## Full Local Check
 
-`pnpm run full-check` runs every check CI runs — `pnpm install --frozen-lockfile`, `pnpm audit`, `validate:changeset`, build, lint, `validate:format`, typecheck, `test:coverage`, `validate:deps`, `validate:api-exports`, `validate:docs`, `verify:packages`, `validate:size` — covering what [ci.yml](./.github/workflows/ci.yml)'s `Build`/`Static Analysis`/`Test` jobs run (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus browser e2e tests (otherwise a separate job there). Mutation testing is deliberately not included — it runs nightly in its own CI workflow instead, see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow):
+`pnpm run full-check` runs every check CI runs — the full, current list is [`full-check.ts`](./scripts/validate/full-check.ts)'s own `CHECK_STEPS` array, the single source of truth for what this covers (a list here would just be one more place to go stale as steps are added). It covers what [ci.yml](./.github/workflows/ci.yml)'s `Build`/`Static Analysis`/`Test` jobs run (plus [changesets.yml](./.github/workflows/changesets.yml)'s `Changeset Required` check folded in early), plus browser e2e tests (otherwise a separate job there). Mutation testing is deliberately not included — it runs nightly in its own CI workflow instead, see [DECISIONS.md](./DECISIONS.md#adr-017-mutation-testing-moved-to-a-nightly-ci-workflow):
 
 ```bash
 pnpm run full-check

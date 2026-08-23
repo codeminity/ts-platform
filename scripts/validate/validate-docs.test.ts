@@ -59,11 +59,11 @@ describe(validateDocs, () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)
   })
 
-  it('throws when no TypeScript code blocks are found', async () => {
+  it('skips (returns false) rather than failing when no TypeScript code blocks are found', async () => {
     mockGlobby(['README.md'])
     mockReadFile('# No code here')
 
-    await expect(validateDocs()).rejects.toThrow('No TypeScript code blocks were found')
+    await expect(validateDocs()).resolves.toBe(false)
 
     expect(mockedRunCommand).not.toHaveBeenCalled()
   })
@@ -90,7 +90,7 @@ describe(validateDocs, () => {
 
     mockedRunCommand.mockResolvedValue(undefined)
 
-    await expect(validateDocs()).resolves.toBeUndefined()
+    await expect(validateDocs()).resolves.toBe(true)
   })
 
   it('skips a string-shorthand export entry (no types field to type-check against)', async () => {
@@ -109,7 +109,7 @@ describe(validateDocs, () => {
     const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined)
     mockedRunCommand.mockResolvedValue(undefined)
 
-    await expect(validateDocs()).resolves.toBeUndefined()
+    await expect(validateDocs()).resolves.toBe(true)
 
     const tsconfigWrite = writeSpy.mock.calls.find(([file]) =>
       String(file).endsWith('tsconfig.json')
@@ -139,7 +139,7 @@ describe(validateDocs, () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(false)
     mockedRunCommand.mockResolvedValue(undefined)
 
-    await expect(validateDocs()).resolves.toBeUndefined()
+    await expect(validateDocs()).resolves.toBe(true)
   })
 
   it('extracts blocks, writes a temp tsconfig with dynamic paths, and runs tsc via pnpm exec', async () => {
@@ -150,7 +150,7 @@ describe(validateDocs, () => {
 
     mockedRunCommand.mockResolvedValue(undefined)
 
-    await expect(validateDocs()).resolves.toBeUndefined()
+    await expect(validateDocs()).resolves.toBe(true)
 
     expect(mockedRunCommand).toHaveBeenCalledWith(
       'pnpm',

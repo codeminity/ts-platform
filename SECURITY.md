@@ -31,17 +31,13 @@ We aim to respond within **48–72 hours**.
 
 ts-platform provides low-level infrastructure primitives for the Codeminity ecosystem.
 
-Security-sensitive areas include:
-
-- concurrency primitives (refresh queue / async coordination)
-- retry orchestration
-- authentication/token handling
+Security-sensitive areas — the specific threats considered and assets protected — are catalogued in [ASSURANCE_CASE.md](./ASSURANCE_CASE.md#1-threat-model), the single source of truth for this; not duplicated here, so this section can't drift out of sync with it.
 
 This repository does **not** handle:
 
 - payment processing
 - user authentication systems
-- direct network services (except via adapters)
+- direct network services, except through this repo's own adapter layer
 
 ---
 
@@ -53,7 +49,7 @@ This project is designed with:
 - deterministic async execution
 - minimal external dependencies
 - explicit control flow
-- no global mutable state, except one documented case in `@codeminity/axios`'s default export (shared with plain Axios's own singleton for API parity) — see [ARCHITECTURE.md](./ARCHITECTURE.md#state-rule)
+- no global mutable state, except the documented exceptions listed in [ARCHITECTURE.md](./ARCHITECTURE.md#state-rule)
 
 ---
 

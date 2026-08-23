@@ -2,12 +2,7 @@
 
 ## Before opening an issue
 
-Most usage questions are answered in the relevant package's own README:
-
-- [`@codeminity/axios`](./packages/request/axios/README.md)
-- [`@codeminity/fetch`](./packages/request/fetch/README.md)
-- [`@codeminity/request-core`](./packages/request/core/README.md)
-- [`@codeminity/ui-kit`](./packages/ui-kit/README.md)
+Most usage questions are answered in the relevant package's own README — see the package list in [README.md](./README.md).
 
 ---
 

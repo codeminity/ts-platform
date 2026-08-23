@@ -17,6 +17,12 @@ Each package:
 
 ---
 
+## Apps
+
+`apps/` holds internal, unpublished consumers of the packages — real proving grounds for the packages, not products this repo ships. An app is not a package: it's `"private": true`, has no version to publish, and isn't subject to the independent-publishability rule above. It still only ever depends on a package through that package's real `workspace:*` dependency and declared `exports` — the same module-resolution encapsulation described under Dependency Rules applies regardless of whether the consumer is a package or an app, so there's no separate enforcement rule needed for this boundary either.
+
+---
+
 ## Dependency Rules
 
 ### Allowed
@@ -48,7 +54,7 @@ Pure logic with no external integrations.
 - no I/O concerns
 - no UI-_framework_ concerns (no Vue/React/Angular component logic)
 
-`@codeminity/ui-kit` is the deliberate exception this last rule is written for: its entire purpose is UI _primitives_ (Custom Elements built with Lit), not UI-framework integration — its `/vue` subpath is a thin translation layer over those same elements, not a separate adapter package. Web Components aren't a UI-framework dependency, so this doesn't violate the rule's actual intent.
+One package is the deliberate exception this last rule is written for: its entire purpose is building UI primitives themselves, not integrating with a specific UI framework — any thin translation layer it offers over those primitives is still not a separate adapter package. See that package's own ARCHITECTURE.md for why this doesn't violate the rule's actual intent.
 
 ### Adapter Layer
 
@@ -83,7 +89,7 @@ Deep imports are forbidden.
 
 ## State Rule
 
-- no global mutable state, with two documented exceptions: `@codeminity/axios`'s default export intentionally shares Axios's own global `.defaults`/`.interceptors` for parity with plain Axios — see [Instance Isolation](./packages/request/axios/ARCHITECTURE.md#instance-isolation); and `@codeminity/request-core`'s `warnIfInsecureUrl` keeps a process-wide per-origin dedup cache so a misconfigured `baseURL` warns once regardless of how many adapter instances hit it — see [request-core's DECISIONS.md](./packages/request/core/DECISIONS.md#adr-006-no-global-state). Anything created via `axios.create()`/`createFetch()` is otherwise fully isolated.
+- no global mutable state — a package that genuinely needs a narrow, deliberate exception documents it in its own ARCHITECTURE.md/DECISIONS.md, not here
 - state must be explicit and scoped
 
 ---
