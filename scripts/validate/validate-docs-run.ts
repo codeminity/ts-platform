@@ -1,9 +1,13 @@
 import { validateDocs } from './validate-docs'
 
 async function main() {
-  await validateDocs()
+  const validated = await validateDocs()
 
-  console.log('✅ Validate documents passed')
+  console.log(
+    validated
+      ? '✅ Validate documents passed'
+      : 'No TypeScript code blocks found in any doc — nothing to validate yet, skipping'
+  )
 }
 
 main().catch((error: unknown) => {

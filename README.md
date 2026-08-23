@@ -77,6 +77,8 @@ Packages are designed to remain independent and avoid unnecessary coupling.
 
 Packages may depend on other packages through their public APIs when composition requires it, but internal implementation details are never shared directly.
 
+`apps/` holds internal, unpublished consumers of the packages (currently [`ui-kit-docs`](./apps/ui-kit-docs)) — see [ARCHITECTURE.md#apps](./ARCHITECTURE.md#apps).
+
 ---
 
 ## Tooling

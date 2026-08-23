@@ -6,10 +6,9 @@ stable.
 
 ## What we intend to do
 
-- **Stabilize public APIs.** `@codeminity/axios`, `@codeminity/fetch`, and
-  `@codeminity/request-core` are still pre-1.0 (see each package's
-  `CHANGELOG.md`). Work continues toward API stability ahead of a 1.0
-  release for each.
+- **Stabilize public APIs.** Every package still pre-1.0 (see its own
+  `CHANGELOG.md`) continues toward API stability ahead of its own 1.0
+  release.
 - **Keep quality bars where they are, not lower them.** 100% test coverage
   (statements/branches/functions/lines) and mutation testing stay mandatory
   as the codebase grows — see [CONTRIBUTING.md](./CONTRIBUTING.md#testing-rules).

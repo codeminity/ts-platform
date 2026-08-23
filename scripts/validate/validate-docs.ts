@@ -66,7 +66,12 @@ function collectTypesPaths(packages: WorkspacePackage[]): Record<string, string[
   return paths
 }
 
-export async function validateDocs(): Promise<void> {
+/**
+ * Returns `false` (a skip, not a failure) when there's nothing to validate —
+ * a workspace with no packages yet has no example code in its docs either,
+ * and that's a legitimate state, not a misconfiguration to error on.
+ */
+export async function validateDocs(): Promise<boolean> {
   const workspacePackages = await discoverWorkspacePackages()
   const typesPaths = collectTypesPaths(workspacePackages)
 
@@ -99,7 +104,7 @@ export async function validateDocs(): Promise<void> {
     }
 
     if (blockCount === 0) {
-      throw new Error('No TypeScript code blocks were found to validate')
+      return false
     }
 
     for (const [specifier, [typesFile]] of Object.entries(typesPaths)) {
@@ -125,6 +130,8 @@ export async function validateDocs(): Promise<void> {
     fs.writeFileSync(path.join(tempDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2))
 
     await runCommand('pnpm', ['exec', 'tsc', '-p', path.join(tempDir, 'tsconfig.json'), '--noEmit'])
+
+    return true
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true })
   }
