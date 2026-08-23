@@ -47,8 +47,8 @@ function report(
 
 describe(compareBenchReports, () => {
   it('buckets a matched benchmark under threshold as withinThreshold, not a regression', () => {
-    const baseline = report([{ name: 'a', mean: 100 }])
-    const current = report([{ name: 'a', mean: 120 }])
+    const baseline = report([{ name: 'a', mean: 100_000 }])
+    const current = report([{ name: 'a', mean: 120_000 }])
 
     const result = compareBenchReports(baseline, current, 50)
 
@@ -58,11 +58,25 @@ describe(compareBenchReports, () => {
         file: 'default.bench.ts',
         group: 'default.bench.ts > default group',
         name: 'a',
-        baselineMeanNs: 100,
-        currentMeanNs: 120,
+        baselineMeanNs: 100_000,
+        currentMeanNs: 120_000,
         percentSlower: 20
       }
     ])
+  })
+
+  it('never classifies a match as a regression when the baseline mean is below the measurable floor', () => {
+    // Mirrors the real false positive this floor was added for: a
+    // near-instant synchronous benchmark where GC/JIT/scheduler noise alone
+    // produces a huge percentage swing between two absolute values that are
+    // both effectively zero.
+    const baseline = report([{ name: 'a', mean: 500 }])
+    const current = report([{ name: 'a', mean: 1_000 }])
+
+    const result = compareBenchReports(baseline, current, 50)
+
+    expect(result.regressions).toStrictEqual([])
+    expect(result.withinThreshold).toStrictEqual([expect.objectContaining({ percentSlower: 100 })])
   })
 
   it('matches the same benchmark even when its absolute filepath differs between runs', () => {
@@ -75,7 +89,7 @@ describe(compareBenchReports, () => {
       {
         filepath: '/tmp/bench-nightly-worktree-abc123/packages/request/core/bench/f.bench.ts',
         name: 'a',
-        mean: 100
+        mean: 100_000
       }
     ])
     const current = report([
@@ -83,7 +97,7 @@ describe(compareBenchReports, () => {
         filepath:
           '/home/runner/work/ts-platform/ts-platform/packages/request/core/bench/f.bench.ts',
         name: 'a',
-        mean: 120
+        mean: 120_000
       }
     ])
 
@@ -95,8 +109,8 @@ describe(compareBenchReports, () => {
   })
 
   it('buckets a matched benchmark past the threshold as a regression', () => {
-    const baseline = report([{ name: 'a', mean: 100 }])
-    const current = report([{ name: 'a', mean: 200 }])
+    const baseline = report([{ name: 'a', mean: 100_000 }])
+    const current = report([{ name: 'a', mean: 200_000 }])
 
     const result = compareBenchReports(baseline, current, 50)
 
@@ -106,16 +120,16 @@ describe(compareBenchReports, () => {
         file: 'default.bench.ts',
         group: 'default.bench.ts > default group',
         name: 'a',
-        baselineMeanNs: 100,
-        currentMeanNs: 200,
+        baselineMeanNs: 100_000,
+        currentMeanNs: 200_000,
         percentSlower: 100
       }
     ])
   })
 
   it('treats a percentSlower exactly at the threshold as a regression (inclusive boundary)', () => {
-    const baseline = report([{ name: 'a', mean: 100 }])
-    const current = report([{ name: 'a', mean: 150 }])
+    const baseline = report([{ name: 'a', mean: 100_000 }])
+    const current = report([{ name: 'a', mean: 150_000 }])
 
     const result = compareBenchReports(baseline, current, 50)
 
@@ -124,8 +138,8 @@ describe(compareBenchReports, () => {
   })
 
   it('treats a faster current run (negative percentSlower) as withinThreshold', () => {
-    const baseline = report([{ name: 'a', mean: 100 }])
-    const current = report([{ name: 'a', mean: 40 }])
+    const baseline = report([{ name: 'a', mean: 100_000 }])
+    const current = report([{ name: 'a', mean: 40_000 }])
 
     const result = compareBenchReports(baseline, current, 50)
 
@@ -134,7 +148,7 @@ describe(compareBenchReports, () => {
   })
 
   it('reports a baseline benchmark missing from current as baselineOnly', () => {
-    const baseline = report([{ name: 'removed', mean: 100 }])
+    const baseline = report([{ name: 'removed', mean: 100_000 }])
     const current = report([])
 
     const result = compareBenchReports(baseline, current, 50)
@@ -147,7 +161,7 @@ describe(compareBenchReports, () => {
 
   it('reports a current benchmark missing from baseline as currentOnly', () => {
     const baseline = report([])
-    const current = report([{ name: 'added', mean: 100 }])
+    const current = report([{ name: 'added', mean: 100_000 }])
 
     const result = compareBenchReports(baseline, current, 50)
 
@@ -157,14 +171,14 @@ describe(compareBenchReports, () => {
 
   it('matches benchmarks by group+name identity, not by array position', () => {
     const baseline = report([
-      { file: 'a.bench.ts', group: 'g1', name: 'x', mean: 100 },
-      { file: 'b.bench.ts', group: 'g2', name: 'x', mean: 200 }
+      { file: 'a.bench.ts', group: 'g1', name: 'x', mean: 100_000 },
+      { file: 'b.bench.ts', group: 'g2', name: 'x', mean: 200_000 }
     ])
     // Same names, different files/groups, reversed order — identity must
     // still resolve each to its own counterpart, not the other one.
     const current = report([
-      { file: 'b.bench.ts', group: 'g2', name: 'x', mean: 300 },
-      { file: 'a.bench.ts', group: 'g1', name: 'x', mean: 110 }
+      { file: 'b.bench.ts', group: 'g2', name: 'x', mean: 300_000 },
+      { file: 'a.bench.ts', group: 'g1', name: 'x', mean: 110_000 }
     ])
 
     const result = compareBenchReports(baseline, current, 50)
@@ -182,7 +196,7 @@ describe(compareBenchReports, () => {
       files: [
         {
           filepath: '/abs/whatever.bench.ts',
-          groups: [{ fullName: 'no-separator-name', benchmarks: [{ name: 'a', mean: 100 }] }]
+          groups: [{ fullName: 'no-separator-name', benchmarks: [{ name: 'a', mean: 100_000 }] }]
         }
       ]
     }
