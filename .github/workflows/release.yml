@@ -138,7 +138,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install pnpm
-        run: corepack install -g pnpm@11.22.0
+        run: corepack install -g pnpm@11.24.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -151,7 +151,7 @@ jobs:
       # signing key to store as a secret, consistent with the OIDC-only
       # approach used for npm publishing. See SECURITY.md.
       - name: Setup gitsign
-        uses: chainguard-dev/actions/setup-gitsign@7bd1e94b2a1b7faa891392757de7d89489070c5c # v1.6.32
+        uses: chainguard-dev/actions/setup-gitsign@0ffab11a71c1b7bd68ddf94665a8ec88b116223d # v1.6.33
 
       # Everything below is the real build-and-publish path — skipped
       # entirely in workflow_dispatch recovery mode, since the package(s)
