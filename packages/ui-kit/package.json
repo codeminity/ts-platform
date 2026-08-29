@@ -70,9 +70,9 @@
     }
   },
   "devDependencies": {
-    "@vue/test-utils": "^2.4.11",
+    "@vue/test-utils": "^2.5.0",
     "lit-analyzer": "^2.0.3",
     "tsup": "^8.5.1",
-    "vue": "^3.5.41"
+    "vue": "^3.5.42"
   }
 }
