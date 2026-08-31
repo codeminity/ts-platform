@@ -151,7 +151,7 @@ jobs:
       # signing key to store as a secret, consistent with the OIDC-only
       # approach used for npm publishing. See SECURITY.md.
       - name: Setup gitsign
-        uses: chainguard-dev/actions/setup-gitsign@0ffab11a71c1b7bd68ddf94665a8ec88b116223d # v1.6.33
+        uses: chainguard-dev/actions/setup-gitsign@a9d4aa7202a63f8a6b8f81bb1570a0ca54460ac5 # v1.6.34
 
       # Everything below is the real build-and-publish path — skipped
       # entirely in workflow_dispatch recovery mode, since the package(s)
