@@ -2,6 +2,14 @@ import { LitElement, html } from 'lit'
 
 import { drawerStyles } from './drawer.styles.js'
 
+// A bare `el.offsetWidth` read has no meaningful return value to void, so
+// `no-meaningless-void-operator` rejects `void`ing it directly — wrapping
+// the read in a call gives `void` an actual call return value to discard,
+// satisfying that rule and `no-unused-expressions` at once.
+function forceReflow(el: HTMLElement): number {
+  return el.offsetWidth
+}
+
 /**
  * @public
  */
@@ -243,7 +251,10 @@ export class CdmtDrawer extends LitElement {
     this.#syncWidthVar()
 
     if (modeSwitchWhileClosed) {
-      void this.offsetWidth
+      // Forces the browser to flush layout, so the transition removal
+      // below can't be batched with the width change above into one
+      // reflow-free paint.
+      void forceReflow(this)
       this.style.transition = ''
     }
 
