@@ -1,8 +1,22 @@
+import cssPropertyList from 'happy-dom/lib/css/declaration/CSSPropertyList.js'
 import { vi } from 'vitest'
 
 // `export {}` makes this a module, not a script — `declare global` is only
 // valid from inside a module augmenting the global scope.
 export {}
+
+// happy-dom's CSSPropertyManager only stores a property through its generic
+// passthrough path (CSSPropertySetParser.getDefault) when the name is a
+// `--custom-property` or already listed in this kebab-case table — anything
+// else (including real, standard vendor-prefixed properties like
+// `-webkit-line-clamp`/`-webkit-box-orient`) is silently dropped by
+// `style.setProperty()` (confirmed directly against happy-dom's source, not
+// a real browser difference — no known-issue link to cite, not yet reported
+// upstream as of happy-dom 20.14.3). The table is a plain exported object,
+// so registering the two properties CdmtItemLabel sets is enough to make
+// happy-dom store and return them like any other property.
+;(cssPropertyList.kebabCase as Record<string, string>)['-webkit-line-clamp'] = 'webkitLineClamp'
+;(cssPropertyList.kebabCase as Record<string, string>)['-webkit-box-orient'] = 'webkitBoxOrient'
 
 // The affected-scope/scoped-check scripts (lint.ts, typecheck.ts,
 // test-mutation.ts, run-if-relevant.ts, affected-scope.ts,
