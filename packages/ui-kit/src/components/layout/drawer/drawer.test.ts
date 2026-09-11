@@ -374,7 +374,13 @@ describe(CdmtDrawer, () => {
   })
 
   it('does not suppress the transition when a metrics-relevant prop changes but fixedness stays the same, while closed', async () => {
-    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+    // happy-dom's CSSStyleDeclaration synthesizes named accessors
+    // (`.transition =`) through an internal Proxy rather than real
+    // prototype getters/setters, so spying on the accessor itself isn't
+    // possible — `setProperty('transition', ...)` is the real, stable
+    // method every named-property assignment routes through underneath,
+    // and is what's actually spyable.
+    const setPropertySpy = vi.spyOn(CSSStyleDeclaration.prototype, 'setProperty')
 
     // Still docked, still closed — data-cdmt-fixed never changes here, so
     // this must NOT be treated as a mode switch even though the drawer is
@@ -382,7 +388,7 @@ describe(CdmtDrawer, () => {
     el.width = 250
     await el.updateComplete
 
-    expect(transitionSetterSpy).not.toHaveBeenCalled()
+    expect(setPropertySpy.mock.calls.filter((call) => call[0] === 'transition')).toStrictEqual([])
   })
 
   it('detects the mode switch from the real data-cdmt-fixed attribute, not just from #isFixed alone', async () => {
@@ -392,14 +398,18 @@ describe(CdmtDrawer, () => {
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(true)
     expect(el.modelValue).toBe(false)
 
-    const transitionSetterSpy = vi.spyOn(CSSStyleDeclaration.prototype, 'transition', 'set')
+    // See the previous test's comment for why setProperty is spied on
+    // instead of the transition accessor itself.
+    const setPropertySpy = vi.spyOn(CSSStyleDeclaration.prototype, 'setProperty')
     // Switches back to docked (not fixed) while still closed — a real mode
     // switch away from an attribute that was genuinely already present.
     el.overlay = false
     await el.updateComplete
 
     expect(el.hasAttribute('data-cdmt-fixed')).toBe(false)
-    expect(transitionSetterSpy.mock.calls.map((call) => call[0])).toStrictEqual(['none', ''])
+    expect(
+      setPropertySpy.mock.calls.filter((call) => call[0] === 'transition').map((call) => call[1])
+    ).toStrictEqual(['none', ''])
   })
 
   it('shows the backdrop only when open and in a fixed/overlay mode', async () => {

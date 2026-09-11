@@ -88,7 +88,13 @@ export default defineConfig(
       'import-x/no-internal-modules': [
         'error',
         {
-          allow: ['@codeminity/*/test-utils']
+          allow: [
+            '@codeminity/*/test-utils',
+            // vitest.setup.ts patches a happy-dom test-environment gap —
+            // see its own comment for why this reaches past the package's
+            // public entry point.
+            'happy-dom/lib/css/declaration/CSSPropertyList.js'
+          ]
         }
       ],
 
