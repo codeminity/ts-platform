@@ -138,7 +138,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install pnpm
-        run: corepack install -g pnpm@11.24.0
+        run: corepack install -g pnpm@12.3.4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
