@@ -4,15 +4,15 @@ import os from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { resolveCommand, runCommand } from '../lib/run-command'
+import { resolveCommand, runCommand } from '../lib/run-command.js'
 
-import { compareBenchReports } from './compare-bench-reports'
-import { discoverBenchmarkedPackages } from './discover-benchmarked-packages'
-import { formatBenchReport } from './format-bench-report'
-import { resolveLatestTag } from './resolve-latest-tag'
+import { collectBenchFileReports } from './bench-file-report.js'
+import { compareBenchReports } from './compare-bench-reports.js'
+import { discoverBenchmarkedPackages } from './discover-benchmarked-packages.js'
+import { formatBenchReport } from './format-bench-report.js'
+import { resolveLatestTag } from './resolve-latest-tag.js'
 
-import type { PackageBenchOutcome } from './format-bench-report'
-import type { VitestBenchReport } from './vitest-bench-report.type'
+import type { PackageBenchOutcome } from './format-bench-report.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -36,31 +36,23 @@ async function getAllTags(): Promise<string[]> {
     .filter((line) => line.length > 0)
 }
 
+// Each `*.bench.ts` file writes its own report entry under
+// `$BENCH_REPORT_DIR` (see bench-file-report.ts) — Vitest 5 removed
+// `vitest bench --outputJson`, the single combined report this used to read
+// directly instead of running the whole directory and merging its own
+// output afterward via `collectBenchFileReports`.
 async function runBench(
   cwd: string,
   benchDirRelativeToCwd: string,
-  outputJsonPath: string
+  reportDir: string
 ): Promise<void> {
   const resolved = resolveCommand('pnpm')
 
   await execFileAsync(
     resolved.command,
-    [
-      ...resolved.argsPrefix,
-      'exec',
-      'vitest',
-      'bench',
-      '--run',
-      benchDirRelativeToCwd,
-      '--outputJson',
-      outputJsonPath
-    ],
-    { cwd, maxBuffer: 1024 * 1024 * 64 }
+    [...resolved.argsPrefix, 'exec', 'vitest', 'bench', '--run', benchDirRelativeToCwd],
+    { cwd, maxBuffer: 1024 * 1024 * 64, env: { ...process.env, BENCH_REPORT_DIR: reportDir } }
   )
-}
-
-function readBenchReport(jsonPath: string): VitestBenchReport {
-  return JSON.parse(fs.readFileSync(jsonPath, 'utf8')) as VitestBenchReport
 }
 
 async function buildAtWorktree(worktreeDir: string): Promise<void> {
@@ -71,14 +63,14 @@ async function buildAtWorktree(worktreeDir: string): Promise<void> {
 async function benchAtTag(
   tag: string,
   benchDirRelativeToRepoRoot: string,
-  outputJsonPath: string
+  reportDir: string
 ): Promise<void> {
   const worktreeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bench-nightly-worktree-'))
 
   try {
     await execFileAsync('git', ['worktree', 'add', '--detach', worktreeDir, tag])
     await buildAtWorktree(worktreeDir)
-    await runBench(worktreeDir, benchDirRelativeToRepoRoot, outputJsonPath)
+    await runBench(worktreeDir, benchDirRelativeToRepoRoot, reportDir)
   } finally {
     await execFileAsync('git', ['worktree', 'remove', '--force', worktreeDir]).catch(() => {
       // Best-effort cleanup — a leftover worktree in the CI runner's temp
@@ -105,14 +97,14 @@ async function main(): Promise<void> {
     }
 
     const safeName = pkg.name.replace(/[/@]/g, '_')
-    const baselineJsonPath = path.join(os.tmpdir(), `bench-baseline-${safeName}.json`)
-    const currentJsonPath = path.join(os.tmpdir(), `bench-current-${safeName}.json`)
+    const baselineReportDir = fs.mkdtempSync(path.join(os.tmpdir(), `bench-baseline-${safeName}-`))
+    const currentReportDir = fs.mkdtempSync(path.join(os.tmpdir(), `bench-current-${safeName}-`))
 
-    await benchAtTag(tag, pkg.benchDir, baselineJsonPath)
-    await runBench('.', pkg.benchDir, currentJsonPath)
+    await benchAtTag(tag, pkg.benchDir, baselineReportDir)
+    await runBench('.', pkg.benchDir, currentReportDir)
 
-    const baseline = readBenchReport(baselineJsonPath)
-    const current = readBenchReport(currentJsonPath)
+    const baseline = collectBenchFileReports(baselineReportDir)
+    const current = collectBenchFileReports(currentReportDir)
 
     outcomes.push({
       packageName: pkg.name,

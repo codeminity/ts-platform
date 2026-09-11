@@ -1,9 +1,14 @@
 import { AxiosError } from 'axios'
-import { bench, describe } from 'vitest'
+import { afterAll, describe, test } from 'vitest'
 
+import { toMeanNs, writeBenchFileReport } from '../../../../scripts/bench/bench-file-report.js'
 import { handleRetry } from '../src/retry/retry'
 
+import type { RecordedBenchmark } from '../../../../scripts/bench/bench-file-report.js'
 import type { RetryConfig } from '../src/retry/retry-config.interface'
+
+const FILE = 'packages/request/axios/bench/retry-orchestration.bench.ts'
+const GROUP = 'handleRetry (axios)'
 
 function errorWithStatus(status: number): AxiosError {
   const error = new AxiosError('error')
@@ -22,12 +27,26 @@ const exhaustedConfig: RetryConfig = { retries: 0, retryOnStatuses: [503] }
 
 const retryableError = errorWithStatus(503)
 
-describe('handleRetry (axios)', () => {
-  bench('retryable, no delay configured', async () => {
-    await handleRetry(retryableError, 1, retryableConfig)
+describe(GROUP, () => {
+  const recorded: RecordedBenchmark[] = []
+
+  afterAll(() => {
+    writeBenchFileReport(process.env.BENCH_REPORT_DIR ?? '.bench-results', FILE, GROUP, recorded)
   })
 
-  bench('retries exhausted, returns false immediately', async () => {
-    await handleRetry(retryableError, 1, exhaustedConfig)
+  test('retryable, no delay configured', async ({ bench }) => {
+    const result = await bench('retryable, no delay configured', async () => {
+      await handleRetry(retryableError, 1, retryableConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
+  })
+
+  test('retries exhausted, returns false immediately', async ({ bench }) => {
+    const result = await bench('retries exhausted, returns false immediately', async () => {
+      await handleRetry(retryableError, 1, exhaustedConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 })

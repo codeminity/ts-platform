@@ -4,6 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "incremental": false,
-    "composite": false
+    "composite": false,
+    "types": ["node"]
   }
 }

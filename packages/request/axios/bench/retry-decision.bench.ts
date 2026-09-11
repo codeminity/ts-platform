@@ -1,9 +1,14 @@
 import { AxiosError } from 'axios'
-import { bench, describe } from 'vitest'
+import { afterAll, describe, test } from 'vitest'
 
+import { toMeanNs, writeBenchFileReport } from '../../../../scripts/bench/bench-file-report.js'
 import { shouldRetry } from '../src/retry/should-retry'
 
+import type { RecordedBenchmark } from '../../../../scripts/bench/bench-file-report.js'
 import type { RetryConfig } from '../src/retry/retry-config.interface'
+
+const FILE = 'packages/request/axios/bench/retry-decision.bench.ts'
+const GROUP = 'shouldRetry (axios)'
 
 function errorWithStatus(status: number): AxiosError {
   const error = new AxiosError('error')
@@ -23,20 +28,42 @@ const retryableError = errorWithStatus(503)
 const nonRetryableError = errorWithStatus(404)
 const networkError = Object.assign(new AxiosError('network'), { code: 'ERR_NETWORK' })
 
-describe('shouldRetry (axios)', () => {
-  bench('default policy, retryable status', () => {
-    shouldRetry(retryableError, 1, defaultConfig)
+describe(GROUP, () => {
+  const recorded: RecordedBenchmark[] = []
+
+  afterAll(() => {
+    writeBenchFileReport(process.env.BENCH_REPORT_DIR ?? '.bench-results', FILE, GROUP, recorded)
   })
 
-  bench('default policy, non-retryable status', () => {
-    shouldRetry(nonRetryableError, 1, defaultConfig)
+  test('default policy, retryable status', async ({ bench }) => {
+    const result = await bench('default policy, retryable status', () => {
+      shouldRetry(retryableError, 1, defaultConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 
-  bench('default policy, retries exhausted', () => {
-    shouldRetry(retryableError, 4, defaultConfig)
+  test('default policy, non-retryable status', async ({ bench }) => {
+    const result = await bench('default policy, non-retryable status', () => {
+      shouldRetry(nonRetryableError, 1, defaultConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 
-  bench('custom shouldRetry callback', () => {
-    shouldRetry(networkError, 1, customConfig)
+  test('default policy, retries exhausted', async ({ bench }) => {
+    const result = await bench('default policy, retries exhausted', () => {
+      shouldRetry(retryableError, 4, defaultConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
+  })
+
+  test('custom shouldRetry callback', async ({ bench }) => {
+    const result = await bench('custom shouldRetry callback', () => {
+      shouldRetry(networkError, 1, customConfig)
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 })
