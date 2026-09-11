@@ -1,17 +1,37 @@
 import { AxiosHeaders } from 'axios'
-import { bench, describe } from 'vitest'
+import { afterAll, describe, test } from 'vitest'
 
+import { toMeanNs, writeBenchFileReport } from '../../../../scripts/bench/bench-file-report.js'
 import { createAuthorizationHeader } from '../src/auth/create-auth-header'
+
+import type { RecordedBenchmark } from '../../../../scripts/bench/bench-file-report.js'
+
+const FILE = 'packages/request/axios/bench/create-auth-header.bench.ts'
+const GROUP = 'createAuthorizationHeader (axios)'
 
 const emptyHeaders = new AxiosHeaders()
 const existingHeaders = new AxiosHeaders({ Accept: 'application/json', 'X-Request-Id': 'abc123' })
 
-describe('createAuthorizationHeader (axios)', () => {
-  bench('no existing headers', () => {
-    createAuthorizationHeader(emptyHeaders, 'token')
+describe(GROUP, () => {
+  const recorded: RecordedBenchmark[] = []
+
+  afterAll(() => {
+    writeBenchFileReport(process.env.BENCH_REPORT_DIR ?? '.bench-results', FILE, GROUP, recorded)
   })
 
-  bench('several existing headers preserved', () => {
-    createAuthorizationHeader(existingHeaders, 'token')
+  test('no existing headers', async ({ bench }) => {
+    const result = await bench('no existing headers', () => {
+      createAuthorizationHeader(emptyHeaders, 'token')
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
+  })
+
+  test('several existing headers preserved', async ({ bench }) => {
+    const result = await bench('several existing headers preserved', () => {
+      createAuthorizationHeader(existingHeaders, 'token')
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 })

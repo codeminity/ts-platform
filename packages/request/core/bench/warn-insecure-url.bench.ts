@@ -1,8 +1,15 @@
-import { afterAll, beforeAll, bench, describe } from 'vitest'
+import { afterAll, beforeAll, describe, test } from 'vitest'
 
+import { toMeanNs, writeBenchFileReport } from '../../../../scripts/bench/bench-file-report.js'
 import { isInsecureUrl, warnIfInsecureUrl } from '../src/auth/warn-insecure-url'
 
-describe('isInsecureUrl / warnIfInsecureUrl', () => {
+import type { RecordedBenchmark } from '../../../../scripts/bench/bench-file-report.js'
+
+const FILE = 'packages/request/core/bench/warn-insecure-url.bench.ts'
+const GROUP = 'isInsecureUrl / warnIfInsecureUrl'
+
+describe(GROUP, () => {
+  const recorded: RecordedBenchmark[] = []
   let originalWarn: typeof console.warn
 
   // warnIfInsecureUrl warns at most once per origin, so after its first
@@ -22,19 +29,42 @@ describe('isInsecureUrl / warnIfInsecureUrl', () => {
     console.warn = originalWarn
   })
 
-  bench('isInsecureUrl, https URL', () => {
-    isInsecureUrl('https://api.example.com/path')
+  afterAll(() => {
+    writeBenchFileReport(process.env.BENCH_REPORT_DIR ?? '.bench-results', FILE, GROUP, recorded)
   })
 
-  bench('isInsecureUrl, http URL', () => {
-    isInsecureUrl('http://api.example.com/path')
+  test('isInsecureUrl, https URL', async ({ bench }) => {
+    const result = await bench('isInsecureUrl, https URL', () => {
+      isInsecureUrl('https://api.example.com/path')
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 
-  bench('isInsecureUrl, unparseable string', () => {
-    isInsecureUrl('not a url')
+  test('isInsecureUrl, http URL', async ({ bench }) => {
+    const result = await bench('isInsecureUrl, http URL', () => {
+      isInsecureUrl('http://api.example.com/path')
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 
-  bench('warnIfInsecureUrl, repeated calls against one insecure origin', () => {
-    warnIfInsecureUrl('http://bench.example.com/path')
+  test('isInsecureUrl, unparseable string', async ({ bench }) => {
+    const result = await bench('isInsecureUrl, unparseable string', () => {
+      isInsecureUrl('not a url')
+    }).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
+  })
+
+  test('warnIfInsecureUrl, repeated calls against one insecure origin', async ({ bench }) => {
+    const result = await bench(
+      'warnIfInsecureUrl, repeated calls against one insecure origin',
+      () => {
+        warnIfInsecureUrl('http://bench.example.com/path')
+      }
+    ).run()
+
+    recorded.push({ name: result.name, meanNs: toMeanNs(result.latency.mean) })
   })
 })
