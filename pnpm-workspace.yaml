@@ -19,3 +19,6 @@ allowBuilds:
 # pnpm 11 already defaults to this exact value — stated explicitly so the
 # policy is visible here instead of relying on an undocumented tool default.
 minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  # Renovate security update: happy-dom@21.0.4
+  - happy-dom@21.0.4
